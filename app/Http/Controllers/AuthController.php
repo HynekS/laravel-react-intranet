@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use App\User;
-
+ 
 class AuthController extends Controller
 {
   /**
@@ -62,7 +62,7 @@ class AuthController extends Controller
         $user = User::where('user_name', $request->input('user_name'))->first();
         $user->password = Hash::make($request->input('password'));
         $user->save();
-        return $this->createToken($user, $request);
+        return $this->createResponse($user, $request);
       } else {
         return response()->json([
           'message' => trans('auth.failed'),
@@ -85,8 +85,8 @@ class AuthController extends Controller
   {
     $tokenResult = $user->createToken('Personal Access Token');
     $token = $tokenResult->token;
-    $token->expires_at = Carbon::now()->addWeeks(1);
     $token->save();
+
     return response()->json([
       'access_token' => $tokenResult->accessToken,
       'token_type' => 'Bearer',
@@ -94,8 +94,36 @@ class AuthController extends Controller
         $tokenResult->token->expires_at
       )->toDateTimeString(),
       'user' => $user
-    ]);
+    ]); 
   }
+
+  public function userRefreshToken(Request $request)
+{
+    $client = DB::table('oauth_clients')
+        ->where('password_client', true)
+        ->first();
+
+    $data = [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $request->refresh_token,
+        'client_id' => $client->id,
+        'client_secret' => $client->secret,
+        'scope' => ''
+    ];
+    $request = Request::create('/oauth/token', 'POST', $data);
+    $content = json_decode(app()->handle($request)->getContent());
+
+    return response()->json([
+        'error' => false,
+        'data' => [
+            'meta' => [
+                'token' => $content->access_token,
+                'refresh_token' => $content->refresh_token,
+                'type' => 'Bearer'
+            ]
+        ]
+    ], Response::HTTP_OK);
+}
 
   /**
    * Logout user (Revoke the token)
