@@ -19,7 +19,7 @@ const LoginPage = props => {
         position: relative;
         height: 100vh;
         &:after {
-          content: "\A";
+          content: "";
           position: absolute;
           width: 100%;
           height: 100%;
