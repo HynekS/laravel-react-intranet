@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\User;
+use Illuminate\Support\Facades\DB;
 
 class Akce extends Model
 {
@@ -10,7 +12,7 @@ class Akce extends Model
     protected $table = 'akce';
     protected $primaryKey = 'id_akce';
     public $timestamps = false;
-    protected $appends = ['invoice_sum'];
+    // protected $appends = ['invoice_sum'];
 
     /*
      * Relations to other tables
@@ -22,19 +24,20 @@ class Akce extends Model
         return $this->hasMany('App\Faktura', 'akce_id');
     }
 
-    public function sumUpInvoicesOfType($type)
+    public function fakturyDohled()
     {
-        return $this->invoice()->where('typ_castky', '=', $type)->sum('castka');
+        return $this->hasMany('App\Faktura', 'akce_id')->where('typ_castky', '=', 0);
     }
 
-    public function getInvoiceSumAttribute()
+    public function fakturyVyzkum()
     {
-        $vyzkum = $this->sumUpInvoicesOfType(1);
-        $dohled = $this->sumUpInvoicesOfType(0);
-        return [
-            "vyzkumFakturovano" => $vyzkum,
-            "dohledyFakturovano" => $dohled
-        ];
+        return $this->hasMany('App\Faktura', 'akce_id')->where('typ_castky', '=', 1);
+    }
+
+    // Zajišťuje
+    public function user()
+    {
+        return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
     // Dokumentace apod.
@@ -85,15 +88,21 @@ class Akce extends Model
     public function scopeWithAll($query)
     {
         return $query->with(
-            'invoice',
-            //'gps_point',
-            'analyza',
-            'digitalizace_nalez',
-            'digitalizace_plan',
-            'geodet_bod',
-            'geodet_plan',
-            'teren_foto',
-            'teren_scan'
+            [
+                'fakturyDohled',
+                'fakturyVyzkum',
+                'user' => function ($q) {
+                    return $q->select('id', 'full_name');
+                },
+                //'gps_point',
+                'analyza',
+                'digitalizace_nalez',
+                'digitalizace_plan',
+                'geodet_bod',
+                'geodet_plan',
+                'teren_foto',
+                'teren_scan'
+            ]
         );
     }
 
