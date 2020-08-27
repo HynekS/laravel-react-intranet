@@ -1,9 +1,10 @@
 import axios from "axios"
-// import { loadProgressBar } from 'axios-progress-bar';
-// import { history } from '../index';
-import configuredStore from '../store/configuredStore';
-import { logout } from "../store/auth";
+/*
+import { loadProgressBar } from "axios-progress-bar"
+import "axios-progress-bar/dist/nprogress.css"
 
+loadProgressBar()
+*/
 const API_URL =
   process.env.NODE_ENV === "test"
     ? process.env.BASE_URL || `http://localhost:${process.env.PORT}/api/`
@@ -11,23 +12,27 @@ const API_URL =
 
 axios.defaults.baseURL = API_URL
 axios.defaults.headers.common.Accept = "application/json"
-axios.defaults.headers.common["X-CSRF-TOKEN"] = document
-  .querySelector('meta[name="csrf-token"]')
-  .content
+axios.defaults.headers.common["X-CSRF-TOKEN"] = document.querySelector(
+  'meta[name="csrf-token"]',
+).content
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
 
 axios.interceptors.response.use(
   response => response,
   error => {
-    if (error.response.status === 401) {
-      console.warn("interceptor: unauthenticated request")
+    if (error.response?.status === 401) {
+      localStorage.removeItem("oauth_token")
+      localStorage.removeItem("expires_at")
       history.pushState({}, "Pueblo intranet", "/")
-      // configuredStore.dispatch(logout());
+      // TODO force delete user (can not do it via logout because this route is protected)
     }
     return Promise.reject(error)
   },
 )
 
-// loadProgressBar();
+axios.interceptors.request.use(
+  config => console.log(config) || config,
+  error => Promise.reject(error),
+)
 
 export default axios
