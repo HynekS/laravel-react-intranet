@@ -2,7 +2,7 @@ import React from "react"
 
 const Header = ({ children }) => {
   return (
-    <header>
+    <header id="header">
       {children}
     </header>
   )
