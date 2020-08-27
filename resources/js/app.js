@@ -7,6 +7,7 @@ import "tailwindcss/dist/base.css"
 
 import configuredStore from "./store/configuredStore"
 import { checkForValidToken } from "./store/auth"
+import globalStyles from "./globalStyles"
 
 configuredStore.dispatch(checkForValidToken())
 
@@ -18,10 +19,7 @@ const App = () => {
       <BrowserRouter>
         <Global
           styles={css`
-            html {
-              overflow-y: overlay;
-              -ms-overflow-style: -ms-autohiding-scrollbar;
-            }
+            ${globalStyles()}
           `}
         />
         <HomePage />
