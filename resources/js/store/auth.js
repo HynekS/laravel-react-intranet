@@ -1,10 +1,13 @@
 import client from "../utils/axiosWithDefaults"
 
 const initialState = {
-  inAuthPending: false,
+  isAuthPending: false,
   authError: null,
   isUserBeingFetched: false,
   userError: null,
+  user: null,
+  isLogoutPending: false,
+  logoutError: null,
 }
 
 // Actions
@@ -21,6 +24,7 @@ const FETCH_USER_FAILURE = "[auth] Fetching user has failed"
 
 const LOGOUT_INITIALIZED = "[auth] Logout was initialized"
 const LOGOUT_SUCCESS = "[auth] Logout was succesful"
+const LOGOUT_FAILURE = "[auth] Logout has failed"
 
 // Reducer
 export default function reducer(state = initialState, action = {}) {
@@ -28,20 +32,20 @@ export default function reducer(state = initialState, action = {}) {
     case LOGIN_INITIALIZED:
       return {
         ...state,
-        inAuthPending: true,
+        isAuthPending: true,
         authError: null,
       }
     case LOGIN_SUCCESS:
       console.log(action.user)
       return {
         ...state,
-        inAuthPending: false,
+        isAuthPending: false,
         user: action.user,
       }
     case LOGIN_FAILURE:
       return {
         ...state,
-        inAuthPending: false,
+        isAuthPending: false,
         authError: action.error,
       }
     case FETCH_USER_INITIALIZED:
@@ -61,10 +65,22 @@ export default function reducer(state = initialState, action = {}) {
         isUserBeingFetched: false,
         userError: action.error,
       }
+    case LOGOUT_INITIALIZED:
+      return {
+        ...state,
+        isLogoutPending: true,
+      }
     case LOGOUT_SUCCESS:
       return {
         ...state,
+        isLogoutPending: false,
         user: null,
+      }
+    case LOGOUT_FAILURE:
+      return {
+        ...state,
+        isLogoutPending: false,
+        logoutError: action.error,
       }
     default:
       return state
@@ -91,6 +107,8 @@ export const fetchUserFailure = error => ({ type: FETCH_USER_FAILURE, error })
 export const logoutInit = () => ({ type: LOGOUT_INITIALIZED })
 
 export const logoutSuccess = () => ({ type: LOGOUT_SUCCESS })
+
+export const logoutFailure = error => ({ type: LOGOUT_FAILURE, error })
 
 // Thunks
 export const checkForValidToken = () => {
@@ -132,11 +150,10 @@ export const fetchUser = () => async dispatch => {
     dispatch(fetchUserSuccess(response.data))
   } catch (e) {
     dispatch(fetchUserFailure(e))
-    console.log(e)
   }
 }
 
-export const logout = () => async dispatch => {
+export const logout = navigate => async dispatch => {
   try {
     dispatch(logoutInit())
     const response = await client.get("auth/logout")
@@ -145,8 +162,8 @@ export const logout = () => async dispatch => {
       localStorage.removeItem("expires_at")
     }
     dispatch(logoutSuccess())
-    history.pushState({}, "Pueblo intranet", "/")
+    navigate("/")
   } catch (e) {
-    console.log(e)
+    dispatch(logoutFailure(e))
   }
 }
