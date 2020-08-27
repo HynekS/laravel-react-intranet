@@ -43,6 +43,7 @@ Route::group(['prefix' => 'akce', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
+    Route::get('/meta', 'MetaController@index');
     Route::post('/', 'UploadController@upload');
 });
 
