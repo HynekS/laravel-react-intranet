@@ -18,28 +18,14 @@ const StyledNavLink = styled(NavLink)`
 
 const Nav = ({ ...props }) => {
   const user = useSelector(store => store.auth.user)
-  // const [isMenuActive, toggleIsMenuActive] = useState(false)
 
   const currentYear = new Date().getFullYear()
   return (
     <NavContainer role="navigation" aria-label="main navigation">
       <div>
-        <NavLink to="/dashboard">
+        <NavLink to="/">
           <LogoThumb />
         </NavLink>
-        {/* Hamburger expandable menu
-        <a
-          role="button"
-          onClick={() => toggleIsMenuActive(!isMenuActive)}
-          className={`navbar-burger ${isMenuActive ? "is-active" : ""}`}
-          aria-label="menu"
-          aria-expanded="false"
-        >
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-          <span aria-hidden="true" />
-        </a>
-      */}
       </div>
       <div>
         <StyledNavLink to={`/akce`}>vše</StyledNavLink>
