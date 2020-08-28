@@ -30,9 +30,4 @@ axios.interceptors.response.use(
   },
 )
 
-axios.interceptors.request.use(
-  config => console.log(config) || config,
-  error => Promise.reject(error),
-)
-
 export default axios
