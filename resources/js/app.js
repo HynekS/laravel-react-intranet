@@ -3,7 +3,7 @@ import { BrowserRouter } from "react-router-dom"
 import { render } from "react-dom"
 import { Provider } from "react-redux"
 import { Global, css } from "@emotion/core"
-import "tailwindcss/dist/base.css"
+import "tailwindcss/dist/base.min.css"
 
 import configuredStore from "./store/configuredStore"
 import { checkForValidToken } from "./store/auth"
