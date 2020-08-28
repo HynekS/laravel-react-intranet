@@ -1,3 +1,4 @@
+
 const mix = require("laravel-mix")
 require("laravel-mix-bundle-analyzer")
 
@@ -10,7 +11,7 @@ require("laravel-mix-bundle-analyzer")
  | for your Laravel application. By default, we are compiling the Sass
  | file for the application as well as bundling up all the JS files.
  |
- */
+*/ 
 const RemovePlugin = require("remove-files-webpack-plugin")
 
 const removePlugin = new RemovePlugin({
@@ -55,8 +56,12 @@ mix
     },
   })
   .react("resources/js/app.js", "public/js")
-  .version()
+  //.version()
   .copyDirectory("resources/images/", "public/images/", false)
-  .bundleAnalyzer()
+  // .bundleAnalyzer()
   .sourceMaps(false, "source-map")
   .browserSync("localhost:8000")
+
+  if (mix.inProduction()) {
+    mix.version();
+  }
