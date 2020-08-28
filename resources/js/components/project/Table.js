@@ -124,7 +124,6 @@ const Table = ({ rawData }) => {
             <StyledFluidTable
               data={data}
               columns={columns}
-              /*{estimatedRowHeight={150}}*/
               rowHeight={90}
               onSort={onSort}
               sortDirection="ASC"
