@@ -11,11 +11,12 @@
     "prettify": "prettier --write \"resources/js/**/*.js\""
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
-    "@babel/plugin-transform-react-jsx": "^7.9.1",
+    "@babel/core": "^7.11.4",
+    "@babel/plugin-transform-react-jsx": "^7.10.4",
     "@babel/preset-react": "^7.0.0",
-    "@emotion/core": "^10.0.28",
+    "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
+    "@svgr/cli": "^5.4.0",
     "@testing-library/dom": "^7.1.2",
     "axios": "^0.19",
     "babel-plugin-macros": "^2.8.0",
@@ -29,9 +30,11 @@
     "resolve-url-loader": "^3.1.0",
     "sass": "^1.26.3",
     "sass-loader": "^8.0.2",
-    "twin.macro": "^1.0.0-alpha.7"
+    "twin.macro": "^1.7.0"
   },
   "dependencies": {
+    "@emotion/babel-plugin-jsx-pragmatic": "^0.1.5",
+    "@types/react": "^16.9.48",
     "D": "^1.0.0",
     "axios-progress-bar": "git+https://github.com/HynekS/progress-bar-4-axios-updated.git#master",
     "babel-plugin-transform-react-jsx": "^6.24.1",
@@ -51,6 +54,16 @@
     "react-router-dom": "^6.0.0-alpha.2",
     "react-transition-group": "^4.3.0",
     "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "tailwindcss": "^1.7.5"
+  },
+  "babelMacros": {
+    "twin": {
+      "config": "tailwind.config.js",
+      "preset": "emotion",
+      "debugProp": true,
+      "debugPlugins": false,
+      "debug": false
+    }
   }
 }
