@@ -1,8 +1,8 @@
+/** @jsx jsx */
 import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
-
-// TODO extract to another file ↓
-//import { NavLink, useLocation } from "react-router-dom"
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
 import Input from "../common/Input"
 import Checkbox from "../common/Checkbox"
@@ -33,7 +33,7 @@ const Detail = ({ detail }) => {
   }
 
   return (
-    <div>
+    <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div>
