@@ -3,19 +3,12 @@ import Http from "../../../utils/axiosWithDefaults"
 import fileDownload from "js-file-download"
 import getFileExtension from "../../../utils/getFileExtension"
 
-const ProjectFilesFile = ({ file }) => {
-  const icon = file?.file_path ? getFileExtension(file.file_path) : "fallback"
+const File = ({ file }) => {
+  const icon = file?.file_path ? String(getFileExtension(file.file_path)).toLowerCase() : "fallback"
   return file ? (
-    <>
+    <div style={{ padding: "1rem", display: "inline-block" }}>
       <button
-        style={{
-          background: `url(/images/icons/${icon}.svg) top center no-repeat`,
-          border: "none",
-          cursor: "pointer",
-          width: 124,
-          MsWordBreak: "break-all",
-          wordBreak: "break-word",
-        }}
+        style={{ width: 50 }}
         onClick={() =>
           Http({
             url: `/download/${file.file_path}`,
@@ -27,13 +20,41 @@ const ProjectFilesFile = ({ file }) => {
             .catch(error => console.log(error))
         }
       >
-        <span style={{ marginTop: 66 }}>
-          {file.file_path}
+        <span
+          style={{
+            display: "block",
+            background: `url(/images/fileIcons/${icon}.svg) top center no-repeat`,
+            border: "none",
+            cursor: "pointer",
+            padding: "1rem",
+            width: 50,
+            height: 40,
+            backgroundSize: "contain",
+            backgroundPosition: "50% 0",
+          }}
+        ></span>
+
+        <span
+          style={{
+            display: "block",
+            height: "3rem",
+            lineHeight: 1,
+            MsWordBreak: "break-all",
+            wordBreak: "break-word",
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+          }}
+        >
+          <small>{file.file_path}</small>
         </span>
-        <span>{new Date(file.vlozeno).toLocaleDateString("cs-CZ")}</span>
+        <span>
+          <small>{new Date(file.vlozeno).toLocaleDateString("cs-CZ")}</small>
+        </span>
       </button>
-    </>
-  ) : <div>No file</div>
+    </div>
+  ) : (
+    <div>No file</div>
+  )
 }
 
-export default ProjectFilesFile
+export default File
