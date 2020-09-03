@@ -21,10 +21,14 @@ axios.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
+      /* This is not working as expected. It gives an impossible state when token is invalidated,
+       but the user is logged in (but can't do anything because of these 401s).
+       It is because of deletion of tokens to prevent bloat the db table, but if a user logs in on multiple devices,
+       it causes this bug. */
       localStorage.removeItem("oauth_token")
       localStorage.removeItem("expires_at")
       history.pushState({}, "Pueblo intranet", "/")
-      // TODO force delete user (can not do it via logout because this route is protected)
+      // TODO force delete user (can not do it via logout because this route is protected. See comment above)
     }
     return Promise.reject(error)
   },
