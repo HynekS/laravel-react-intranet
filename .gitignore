@@ -1,7 +1,9 @@
 /node_modules
 /public/hot
 /public/storage
+/public/images
 /public/*.js
+/public/js/*.map
 /public/*.map
 /public/mix-manifest.json
 /storage/*.key
