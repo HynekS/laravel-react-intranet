@@ -6,13 +6,11 @@ const dict = {
 }
 
 const budgetCellRenderer = ({ row, key }) => {
-  // const { invoice_sum } = row
   const budget = row[key]
-  //const sum = invoice_sum[dict[key]]
   const sum = row[dict[key]].reduce((acc, item) => acc + item.castka, 0)
 
   if (budget && sum === 0) {
-    return <div style={{ width: "inherit", textAlign: "right" }}>{budget.toLocaleString("cs-CZ")}</div>
+    return <div>{budget.toLocaleString("cs-CZ")}</div>
   } else if (budget && sum) {
     return (
       <div style={{ width: "inherit", textAlign: "right" }}>
