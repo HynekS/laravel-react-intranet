@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 
 import client from "../../utils/axiosWithDefaults"
-import Table from "./Table"
+// import Table from "./Table"
+import BaseTable from "./BaseTable"
 
 import { loadProgressBar } from "axios-progress-bar"
 import "axios-progress-bar/dist/nprogress.css"
@@ -35,7 +36,8 @@ const TableDataProvider = props => {
     }
   }, [year])
 
-  return data ? <Table rawData={data} {...props} /> : "Loading…"
+  // return data ? <Table rawData={data} {...props} /> : "Loading…"
+  return data ? <BaseTable rawData={data} {...props} /> : "Loading…"
 }
 
 export default TableDataProvider
