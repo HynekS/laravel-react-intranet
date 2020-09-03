@@ -2,6 +2,7 @@ import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import { render } from "react-dom"
 import { Provider } from "react-redux"
+import { ModalProvider } from "react-modal-hook"
 import { Global, css } from "@emotion/core"
 import "tailwindcss/dist/base.min.css"
 
@@ -31,7 +32,12 @@ const App = () => {
 export default App
 
 if (document.getElementById("app")) {
-  render(<App />, document.getElementById("app"))
+  render(
+    <ModalProvider>
+      <App />
+    </ModalProvider>,
+    document.getElementById("app"),
+  )
 }
 
 if (module.hot) {
