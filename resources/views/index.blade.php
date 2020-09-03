@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="format-detection" content="telephone=no">
     <link rel="shortcut icon" href="{{ URL::asset('/images/favicons/favicon.ico') }}">
     <link rel="icon" type="image/png" href="{{ URL::asset('/images/favicons/favicon-32x32.png') }}" type="image/x-icon" />
     <title>Pueblo intranet</title>
