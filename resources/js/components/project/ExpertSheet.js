@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react"
 import useScript from "../../utils/useScript"
 import styled from "@emotion/styled"
+import tw from "twin.macro"
 
 const MapContainer = styled.div`
+  ${tw`bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none`}
   position: relative;
   & img {
     max-width: initial;
