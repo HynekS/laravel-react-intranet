@@ -1,4 +1,7 @@
+/** @jsx jsx */
 import React from "react"
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
 import where from "../../../utils/where"
 import FilesGroup from "./FilesGroup"
@@ -43,7 +46,7 @@ const ProjectRelatedFiles = ({ detail, ...props }) => {
   )
 
   return detail ? (
-    <div>
+    <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
       <FilesGroup
         group={where(withData, { group: "teren" })}
         label="Terén"
