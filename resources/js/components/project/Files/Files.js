@@ -8,7 +8,12 @@ import FilesGroup from "./FilesGroup"
 
 const relations = [
   { key: "teren_foto", publicName: "terénní foto", group: "teren" },
-  { key: "teren_databaze", publicName: "terénní databáze", group: "teren" },
+  {
+    key: "teren_databaze",
+    publicName: "terénní databáze",
+    group: "teren",
+    partOfAkceTable: true
+  },
   {
     key: "teren_scan",
     publicName: "scany terénní dokumentace",
@@ -18,6 +23,7 @@ const relations = [
     key: "LAB_databaze",
     publicName: "databáze z laboratoře",
     group: "laborator",
+    partOfAkceTable: true
   },
   {
     key: "digitalizace_nalez",
@@ -34,16 +40,29 @@ const relations = [
   { key: "analyza", publicName: "odborné analýzy", group: "analyzy" },
 ]
 
-const ProjectRelatedFiles = ({ detail, ...props }) => {
-  /*
-  TBH, I have a little idea what this function is exactly doing. But in general, it is supposed
-  to create groups of related data with meaningful labels (see the 'relations' schema above).
-  */
-  const withData = relations.map(item =>
-    Object.assign({}, item, {
-      data: detail[item.key] === null ? [] : [].concat(detail[item.key]),
-    }),
-  )
+const Files = ({ detail, ...props }) => {
+  /* OK I know tis is ugly, but it is neccessary for data normalization */
+  const withData = relations.map(item => {
+    if (item.partOfAkceTable) {
+      return {
+        ...item,
+        data:
+          detail[item.key] === "(NULL)" //WTF OMG
+            ? []
+            : [].concat([{
+              file_path: detail[item.key],
+              id_akce: detail["id_akce"], // probably unnecessary
+              vlozeno: item.key === "teren_databaze" ? detail["teren_databaze_vlozeno"] : detail["LAB_databaze_vlozeno"],
+              vlozil: item.key === "teren_databaze" ? detail["teren_databaze_vlozil"] : detail["LAB_databaze_vlozil"],
+            }])
+      }
+    } else {
+      return {
+        ...item,
+        data: detail[item.key] === null ? [] : [].concat(detail[item.key]),
+      }
+    }
+  })
 
   return detail ? (
     <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
@@ -83,4 +102,4 @@ const ProjectRelatedFiles = ({ detail, ...props }) => {
   )
 }
 
-export default ProjectRelatedFiles
+export default Files
