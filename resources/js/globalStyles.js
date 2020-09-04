@@ -32,5 +32,6 @@ export default function globalStyles(props) {
     to {
       transform: rotate(360deg);
     }
-}`
+  }
+  `
 }
