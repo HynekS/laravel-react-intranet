@@ -34,7 +34,7 @@ Route::group([
 Route::group(['prefix' => 'akce', 'middleware' => 'auth:api'], function () {
 
     Route::get('/', 'AkceController@index');
-    Route::get('/{year}','AkceController@showYear');
+    Route::get('/{year}', 'AkceController@showYear');
     Route::get('/{year}/{num}', 'AkceController@getByNumberOfYear');
 
     Route::post('/', 'AkceController@store');
@@ -44,9 +44,6 @@ Route::group(['prefix' => 'akce', 'middleware' => 'auth:api'], function () {
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/meta', 'MetaController@index');
-    Route::post('/', 'UploadController@upload');
-});
-
-Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('/{file_name}', 'DownloadController@download');
+    Route::post('/upload', 'UploadController@upload');
+    Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
 });
