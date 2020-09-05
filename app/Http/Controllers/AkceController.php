@@ -68,10 +68,16 @@ class AkceController extends Controller
     public function showYear($year)
     {
         $akceFromYear = Akce::year($year)->WithAll()->get();
+        /*
         $transformed = $akceFromYear->map(function ($item) {
             return AkceTransformer::transformResponse($item);
-        });
-        return $transformed;
+        });*/
+        $keyed = collect($akceFromYear->map(function ($item) {
+            return AkceTransformer::transformResponse($item);
+        }))->keyBy('id_akce');
+        return $keyed;
+        //return $transformed;
+
     }
     public function getByNumberOfYear($year, $num)
     {
