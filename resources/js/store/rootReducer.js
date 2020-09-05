@@ -1,6 +1,7 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from "redux"
 
-import auth from './auth'
-import data from './data'
+import auth from "./auth"
+import projects from "./projects"
+import meta from "./meta"
 
-export default combineReducers({ app, auth, data })
+export default combineReducers({ app, auth, projects, meta })
