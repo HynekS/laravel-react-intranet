@@ -20,7 +20,6 @@ const Table = ({ rawData }) => {
   const [sortBy, setSortBy] = useState({ key: "c_akce", order: SortOrder.ASC })
 
   useEffect(() => {
-    console.log(rawData)
     setData(rawData)
   }, [rawData])
 
@@ -36,7 +35,6 @@ const Table = ({ rawData }) => {
     }
     setSortBy({ column, key, order })
     setData(sortedList)
-    console.log(JSON.stringify(data.map((obj) => obj[key])))
   }
 
   const columns = [
@@ -206,6 +204,9 @@ const Table = ({ rawData }) => {
                   &:hover {
                     ${tw`bg-green-200 bg-opacity-50`}
                   }
+                }
+                .BaseTable__row {
+                  border-bottom: none;
                 }
               `}
               data={data}
