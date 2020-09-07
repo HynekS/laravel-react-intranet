@@ -1,5 +1,6 @@
 import { loadProgressBar } from "axios-progress-bar"
 import client from "../utils/axiosWithDefaults"
+import store from "./configuredStore"
 
 const yearsSince2013 = Array.from(
   { length: new Date().getFullYear() - 2013 + 1 },
@@ -7,12 +8,15 @@ const yearsSince2013 = Array.from(
 )
 
 const initialState = {
-  isFetching: false,
-  error: null,
+  isFetchingOneYear: false,
+  fetchingOneYearError: null,
   byYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: {} }))),
   ById: {},
   AllIds: [],
   IdsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
+  isFetchingAll: false,
+  isAllFetched: false,
+  fetchingAllError: null,
 }
 
 // Actions
@@ -22,6 +26,10 @@ const FETCH_PROJECTS_OF_ONE_YEAR_SUCCESS = year =>
   `[projects] Fetching projects of year ${year} was succesful`
 const FETCH_PROJECTS_OF_ONE_YEAR_FAILURE = "[projects] Fetching projects of one year has failed"
 
+const FETCH_ALL_PROJECTS_INITIALIZED = "[projects] Fetching all projects has started"
+const FETCH_ALL_PROJECTS_SUCCESS = "[projects] Fetching all projects was succesful"
+const FETCH_ALL_PROJECTS_FAILURE = "[projects] Fetching all projects has failed"
+
 const FETCH_SINGLE_PROJECT_INITIALIZED = "[projects] Fetching single project has started"
 const FETCH_SINGLE_PROJECT_SUCCESS = "[projects] Fetching single project was succesful"
 const FETCH_SINGLE_PROJECT_FAILURE = "[projects] Fetching single project has failed"
@@ -29,32 +37,48 @@ const FETCH_SINGLE_PROJECT_FAILURE = "[projects] Fetching single project has fai
 // Reducer
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
+    case FETCH_ALL_PROJECTS_INITIALIZED:
+      return {
+        ...state,
+        isFetchingAll: true,
+      }
+    case FETCH_ALL_PROJECTS_SUCCESS:
+      return {
+        ...state,
+        isAllFetched: true,
+        isFetchingAll: false,
+      }
+    case FETCH_ALL_PROJECTS_FAILURE:
+      return {
+        ...state,
+        isFetchingAll: false,
+        fetchingAllError: action.error,
+      }
     case FETCH_PROJECTS_OF_ONE_YEAR_INITIALIZED(action.year):
       return {
         ...state,
-        isFetching: true,
+        isFetchingOneYear: true,
       }
     case FETCH_PROJECTS_OF_ONE_YEAR_SUCCESS(action.year):
       return {
         ...state,
-        isFetching: false,
+        isFetchingOneYear: false,
         byId: Object.assign({}, state.byId, action.projectsOfOneYear),
         AllIds: state.AllIds.concat(Object.keys(action.projectsOfOneYear)),
         IdsByYear: {
           ...state.IdsByYear,
           [action.year]: [
+            // BEWARE: this throws error (luckily catchable) if year has no projects
             ...new Set([...state.IdsByYear[action.year], ...Object.keys(action.projectsOfOneYear)]),
           ],
         },
-
-        //AllIds: state.AllIds.concat(action.projectsOfOneYear.map(akce => akce.id_akce)),
       }
     case FETCH_PROJECTS_OF_ONE_YEAR_FAILURE:
       console.log(action.error)
       return {
         ...state,
-        isFetching: false,
-        error: action.error,
+        isFetchingOneYear: false,
+        fetchingOneYearError: action.error,
       }
     default:
       return state
@@ -78,15 +102,40 @@ const fetchProjectsOfOneYearFailure = error => ({
   error,
 })
 
+const fetchAllProjectsInit = () => ({
+  type: FETCH_ALL_PROJECTS_INITIALIZED,
+})
+
+const fetchAllProjectsSuccess = () => ({
+  type: FETCH_ALL_PROJECTS_SUCCESS,
+})
+
+const fetchAllProjectsFailure = error => {
+  type: fetchAllProjectsFailure, error
+}
+
 // Thunks
 export const fetchProjectsOfOneYear = year => async dispatch => {
   try {
-    loadProgressBar({}, client)
+    if (!store.getState().projects.isFetchingAll) loadProgressBar({}, client)
     dispatch(fetchProjectsOfOneYearInit(year))
     const response = await client.get(`akce/${year}`)
     dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
   } catch (error) {
     dispatch(fetchProjectsOfOneYearFailure(error))
+  }
+  if (!store.getState().projects.isFetchingAll) loadProgressBar({ progress: false })
+}
+
+export const fetchAllProjects = () => async dispatch => {
+  try {
+    loadProgressBar({}, client)
+    dispatch(fetchAllProjectsInit())
+    Promise.all(yearsSince2013.map(async year => dispatch(fetchProjectsOfOneYear(year)))).then(_ =>
+      dispatch(fetchAllProjectsSuccess()),
+    )
+  } catch (error) {
+    dispatch(fetchAllProjectsFailure(error))
   }
   loadProgressBar({ progress: false })
 }
