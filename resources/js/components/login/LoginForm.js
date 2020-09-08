@@ -38,6 +38,7 @@ const LoginForm = () => {
           placeholder="Jan Novák"
           ref={register({ required: true })}
           onKeyDown={handleEnter}
+          autoFocus={true}
         />
         <HiddenMessage show={errors.user_name}>
           <ErrorMessage>Zadejte, prosím, uživatelské jméno.</ErrorMessage>
