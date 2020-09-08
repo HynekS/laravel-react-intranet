@@ -7,7 +7,7 @@ const RowWrapper = tw.div`md:flex md:items-center mb-2`
 const LabelWrapper = tw.div`md:w-1/3`
 const InputWrapper = tw.div`md:w-2/3`
 
-const Input = ({ name, label, placeholder, register, type="text" }) => {
+const Input = ({ name, label, placeholder, id, register, type = "text", ...props }) => {
   return (
     <RowWrapper>
       <LabelWrapper>
@@ -15,11 +15,12 @@ const Input = ({ name, label, placeholder, register, type="text" }) => {
       </LabelWrapper>
       <InputWrapper>
         <StyledInput
+          id={id}
           type={type}
-          id={name}
           name={name}
           placeholder={placeholder}
           ref={register}
+          {...props}
         />
       </InputWrapper>
     </RowWrapper>
