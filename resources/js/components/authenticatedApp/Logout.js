@@ -21,8 +21,8 @@ const Logout = () => {
       className={`${pending ? "spinner" : ""}`}
       onClick={() => dispatch(logout(navigate))}
     >
+      <SvgLogout tw="w-4 mr-2" />
       <span tw="pr-2">Odhlášení</span>
-      <SvgLogout tw="w-4" />
     </Button>
   )
 }
