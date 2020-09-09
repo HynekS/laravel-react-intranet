@@ -22,7 +22,7 @@ const LoginForm = () => {
   const dispatch = useDispatch()
   const { register, handleSubmit, errors } = useForm()
   const uid = useState(() => uniqueId())
-  const onSubmit = (data, e) => dispatch(submitLoginData(data))
+  const onSubmit = data => dispatch(submitLoginData(data))
 
   return (
     <FormContainer>
