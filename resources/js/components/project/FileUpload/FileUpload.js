@@ -1,19 +1,23 @@
+/** @jsx jsx */
 import React, { Component } from "react"
-
-import Http from "../../../utils/axiosWithDefaults"
 import uuidv4 from "uuid/v4"
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
+import client from "../../../utils/axiosWithDefaults"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
-
 import getFileExtension from "../../../utils/getFileExtension"
+import SvgUpload from "../../../vendor/heroicons/outline/Upload"
+import { emptyUploadImageBase64String } from "./empty-upload-folder"
 
+console.log(emptyUploadImageBase64String)
 class FileUpload extends Component {
   constructor(props) {
     super(props)
     this.state = {
       // props defaults
       fileTypes: props.fileTypes || "*/*",
-      fallbackIconUrl: "./icons/fallback.svg",
+      fallbackIconUrl: "/images/fileIcons/fallback.svg",
       // components state
       uploads: [],
       uploading: false,
@@ -102,20 +106,21 @@ class FileUpload extends Component {
     }
     formData.append("data", JSON.stringify(obj))
 
-    Http.post(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-      .then(success => {
+    client
+      .post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then(_ => {
         this.setState({
           uploads: [],
           fileCount: 0,
           progress: 0,
         })
-        console.log(success)
       })
       .catch(error => {
+        // TODO display error in UI!
         console.log(error)
       })
   }
@@ -124,67 +129,77 @@ class FileUpload extends Component {
     const { uploads, uploading } = this.state
     const guid = uuidv4()
     return (
-      <div
-        style={{
-          padding: "50px",
-          backgroundColor: "CornflowerBlue",
-        }}
-        onDragEnter={this.onChange}
-        onDragEnd={this.onChange}
-        onDragOver={this.onChange}
-        onDrop={this.onChange}
-      >
-        <form onSubmit={this.onFormSubmit}>
-          {uploads.length > 0 && (
-            <ul
+      <section>
+        <div
+          onDragEnter={this.onChange}
+          onDragEnd={this.onChange}
+          onDragOver={this.onChange}
+          onDrop={this.onChange}
+          tw="border-2 border-gray-400 border-dashed rounded-lg p-8 text-center"
+        >
+          <div tw="text-gray-400 text-center">
+            <SvgUpload tw="w-16 stroke-current inline-block" />
+          </div>
+          <form onSubmit={this.onFormSubmit}>
+            {uploads.length > 0 && (
+              <ul
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                }}
+              >
+                {uploads.map((item, i) => (
+                  <li
+                    key={uuidv4()}
+                    style={{
+                      backgroundImage: `url(${item.icon})`,
+                      backgroundPosition: "50% 0",
+                      backgroundRepeat: "no-repeat",
+                      color: "white",
+                      display: "inline-block",
+                      height: "100px",
+                      listStyle: "none",
+                      paddingTop: "80px",
+                      textAlign: "center",
+                      width: `${100 / uploads.length}%`,
+                    }}
+                  >
+                    {item.name}
+                    <span onClick={() => this.removeFile(i)}>Remove</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <input
+              type="file"
+              id={`fileElem-${guid}`}
+              multiple
+              accept={this.state.fileTypes}
+              onChange={this.onChange}
               style={{
-                alignItems: "center",
-                display: "flex",
-                flexDirection: "row",
-                flexWrap: "wrap",
+                display: "none",
               }}
-            >
-              {uploads.map((item, i) => (
-                <li
-                  key={uuidv4()}
-                  style={{
-                    backgroundImage: `url(${item.icon})`,
-                    backgroundPosition: "50% 0",
-                    backgroundRepeat: "no-repeat",
-                    color: "white",
-                    display: "inline-block",
-                    height: "100px",
-                    listStyle: "none",
-                    paddingTop: "80px",
-                    textAlign: "center",
-                    width: `${100 / uploads.length}%`,
-                  }}
+            />
+            {uploads.length === 0 && (
+              <div>
+                <span tw="block text-lg">přetáhněte soubory</span>
+                <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
+                <label
+                  htmlFor={`fileElem-${guid}`}
+                  tw="inline-block bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded focus:outline-none focus:shadow-outline focus:transition-shadow focus:duration-300"
                 >
-                  {item.name}
-                  <span onClick={() => this.removeFile(i)}>Remove</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <input
-            type="file"
-            id={`fileElem-${guid}`}
-            multiple
-            accept={this.state.fileTypes}
-            onChange={this.onChange}
-            style={{
-              display: "none",
-            }}
-          />
-          {uploads.length === 0 && (
-            <label htmlFor={`fileElem-${guid}`}>
-              přetáhněte soubory nebo klikněte pro výběr
-            </label>
-          )}
-          {uploads.length > 0 && <button type="submit">uložit soubory</button>}
-          {uploading && <ProgressBar percentage={this.state.progress} />}
-        </form>
-      </div>
+                  klikněte pro výběr
+                </label>
+              </div>
+            )}
+            {uploads.length > 0 && <button type="submit">uložit soubory</button>}
+            {uploading && <ProgressBar percentage={this.state.progress} />}
+          </form>
+        </div>
+        <div style={{ backgroundImage: emptyUploadImageBase64String, backgroundRepeat: "no-repeat", backgroundPosition: "50% 50%" , height: 150 }}></div>
+      </section>
     )
   }
 }
