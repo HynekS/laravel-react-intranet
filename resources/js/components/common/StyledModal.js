@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react"
 import ReactModal from "react-modal"
 // import styled from "@emotion/styled"
 import "./StyledModal.css"
@@ -62,4 +62,30 @@ const StyledReactModal = styled(ReactModalAdapter)`
 `
 */
 // export default StyledReactModal
+
+ReactModal.defaultStyles = {
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(74, 85, 104, 0.75)'
+  },
+  content: {
+    position: 'absolute',
+    top: '40px',
+    left: '40px',
+    right: '40px',
+    bottom: '40px',
+    background: '#fff',
+    overflow: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    borderRadius: '4px',
+    outline: 'none',
+    padding: '20px'
+  }
+}
+
+
 export default ReactModal
