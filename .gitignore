@@ -3,7 +3,7 @@
 /public/storage
 /public/images
 /public/*.js
-/public/js
+/public/js/*
 /public/*.map
 /public/mix-manifest.json
 /storage/*.key
