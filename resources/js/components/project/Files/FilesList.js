@@ -1,10 +1,12 @@
+/** @jsx jsx */
 import React, { useState, useEffect } from "react"
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
 import Modal from "../../common/StyledModal"
 import File from "./File"
 import FileUpload from "../FileUpload/FileUpload"
-
-
+import SvgX from "../../../vendor/heroicons/outline/X"
 
 const FilesList = ({ subgroup, detail, ...props }) => {
   const { publicName, data, key } = subgroup || {}
@@ -27,10 +29,16 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         {...props}
       >
         <section>
-          <h2>Nahrát soubory: {publicName}</h2>
-          <button onClick={() => setIsModalOpen(false)}>×</button>
+          <header tw="flex justify-between pb-4">
+            <h2 tw="text-lg font-bold">
+              <span tw="text-gray-500">nahrát soubory: </span>
+              <span>{publicName}</span>
+            </h2>
+            <button onClick={() => setIsModalOpen(false)}>
+              <SvgX tw="w-6" />
+            </button>
+          </header>
           <FileUpload model={key} id={detail.id_akce} />
-          <button onClick={() => setIsModalOpen(false)}>Hide modal</button>
         </section>
       </Modal>
     </div>
