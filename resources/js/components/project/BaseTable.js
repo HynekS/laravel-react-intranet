@@ -72,6 +72,7 @@ const Table = ({ rawData }) => {
       width: 100,
       align: Column.Alignment.RIGHT,
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_B" }),
+      sortable: true,
     },
     {
       title: "Výzkum",
@@ -182,55 +183,54 @@ const Table = ({ rawData }) => {
   ]
 
   return (
-    <div>
-      <div
-        style={{
-          height: (() =>
-            window.innerHeight - (document.getElementById("header").offsetHeight || 57))(),
-        }}
-      >
-        <AutoResizer>
-          {({ width, height }) => (
-            <BaseTable
-              css={css`
-                .BaseTable__row.negative {
-                  ${tw`bg-red-100`}
-                  &:hover {
-                    ${tw`bg-red-200 bg-opacity-50`}
-                  }
+    <div
+      style={{
+        width: "100%",
+        height: (() =>
+          window.innerHeight - (document.getElementById("header").offsetHeight || 57))(),
+      }}
+    >
+      <AutoResizer>
+        {({ width, height }) => (
+          <BaseTable
+            css={css`
+              .BaseTable__row.negative {
+                ${tw`bg-red-100`}
+                &:hover {
+                  ${tw`bg-red-200 bg-opacity-50`}
                 }
-                .BaseTable__row.positive {
-                  ${tw`bg-green-100`}
-                  &:hover {
-                    ${tw`bg-green-200 bg-opacity-50`}
-                  }
+              }
+              .BaseTable__row.positive {
+                ${tw`bg-green-100`}
+                &:hover {
+                  ${tw`bg-green-200 bg-opacity-50`}
                 }
-                .BaseTable__row {
-                  border-bottom: none;
-                }
-              `}
-              data={data}
-              rowHeight={90}
-              width={width}
-              height={height}
-              sortBy={sortBy}
-              onColumnSort={onColumnSort}
-              rowClassName={({ rowData }) => {
-                if (rowData.nalez === "1") {
-                  return "positive"
-                }
-                if (rowData.nalez === "0") {
-                  return "negative"
-                }
-              }}
-            >
-              {columns.map(column => (
-                <Column {...column} />
-              ))}
-            </BaseTable>
-          )}
-        </AutoResizer>
-      </div>
+              }
+              .BaseTable__row {
+                border-bottom: none;
+              }
+            `}
+            data={data}
+            rowHeight={90}
+            width={width}
+            height={height}
+            sortBy={sortBy}
+            onColumnSort={onColumnSort}
+            rowClassName={({ rowData }) => {
+              if (rowData.nalez === "1") {
+                return "positive"
+              }
+              if (rowData.nalez === "0") {
+                return "negative"
+              }
+            }}
+          >
+            {columns.map(column => (
+              <Column {...column} />
+            ))}
+          </BaseTable>
+        )}
+      </AutoResizer>
     </div>
   )
 }
