@@ -1,9 +1,15 @@
 export default function globalStyles(props) {
-  return `html {
-    color: #555;
+  return `html, body, #app {
+    height: 100%;
+    margin: 0;
+  }
+
+  html {
+    color: #4A5568;
     overflow-y: overlay;
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
+
   .spinner {
     position: relative;
     color: transparent !important;
