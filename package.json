@@ -51,6 +51,7 @@
     "react-error-boundary": "^1.2.5",
     "react-fluid-table": "^0.3.5",
     "react-hook-form": "^5.1.3",
+    "react-lazy-with-preload": "^2.0.1",
     "react-modal": "^3.11.2",
     "react-redux": "^7.2.0",
     "react-router": "^6.0.0-alpha.2",
