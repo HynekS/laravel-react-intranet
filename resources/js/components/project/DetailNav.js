@@ -9,6 +9,7 @@ import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
 import SvgCurrencyDollar from "../../vendor/heroicons/outline/CurrencyDollar"
 import SvgAcademicCap from "../../vendor/heroicons/outline/AcademicCap"
 import SvgPaperClip from "../../vendor/heroicons/outline/PaperClip"
+import { Detail, Invoices, ExpertSheet, Files } from "./lazyImports"
 
 const activeClassName = "active"
 
@@ -30,25 +31,25 @@ const DetailNav = ({ detail }) => {
     <nav tw="pt-4">
       <ul tw="flex border-b">
         <li tw="mr-1">
-          <StyledNavLink to="" state={detail} activeClassName={activeClassName}>
+          <StyledNavLink to="" state={detail} activeClassName={activeClassName} onMouseOver={Detail.preload()}>
             <SvgClipboardList tw="flex w-6 mr-2" />
             <span>Údaje o akci</span>
           </StyledNavLink>
         </li>
         <li tw="mr-1">
-          <StyledNavLink to="faktury" state={detail} activeClassName={activeClassName}>
+          <StyledNavLink to="faktury" state={detail} activeClassName={activeClassName} onMouseOver={Invoices.preload()}>
             <SvgCurrencyDollar tw="flex w-6 mr-2" />
             <span>Faktury</span>
           </StyledNavLink>
         </li>
         <li tw="mr-1">
-          <StyledNavLink to="expertni-list" state={detail} activeClassName={activeClassName}>
+          <StyledNavLink to="expertni-list" state={detail} activeClassName={activeClassName} onMouseOver={ExpertSheet.preload()}>
             <SvgAcademicCap tw="flex w-6 mr-2" />
             <span>Expertní list</span>
           </StyledNavLink>
         </li>
         <li tw="mr-1">
-          <StyledNavLink to="nahrane-soubory" state={detail} activeClassName={activeClassName}>
+          <StyledNavLink to="nahrane-soubory" state={detail} activeClassName={activeClassName} onMouseOver={Files.preload()}>
             <SvgPaperClip tw="flex w-6 mr-2" />
             <span>Nahrané soubory</span>
           </StyledNavLink>
