@@ -3,8 +3,9 @@ import useScript from "../../utils/useScript"
 import styled from "@emotion/styled"
 import tw from "twin.macro"
 
+import DetailWrapper from "./DetailWrapper"
+
 const MapContainer = styled.div`
-  ${tw`bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none`}
   position: relative;
   & img {
     max-width: initial;
@@ -88,9 +89,11 @@ const ExpertSheet = ({ detail }) => {
   }
 
   return (
-    <MapContainer>
-      <div ref={mapRef} style={{ height: 600 }} />
-    </MapContainer>
+    <DetailWrapper>
+      <MapContainer>
+        <div ref={mapRef} style={{ height: 600 }} />
+      </MapContainer>
+    </DetailWrapper>
   )
 }
 
