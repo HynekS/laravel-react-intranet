@@ -4,6 +4,7 @@ import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
 import where from "../../../utils/where"
+import DetailWrapper from "../DetailWrapper"
 import FilesGroup from "./FilesGroup"
 
 const relations = [
@@ -12,7 +13,7 @@ const relations = [
     key: "teren_databaze",
     publicName: "terénní databáze",
     group: "teren",
-    partOfAkceTable: true
+    partOfAkceTable: true,
   },
   {
     key: "teren_scan",
@@ -23,7 +24,7 @@ const relations = [
     key: "LAB_databaze",
     publicName: "databáze z laboratoře",
     group: "laborator",
-    partOfAkceTable: true
+    partOfAkceTable: true,
   },
   {
     key: "digitalizace_nalez",
@@ -49,12 +50,20 @@ const Files = ({ detail, ...props }) => {
         data:
           detail[item.key] === "(NULL)" //WTF OMG
             ? []
-            : [].concat([{
-              file_path: detail[item.key],
-              id_akce: detail["id_akce"], // probably unnecessary
-              vlozeno: item.key === "teren_databaze" ? detail["teren_databaze_vlozeno"] : detail["LAB_databaze_vlozeno"],
-              vlozil: item.key === "teren_databaze" ? detail["teren_databaze_vlozil"] : detail["LAB_databaze_vlozil"],
-            }])
+            : [].concat([
+                {
+                  file_path: detail[item.key],
+                  id_akce: detail["id_akce"], // probably unnecessary
+                  vlozeno:
+                    item.key === "teren_databaze"
+                      ? detail["teren_databaze_vlozeno"]
+                      : detail["LAB_databaze_vlozeno"],
+                  vlozil:
+                    item.key === "teren_databaze"
+                      ? detail["teren_databaze_vlozil"]
+                      : detail["LAB_databaze_vlozil"],
+                },
+              ]),
       }
     } else {
       return {
@@ -65,40 +74,42 @@ const Files = ({ detail, ...props }) => {
   })
 
   return detail ? (
-    <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
-      <FilesGroup
-        group={where(withData, { group: "teren" })}
-        label="Terén"
-        detail={detail}
-        {...props}
-      />
-      <FilesGroup
-        group={where(withData, { group: "laborator" })}
-        label="Laboratoř"
-        detail={detail}
-        {...props}
-      />
-      <FilesGroup
-        group={where(withData, { group: "digitalizace" })}
-        label="Digitalizace"
-        detail={detail}
-        {...props}
-      />
-      <FilesGroup
-        group={where(withData, { group: "geodezie" })}
-        label="Geodezie"
-        detail={detail}
-        {...props}
-      />
-      <FilesGroup
-        group={where(withData, { group: "analyzy" })}
-        label="Analýzy"
-        detail={detail}
-        {...props}
-      />
-    </div>
+    <DetailWrapper>
+        <FilesGroup
+          group={where(withData, { group: "teren" })}
+          label="Terén"
+          detail={detail}
+          {...props}
+        />
+        <FilesGroup
+          group={where(withData, { group: "laborator" })}
+          label="Laboratoř"
+          detail={detail}
+          {...props}
+        />
+        <FilesGroup
+          group={where(withData, { group: "digitalizace" })}
+          label="Digitalizace"
+          detail={detail}
+          {...props}
+        />
+        <FilesGroup
+          group={where(withData, { group: "geodezie" })}
+          label="Geodezie"
+          detail={detail}
+          {...props}
+        />
+        <FilesGroup
+          group={where(withData, { group: "analyzy" })}
+          label="Analýzy"
+          detail={detail}
+          {...props}
+        />
+    </DetailWrapper>
   ) : (
-    <div>No detail!</div>
+    <DetailWrapper>
+      <div>No detail!</div>
+    </DetailWrapper>
   )
 }
 
