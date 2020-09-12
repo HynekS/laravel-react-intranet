@@ -4,7 +4,7 @@ import { useParams, useLocation } from "react-router-dom"
 import client from "../../utils/axiosWithDefaults"
 import DetailRoutes from "./DetailRoutes"
 import DetailNav from "./DetailNav"
-import DetailWrapper from "./DetailWrapper"
+import DetailPage from "./DetailPage"
 
 const DetailProvider = ({ children }) => {
   const [data, setData] = useState()
@@ -39,10 +39,10 @@ const DetailProvider = ({ children }) => {
   }, [params])
 
   return data ? (
-    <DetailWrapper>
+    <DetailPage>
       <DetailNav detail={data} />
       <DetailRoutes detail={data}></DetailRoutes>
-    </DetailWrapper>
+    </DetailPage>
   ) : (
     <div>Loading data…</div>
   )
