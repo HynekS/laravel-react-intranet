@@ -13,13 +13,40 @@ import { Detail, Invoices, ExpertSheet, Files } from "./lazyImports"
 
 const activeClassName = "active"
 
+const StyledNav = styled("nav")`
+  ${tw`pt-4`}
+  & ul {
+    ${tw`flex`}
+    position: relative;
+    &::after {
+      content: "";
+      ${tw`bg-white`}
+      height: 25px;
+      left: 0;
+      right: 10px;
+      bottom: -25px;
+      position: absolute;
+      z-index: 10;
+    }
+  }
+  & li {
+    ${tw`mr-1`}
+    display: inline-block;
+    position: relative;
+    transition: all 0.25s ease;
+  }
+`
+
 const StyledNavLink = styled(NavLink)`
-  ${tw`flex bg-gray-100 border-b-0 py-2 pl-4 pr-6 font-semibold text-gray-600 hover:text-blue-600 shadow-lg`}
+  ${tw`relative flex bg-gray-200 rounded-t py-2 pl-4 pr-6 font-semibold text-gray-600 hover:(text-blue-600 bg-blue-100 bg-opacity-50 transition duration-300) shadow-lg `}
   & svg {
     ${tw`opacity-25`}
   }
   &.${activeClassName} {
-    ${tw`-mb-px bg-white border-l border-t border-r rounded-t text-gray-700`}
+    padding-top: calc(0.5rem + 2px);
+    margin-top: -2px;
+    transition all 0s;
+    ${tw`bg-white z-10 rounded-t text-gray-700`}
     & svg {
       ${tw`opacity-50`}
     }
@@ -28,34 +55,54 @@ const StyledNavLink = styled(NavLink)`
 
 const DetailNav = ({ detail }) => {
   return (
-    <nav tw="pt-4">
-      <ul tw="flex border-b">
-        <li tw="mr-1">
-          <StyledNavLink to="" state={detail} activeClassName={activeClassName} onMouseOver={Detail.preload()}>
+    <StyledNav>
+      <ul>
+        <li>
+          <StyledNavLink
+            to=""
+            state={detail}
+            activeClassName={activeClassName}
+            onMouseOver={() => Detail.preload()}
+          >
             <SvgClipboardList tw="flex w-6 mr-2" />
             <span>Údaje o akci</span>
           </StyledNavLink>
         </li>
-        <li tw="mr-1">
-          <StyledNavLink to="faktury" state={detail} activeClassName={activeClassName} onMouseOver={Invoices.preload()}>
+        <li>
+          <StyledNavLink
+            to="faktury"
+            state={detail}
+            activeClassName={activeClassName}
+            onMouseOver={() => Invoices.preload()}
+          >
             <SvgCurrencyDollar tw="flex w-6 mr-2" />
             <span>Faktury</span>
           </StyledNavLink>
         </li>
-        <li tw="mr-1">
-          <StyledNavLink to="expertni-list" state={detail} activeClassName={activeClassName} onMouseOver={ExpertSheet.preload()}>
+        <li>
+          <StyledNavLink
+            to="expertni-list"
+            state={detail}
+            activeClassName={activeClassName}
+            onMouseOver={() => ExpertSheet.preload()}
+          >
             <SvgAcademicCap tw="flex w-6 mr-2" />
             <span>Expertní list</span>
           </StyledNavLink>
         </li>
-        <li tw="mr-1">
-          <StyledNavLink to="nahrane-soubory" state={detail} activeClassName={activeClassName} onMouseOver={Files.preload()}>
+        <li>
+          <StyledNavLink
+            to="nahrane-soubory"
+            state={detail}
+            activeClassName={activeClassName}
+            onMouseOver={() => Files.preload()}
+          >
             <SvgPaperClip tw="flex w-6 mr-2" />
             <span>Nahrané soubory</span>
           </StyledNavLink>
         </li>
       </ul>
-    </nav>
+    </StyledNav>
   )
 }
 
