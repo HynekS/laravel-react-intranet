@@ -25,9 +25,9 @@ const StyledReactModal = styled(ReactModalAdapter)`
     right: 0px;
     bottom: 0px;
     &.ReactModal__Overlay {
-      background-color: rgba(0, 0, 0, 0.5);
-      opacity: 0;
+      background-color: rgba(113, 128, 150, 0.75);
       transition: opacity 300ms ease-out;
+      z-index: 30;
     }
     &.ReactModal__Overlay--after-open {
       opacity: 1;
@@ -54,6 +54,7 @@ const StyledReactModal = styled(ReactModalAdapter)`
       transform: translateY(1rem);
       transition: transform 300ms ease-out;
       -webkit-overflow-scrolling: touch;
+      z-index: 40;
     }
 
     &.ReactModal__Content--after-open {
