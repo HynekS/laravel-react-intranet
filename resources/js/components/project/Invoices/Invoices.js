@@ -3,6 +3,7 @@ import React from "react"
 import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
+import DetailWrapper from "../DetailWrapper"
 import SvgTrash from "../../../vendor/heroicons/outline/Trash"
 import SvgPlus from "../../../vendor/heroicons/outline/Plus"
 
@@ -11,20 +12,23 @@ const InvoicePage = ({ detail }) => {
 
   const { faktury_dohled, faktury_vyzkum } = detail || {}
   return (
-    <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
+    <DetailWrapper>
       {detail ? (
         <div>
-          {!!faktury_dohled.length && <Invoices invoices={faktury_dohled} label="dohledy"/>}
+          {!!faktury_dohled.length && <Invoices invoices={faktury_dohled} label="dohledy" />}
           {!!faktury_vyzkum.length && <Invoices invoices={faktury_vyzkum} label="výzkum" />}
           {faktury_dohled.length + faktury_vyzkum.length === 0 && (
             <div>K této akci nebyly nalezeny žádné faktury.</div>
           )}
-          <Button><SvgPlus tw="w-5 mr-1"/>Nová faktura</Button>
+          <Button>
+            <SvgPlus tw="w-5 mr-1" />
+            Nová faktura
+          </Button>
         </div>
       ) : (
         <div>Loading…</div>
       )}
-    </div>
+    </DetailWrapper>
   )
 }
 
