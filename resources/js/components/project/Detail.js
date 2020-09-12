@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
+import DetailWrapper from "./DetailWrapper"
 import Input from "../common/Input"
 import Checkbox from "../common/Checkbox"
 import Radio from "../common/Radio"
@@ -33,7 +34,7 @@ const Detail = ({ detail }) => {
   }
 
   return (
-    <div tw="bg-white border-r border-l border-b py-4 px-8 rounded-md rounded-tl-none">
+    <DetailWrapper>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div>
@@ -196,7 +197,7 @@ const Detail = ({ detail }) => {
           </div>
         </div>
       </form>
-    </div>
+    </DetailWrapper>
   )
 }
 
