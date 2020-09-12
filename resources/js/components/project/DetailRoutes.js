@@ -1,16 +1,7 @@
 import React from "react"
 import { Routes, Route } from "react-router-dom"
-/*
-import Detail from "./Detail"
-import Invoices from "./Invoices/Invoices"
-import ExpertSheet from "./ExpertSheet"
-import Files from "./Files/Files"
-*/
 
-const Detail = React.lazy(() => import("./Detail"))
-const Invoices = React.lazy(() => import("./Invoices/Invoices"))
-const ExpertSheet = React.lazy(() => import("./ExpertSheet"))
-const Files = React.lazy(() => import("./Files/Files"))
+import { Detail, Invoices, ExpertSheet, Files } from "./lazyImports"
 
 const DetailRoutes = ({ detail }) => {
   return (
