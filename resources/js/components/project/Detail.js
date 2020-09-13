@@ -10,10 +10,11 @@ import Checkbox from "../common/Checkbox"
 import Radio from "../common/Radio"
 import Select from "../common/Select"
 
+import ButtonStyledRadio from "./ButtonStyledRadio"
+
 const Detail = ({ detail }) => {
   const { register, handleSubmit, setValue, watch, errors } = useForm()
-  // TODO extract to another file ↓
-  // let { pathname } = useLocation();
+  const { c_akce, nazev_akce } = detail || {}
 
   useEffect(() => {
     if (detail) {
@@ -35,6 +36,9 @@ const Detail = ({ detail }) => {
 
   return (
     <DetailWrapper>
+      <h2 tw="font-bold text-gray-700">
+        {c_akce}&ensp;{nazev_akce}
+      </h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div>
@@ -90,12 +94,19 @@ const Detail = ({ detail }) => {
                 placeholder="id registrace"
                 register={register}
               />
-              {/*<SelectField
+              <Select
                 name="id_stav"
                 label="stav"
                 placeholder="stav"
-                options={mockOptions.stav}
-              />*/}
+                options={[
+                  { label: "-1 (akce padla)", value: -1 },
+                  { label: "1 (před zahájením)", value: 1 },
+                  { label: "2 (zahájeno v terénu)", value: 2 },
+                  { label: "3 (probíhá zpracování)", value: 3 },
+                  { label: "4 (hotovo)", value: 4 },
+                ]}
+                register={register}
+              />
             </div>
           </div>
           <div>
@@ -144,7 +155,7 @@ const Detail = ({ detail }) => {
           </div>
           <div>
             <div>
-              <Radio
+              <ButtonStyledRadio
                 name="nalez"
                 label="nález"
                 options={{
@@ -192,7 +203,12 @@ const Detail = ({ detail }) => {
                 register={register}
               />
 
-              <button type="submit">Uložit změny</button>
+              <button
+                type="submit"
+                tw="bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline focus:transition-shadow focus:duration-300"
+              >
+                Uložit změny
+              </button>
             </div>
           </div>
         </div>
