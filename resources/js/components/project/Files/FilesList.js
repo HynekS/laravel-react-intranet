@@ -28,7 +28,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         closeTimeoutMS={500}
         {...props}
       >
-        <section>
+        <section tw="flex flex-1 flex-col h-full">
           <header tw="flex justify-between pb-4">
             <h2 tw="text-lg font-bold">
               <span tw="text-gray-500">nahrát soubory: </span>
