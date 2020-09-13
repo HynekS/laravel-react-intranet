@@ -39,6 +39,8 @@ const StyledReactModal = styled(ReactModalAdapter)`
   }
 
   &__content {
+    max-width: 72rem;
+    margin: 0 auto;
     position: absolute;
     top: 40px;
     left: 40px;
