@@ -1,4 +1,6 @@
+/** @jsx jsx */
 import React from "react"
+import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
 const StyledLabel = tw.label`block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4`
@@ -9,7 +11,7 @@ const InputWrapper = tw.div`md:w-2/3`
 const Radio = ({ name, options, label, register }) => {
   const renderRadioButtons = (key, index) => {
     return (
-      <label key={key} htmlFor={`${name}-${index}`}>
+      <label key={key} htmlFor={`${name}-${index}`} tw="pr-2">
         {key}
         <input
           type="radio"
@@ -17,6 +19,7 @@ const Radio = ({ name, options, label, register }) => {
           name={name}
           value={String(options[key])}
           ref={register}
+          tw="ml-1"
         />
       </label>
     )
