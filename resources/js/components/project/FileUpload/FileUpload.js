@@ -126,39 +126,35 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           ]}
         ></div>
         <form onSubmit={onFormSubmit} tw="pointer-events-none">
-          <input
-            type="file"
-            id={`fileElem-${guid}`}
-            multiple
-            accept={fileTypes}
-            onChange={onChange}
-            tw="hidden"
-          />
-          {
-            /*uploads.length === 0 && (*/
-            <div css={[isItemOverDropArea && tw`invisible`]}>
-              <div tw="text-gray-400 text-center pointer-events-none">
-                <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
-              </div>
-              <span tw="block text-lg">přetáhněte soubory</span>
-              <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
-              <label
-                htmlFor={`fileElem-${guid}`}
-                css={[
-                  tw`inline-block bg-blue-600 mb-4 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded focus:(outline-none shadow-outline transition-shadow duration-300)`,
-                  isItemOverDropArea ? tw`pointer-events-none` : tw`pointer-events-auto`,
-                ]}
-              >
-                klikněte pro výběr
-              </label>
+          <div css={[isItemOverDropArea && tw`invisible`]}>
+            <div tw="text-gray-400 text-center pointer-events-none">
+              <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
             </div>
-            /* )} */
-          }
+            <span tw="block text-lg">přetáhněte soubory</span>
+            <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
+            <input
+              type="file"
+              id={`fileElem-${guid}`}
+              multiple
+              accept={fileTypes}
+              onChange={onChange}
+              tw="w-0"
+            />
+            <label
+              htmlFor={`fileElem-${guid}`}
+              css={[
+                tw`inline-block bg-blue-600 mb-4 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded focus:(outline-none shadow-outline transition-shadow duration-300)`,
+                isItemOverDropArea ? tw`pointer-events-none` : tw`pointer-events-auto`,
+              ]}
+            >
+              klikněte pro výběr
+            </label>
+          </div>
         </form>
       </div>
       <div>
         <ul tw="flex flex-wrap pt-4">
-          {uploads.map(item => (
+          {uploads.map((item, i) => (
             <li key={uuidv4()} tw="p-4 overflow-hidden" style={{ flex: "0 1 33.3%" }}>
               <div tw="flex">
                 <div
@@ -177,14 +173,14 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
                     {item.name}
                   </span>
                   <span tw="block">{filesize(item.size)}</span>
-                  {/*<span onClick={() => removeFile(i)}>Remove</span>*/}
+                  <span onClick={() => removeFile(i)}>Remove</span>
                 </div>
               </div>
             </li>
           ))}
         </ul>
       </div>
-      <span>celková velikost:</span>
+      <span>celková velikost: {filesize(uploads.reduce((acc, file) => acc + file.size, 0))}</span>
       {/*uploads.length > 0*/ true && (
         <button
           type="submit"
