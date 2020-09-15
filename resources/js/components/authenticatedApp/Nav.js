@@ -26,14 +26,14 @@ const Nav = ({ ...props }) => {
   return (
     <Container role="navigation" aria-label="main navigation">
         <div>
-          <NavLink to="/">
+          <NavLink to="/" aria-label="návrat na domovskou stránku">
             <LogoThumb />
           </NavLink>
         </div>
         <NavContainer>
           <StyledNavLink to={`/akce`}>vše</StyledNavLink>
           {Array.from({ length: currentYear - 2013 }, (_, i) => currentYear - i).map((year, i) => (
-            <StyledNavLink to={`/akce/${year}`} key={year}>
+            <StyledNavLink to={`/akce/${year}`} key={year} aria-label={`akce proběhlé v roce ${year}`}>
               {year}
             </StyledNavLink>
           ))}
