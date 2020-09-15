@@ -11,12 +11,15 @@ class AkceController extends Controller
 {
     public function index()
     {
-        //return Akce::WithAll()->get();
-
+        /*
+        I am not using that at the moment. The memory consumption was high,
+        and performance wise – it does make much more sense to request each year separately (in parallel Promise.all). 
+        */
+        return Akce::WithAll()->get();
+        /*
         $years = [];
         $allProjectsByYear = new \stdClass;
 
-        // This overhead is because I don't know how to remove 'appends' property in one query
         $distinctYears = Akce::distinct()->get(['rok_per_year']);
         foreach ($distinctYears as $key => $value) {
             $years[] = $value->rok_per_year;
@@ -28,14 +31,10 @@ class AkceController extends Controller
                 return AkceTransformer::transformResponse($item);
             });
             $allProjectsByYear->$year = $transformed;
-            // $allProjectsByYear->$year = Akce::year($year)->get();
         }
 
         return json_encode($allProjectsByYear);
-
-        // Might be useful, but gives an object instead of array ('cause JSON can't use associative arrays)
-        //$result = Akce::all()->keyBy('id_akce');
-        //return $result;
+        */
     }
 
     public function show(Akce $akce)
@@ -68,16 +67,11 @@ class AkceController extends Controller
     public function showYear($year)
     {
         $akceFromYear = Akce::year($year)->WithAll()->get();
-        /*
-        $transformed = $akceFromYear->map(function ($item) {
-            return AkceTransformer::transformResponse($item);
-        });*/
+
         $keyed = collect($akceFromYear->map(function ($item) {
             return AkceTransformer::transformResponse($item);
         }))->keyBy('id_akce');
         return $keyed;
-        //return $transformed;
-
     }
     public function getByNumberOfYear($year, $num)
     {
