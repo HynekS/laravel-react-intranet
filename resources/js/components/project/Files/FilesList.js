@@ -30,7 +30,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
       >
         <section tw="flex flex-1 flex-col h-full">
           <header tw="flex justify-between pb-4">
-            <h2 tw="text-lg font-bold">
+            <h2 tw="text-lg font-medium">
               <span tw="text-gray-500">nahrát soubory: </span>
               <span>{publicName}</span>
             </h2>
