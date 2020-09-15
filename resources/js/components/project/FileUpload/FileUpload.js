@@ -2,13 +2,14 @@
 /** @jsx jsx */
 import React, { useState } from "react"
 import uuidv4 from "uuid/v4"
+import filesize from "filesize.js"
 import { jsx } from "@emotion/core"
 import tw, { css } from "twin.macro"
 
 import client from "../../../utils/axiosWithDefaults"
 // import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import getFileExtension from "../../../utils/getFileExtension"
-import SvgUpload from "../../../vendor/heroicons/outline/Upload"
+import SvgDropFiles from "./DropFiles"
 import getImageOrFallback from "../../../utils/getImageOrFallback"
 
 const getIconUrl = extension => `/images/fileIcons/${extension}.svg`
@@ -64,6 +65,8 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
         resolve({
           content: e.target.result,
           name: file.name,
+          size: file.size,
+          type: file.type,
           extension: getFileExtension(file.name).toLowerCase(),
         })
       reader.readAsDataURL(file)
@@ -122,14 +125,6 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
             isItemOverDropArea && tw`border-white`,
           ]}
         ></div>
-        <div
-          css={[
-            tw`text-gray-400 text-center pointer-events-none`,
-            isItemOverDropArea && tw`invisible`,
-          ]}
-        >
-          <SvgUpload tw="w-6 stroke-current inline-block" />
-        </div>
         <form onSubmit={onFormSubmit} tw="pointer-events-none">
           <input
             type="file"
@@ -139,8 +134,12 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
             onChange={onChange}
             tw="hidden"
           />
-          {uploads.length === 0 && (
+          {
+            /*uploads.length === 0 && (*/
             <div css={[isItemOverDropArea && tw`invisible`]}>
+              <div tw="text-gray-400 text-center pointer-events-none">
+                <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
+              </div>
               <span tw="block text-lg">přetáhněte soubory</span>
               <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
               <label
@@ -153,43 +152,47 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
                 klikněte pro výběr
               </label>
             </div>
-          )}
-          {uploads.length > 0 && <button type="submit">uložit soubory</button>}
+            /* )} */
+          }
         </form>
       </div>
       <div>
-        {uploads.length > 0 && (
-          <ul
-            style={{
-              alignItems: "center",
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-            }}
-          >
-            {uploads.map((item, i) => (
-              <li
-                key={uuidv4()}
-                style={{
-                  backgroundImage: `url(${item.icon})`,
-                  backgroundPosition: "50% 0",
-                  backgroundRepeat: "no-repeat",
-                  color: "white",
-                  display: "inline-block",
-                  height: "100px",
-                  listStyle: "none",
-                  paddingTop: "80px",
-                  textAlign: "center",
-                  width: `${100 / uploads.length}%`,
-                }}
-              >
-                {item.name}
-                <span onClick={() => removeFile(i)}>Remove</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul tw="flex flex-wrap pt-4">
+          {uploads.map(item => (
+            <li key={uuidv4()} tw="p-4 overflow-hidden" style={{ flex: "0 1 33.3%" }}>
+              <div tw="flex">
+                <div
+                  tw="w-8"
+                  style={{
+                    backgroundImage: `url(${item.icon})`,
+                    backgroundRepeat: "no-repeat",
+                    minWidth: "3rem",
+                  }}
+                ></div>
+                <div>
+                  <span
+                    tw="block overflow-hidden whitespace-no-wrap"
+                    style={{ maxWidth: 960, textOverflow: "ellipsis" }}
+                  >
+                    {item.name}
+                  </span>
+                  <span tw="block">{filesize(item.size)}</span>
+                  {/*<span onClick={() => removeFile(i)}>Remove</span>*/}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
+      <span>celková velikost:</span>
+      {/*uploads.length > 0*/ true && (
+        <button
+          type="submit"
+          tw="flex self-end items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)"
+        >
+          uložit soubory
+        </button>
+      )}
     </div>
   )
 }
