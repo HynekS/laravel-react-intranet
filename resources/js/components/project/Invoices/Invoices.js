@@ -18,7 +18,7 @@ const InvoicePage = ({ detail }) => {
           {!!faktury_dohled.length && <Invoices invoices={faktury_dohled} label="dohledy" />}
           {!!faktury_vyzkum.length && <Invoices invoices={faktury_vyzkum} label="výzkum" />}
           {faktury_dohled.length + faktury_vyzkum.length === 0 && (
-            <div>K této akci nebyly nalezeny žádné faktury.</div>
+            <div tw="pb-4">K této akci nebyly nalezeny žádné faktury.</div>
           )}
           <Button>
             <SvgPlus tw="w-5 mr-1" />
