@@ -36,7 +36,7 @@ const Detail = ({ detail }) => {
 
   return (
     <DetailWrapper>
-      <h2 tw="font-bold text-gray-700">
+      <h2 tw="font-medium text-gray-700 text-xl">
         {c_akce}&ensp;{nazev_akce}
       </h2>
       <form onSubmit={handleSubmit(onSubmit)}>
