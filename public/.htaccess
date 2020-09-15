@@ -25,14 +25,14 @@ Header set Connection keep-alive
 
 # Cache-control headers
 
-    # 2 WEEKS
+    # 1 year
     <filesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|swf)$">
-        Header set Cache-Control "max-age=1209600, public"
+        Header set Cache-Control "max-age=31540000, public"
     </filesMatch>
 
-    # 480 weeks
+    # 1 year
     <filesMatch "\.(eot|svg|ttf|woff|woff2)$">
-        Header set Cache-Control "max-age=1209600, public"
+        Header set Cache-Control "max-age=31540000, public"
     </filesMatch>
 
     # 1 DAY
