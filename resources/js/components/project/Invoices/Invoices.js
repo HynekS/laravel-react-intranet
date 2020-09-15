@@ -8,7 +8,7 @@ import SvgTrash from "../../../vendor/heroicons/outline/Trash"
 import SvgPlus from "../../../vendor/heroicons/outline/Plus"
 
 const InvoicePage = ({ detail }) => {
-  const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`
+  const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:(outline-none shadow-outline)`
 
   const { faktury_dohled, faktury_vyzkum } = detail || {}
   return (
