@@ -74,7 +74,11 @@ const Table = ({ rawData }) => {
       cell: ({ row }) => (
         <div>
           <div>{row.c_akce}</div>
-          <Link to={`/akce/${year}/${row.c_akce.split("/")[0]}`} state={row}>
+          <Link
+            to={`/akce/${year}/${row.c_akce.split("/")[0]}`}
+            state={row}
+            aria-label={`detail akce č. ${year}/${row.c_akce.split("/")[0]}`}
+          >
             Edit
           </Link>
         </div>
