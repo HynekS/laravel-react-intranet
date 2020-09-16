@@ -18,7 +18,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         <h4>{publicName}</h4>
         <div style={{ backgroundColor: "rgb(247, 250, 252)" }}>
           {data.length > 0 && data.map((file, i) => <File file={file} key={i} />)}
-          <button onClick={() => setIsModalOpen(true)}>Nahrát soubory</button>
+          <button tw="text-white text-sm px-2 py-1 bg-blue-600 rounded" onClick={() => setIsModalOpen(true)}>Nahrát soubory</button>
         </div>
       </div>
       <Modal

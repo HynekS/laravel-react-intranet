@@ -16,13 +16,19 @@ const getIconUrl = extension => `/images/fileIcons/${extension}.svg`
 const fallbackIconUrl = "/images/fileIcons/fallback.svg"
 
 const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
+  /* !!! TODO uploads must be higher up the tree to persist closing modal */
+
   const [uploads, setUploads] = useState([])
-  const [, setIsReadingFiles] = useState(false)
+  const [isReadingFiles, setIsReadingFiles] = useState(false)
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
+  const [response, setResponse] = useState(null)
+  const [error, setError] = useState(null)
   // const [isUploading, setIsUploading] = useState(false) // TODO uploading, not reading – separately for every upload
 
   const onFormSubmit = e => {
+    console.log("submit?")
     e.preventDefault()
+    console.log("submit? after prevent default")
     if (!uploads.length) return false
     onUpload(uploads)
   }
@@ -92,66 +98,88 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           "Content-Type": "multipart/form-data",
         },
       })
-      .then(_ => {
+      .then(res => {
         // TODO !!! notify user of succesful upload !!!
+        setResponse(res)
         setUploads([])
       })
       .catch(error => {
         // TODO display error in UI!
         console.log(error)
+        setError(error)
       })
   }
   const guid = uuidv4()
+
   return (
     <div tw="flex flex-1 flex-col h-full">
-      <div
-        onDrop={onChange}
-        onDragEnd={onChange}
-        onDragEnter={() => {
-          setIsItemOverDropArea(true)
-        }}
-        onDragOver={e => {
-          e.preventDefault()
-        }}
-        onDragLeave={() => setIsItemOverDropArea(false)}
-        css={[
-          tw`relative z-0 flex flex-grow flex-col justify-center -m-2 p-8 text-center rounded-lg transition transition-all duration-300`,
-          isItemOverDropArea && tw`bg-blue-500`,
-        ]}
-      >
+      {!response ? (
         <div
+          onDrop={onChange}
+          onDragEnd={onChange}
+          onDragEnter={() => {
+            setIsItemOverDropArea(true)
+          }}
+          onDragOver={e => {
+            e.preventDefault()
+          }}
+          onDragLeave={() => setIsItemOverDropArea(false)}
           css={[
-            tw`absolute z--10 border-2 border-gray-400 border-dashed inset-2 rounded-lg pointer-events-none transition-all duration-300`,
-            isItemOverDropArea && tw`border-white`,
+            tw`relative z-0 flex flex-grow flex-col justify-center -m-2 p-8 text-center rounded-lg transition transition-all duration-300`,
+            isItemOverDropArea && tw`bg-blue-500`,
           ]}
-        ></div>
-        <form onSubmit={onFormSubmit} tw="pointer-events-none">
-          <div css={[isItemOverDropArea && tw`invisible`]}>
-            <div tw="text-gray-400 text-center pointer-events-none">
-              <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
-            </div>
-            <span tw="block text-lg">přetáhněte soubory</span>
-            <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
-            <input
-              type="file"
-              id={`fileElem-${guid}`}
-              multiple
-              accept={fileTypes}
-              onChange={onChange}
-              tw="w-0"
-            />
-            <label
-              htmlFor={`fileElem-${guid}`}
-              css={[
-                tw`inline-block bg-blue-600 mb-4 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded focus:(outline-none shadow-outline transition-shadow duration-300)`,
-                isItemOverDropArea ? tw`pointer-events-none` : tw`pointer-events-auto`,
-              ]}
+        >
+          <div
+            css={[
+              tw`absolute z--10 border-2 border-gray-400 border-dashed inset-2 rounded-lg pointer-events-none transition-all duration-300`,
+              isItemOverDropArea && tw`border-white`,
+            ]}
+          >
+            <span
+              css={[tw`h-full flex items-center justify-center text-white text-2xl font-medium `]}
             >
-              klikněte pro výběr
-            </label>
+              přetáhněte soubory z počítače
+            </span>
           </div>
-        </form>
-      </div>
+          <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${guid}`}>
+            <div css={[(isItemOverDropArea || isReadingFiles) && tw`invisible`]}>
+              <div tw="text-gray-400 text-center pointer-events-none">
+                <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
+              </div>
+              <span tw="block text-lg">přetáhněte soubory</span>
+              <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
+              <input
+                type="file"
+                id={`fileElem-${guid}`}
+                multiple
+                accept={fileTypes}
+                onChange={onChange}
+                css={css`
+                  ${tw`w-0`}
+                  &:focus + label {
+                    ${tw`outline-none shadow-outline transition-shadow duration-300`}
+                  }
+                `}
+              />
+              <label
+                htmlFor={`fileElem-${guid}`}
+                css={[
+                  tw`inline-block bg-blue-600 mb-4 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded`,
+                  isItemOverDropArea ? tw`pointer-events-none` : tw`pointer-events-auto`,
+                ]}
+              >
+                klikněte pro výběr
+              </label>
+            </div>
+            <span css={[!isReadingFiles && tw`hidden`]}>čtení souborů…</span>
+          </form>
+        </div>
+      ) : (
+        // TODO extract at least this to separate component
+        // Also make one for error state.
+        // Add styles.
+        <div>{response.data.length && "Soubory byly v pořádku uloženy na server."}</div>
+      )}
       <div>
         <ul tw="flex flex-wrap pt-4">
           {uploads.map((item, i) => (
@@ -162,7 +190,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
                   style={{
                     backgroundImage: `url(${item.icon})`,
                     backgroundRepeat: "no-repeat",
-                    minWidth: "3rem",
+                    minWidth: "4rem",
                   }}
                 ></div>
                 <div>
@@ -172,7 +200,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
                   >
                     {item.name}
                   </span>
-                  <span tw="block">{filesize(item.size)}</span>
+                  <span tw="block text-gray-600 text-sm font-medium">{filesize(item.size)}</span>
                   <span onClick={() => removeFile(i)}>Remove</span>
                 </div>
               </div>
@@ -180,14 +208,20 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           ))}
         </ul>
       </div>
-      <span>celková velikost: {filesize(uploads.reduce((acc, file) => acc + file.size, 0))}</span>
-      {/*uploads.length > 0*/ true && (
-        <button
-          type="submit"
-          tw="flex self-end items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)"
-        >
-          uložit soubory
-        </button>
+      {uploads.length > 0 && (
+        <div tw="flex justify-between items-center">
+          <span tw="text-sm font-medium text-gray-700">
+            <span tw="text-gray-500">celková velikost:</span>{" "}
+            {filesize(uploads.reduce((acc, file) => acc + file.size, 0))}
+          </span>
+          <button
+            form={`fileUpload-${guid}`}
+            type="submit"
+            tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)"
+          >
+            uložit soubory
+          </button>
+        </div>
       )}
     </div>
   )
