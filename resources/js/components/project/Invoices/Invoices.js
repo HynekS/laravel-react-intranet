@@ -10,8 +10,14 @@ import SvgPlus from "../../../vendor/heroicons/outline/Plus"
 const InvoicePage = ({ detail }) => {
   const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:(outline-none shadow-outline)`
 
-  const { faktury_dohled, faktury_vyzkum } = detail || {}
-  return (
+  const {
+    faktury_dohled,
+    faktury_vyzkum,
+    rozpocet_B: rozpocet_dohled,
+    rozpocet_A: rozpocet_vyzkum,
+  } = detail || {}
+
+  return console.log(typeof rozpocet_dohled, typeof rozpocet_vyzkum) || (
     <DetailWrapper>
       {detail ? (
         <div>
@@ -19,6 +25,18 @@ const InvoicePage = ({ detail }) => {
           {!!faktury_vyzkum.length && <Invoices invoices={faktury_vyzkum} label="výzkum" />}
           {faktury_dohled.length + faktury_vyzkum.length === 0 && (
             <div tw="pb-4">K této akci nebyly nalezeny žádné faktury.</div>
+          )}
+          {!!rozpocet_dohled && (
+            <div key={rozpocet_dohled}> 
+              rozpočet dohledy: {rozpocet_dohled.toLocaleString("cs-CZ")}<br />
+              fakturováno: {faktury_dohled.reduce((acc, item) => acc + item.castka, 0).toLocaleString("cs-CZ")}
+            </div>
+          )}
+          {!!rozpocet_vyzkum && (
+            <div key={rozpocet_vyzkum}>
+              rozpočet dohledy: {rozpocet_vyzkum.toLocaleString("cs-CZ")}<br />
+              fakturováno: {faktury_vyzkum.reduce((acc, item) => acc + item.castka, 0).toLocaleString("cs-CZ")}
+            </div>
           )}
           <Button>
             <SvgPlus tw="w-5 mr-1" />
