@@ -48,7 +48,11 @@ const Table = ({ rawData }) => {
           <div>
             <strong>{c_akce}</strong>
           </div>
-          <Link to={`/akce/${year}/${c_akce.split("/")[0]}`} state={rowData}>
+          <Link
+            to={`/akce/${year}/${c_akce.split("/")[0]}`}
+            state={rowData}
+            aria-label={`odkaz na detail akce č. ${year}/${c_akce.split("/")[0]}`}
+          >
             <div tw="flex items-center justify-center p-1 px-2 bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white rounded">
               <SvgPencil width="1rem" />
             </div>
