@@ -1,17 +1,25 @@
-import React from "react";
-import "./ProgressBar.css";
+// @ts-check
+/** @jsx jsx */
+import React from "react"
+// import "./ProgressBar.css";
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
-export const ProgressBar = props => (
-  <div className="progress-bar">
-    <Filler percentage={props.percentage} />
+export const ProgressBar = ({ progress }) => (
+  <div tw="h-2 rounded">
+    <Filler progress={progress} />
   </div>
-);
+)
 
-export const Filler = props => (
+export const Filler = ({ progress }) => (
   <div
-    className="filler"
+    tw="bg-blue-400 h-full"
     style={{
-      width: `${props.percentage}%`
+      // width: `${progress}%`
+      borderRadius: "inherit",
+      transform: `scaleX(${progress / 100})`,
+      transformOrigin: "left",
+      transition: "transform 0.2s ease-in",
     }}
   />
-);
+)
