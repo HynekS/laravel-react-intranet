@@ -17,7 +17,6 @@ export default function useAuth() {
 
   useEffect(() => {
     if (token && !user) dispatch(fetchUser())
-    console.log("fetching user")
   }, [])
 
   return { user, loading }
