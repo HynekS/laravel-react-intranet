@@ -14,11 +14,20 @@ const FilesList = ({ subgroup, detail, ...props }) => {
 
   return (
     <div>
-      <div>
-        <h4>{publicName}</h4>
-        <div style={{ backgroundColor: "rgb(247, 250, 252)" }}>
-          {data.length > 0 && data.map((file, i) => <File file={file} key={i} />)}
-          <button tw="text-white text-sm px-2 py-1 bg-blue-600 rounded" onClick={() => setIsModalOpen(true)}>Nahrát soubory</button>
+      <div tw="pb-2">
+        <div tw="p-4 pt-2 bg-gray-200 rounded">
+          <h4 tw="pb-4 text-gray-600 font-semibold">{publicName}</h4>
+          <div tw="flex flex-1 flex-wrap">
+            {data.length > 0 && data.map((file, i) => <File file={file} key={i} />)}
+          </div>
+          <div tw="flex-1">
+            <button
+              tw="text-white text-sm px-2 py-1 bg-blue-600 rounded focus:(outline-none shadow-outline)"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Nahrát soubory
+            </button>
+          </div>
         </div>
       </div>
       <Modal
@@ -34,6 +43,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
               <span tw="text-gray-500">nahrát soubory: </span>
               <span>{publicName}</span>
             </h2>
+
             <button onClick={() => setIsModalOpen(false)}>
               <SvgX tw="w-6" />
             </button>
