@@ -7,9 +7,10 @@ import { jsx } from "@emotion/core"
 import tw, { css } from "twin.macro"
 
 import client from "../../../utils/axiosWithDefaults"
-// import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
+import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import getFileExtension from "../../../utils/getFileExtension"
 import SvgDropFiles from "./DropFiles"
+import SvgCheck from "../../../vendor/heroicons/outline/Check"
 import getImageOrFallback from "../../../utils/getImageOrFallback"
 
 const getIconUrl = extension => `/images/fileIcons/${extension}.svg`
@@ -21,14 +22,12 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
   const [uploads, setUploads] = useState([])
   const [isReadingFiles, setIsReadingFiles] = useState(false)
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [response, setResponse] = useState(null)
   const [error, setError] = useState(null)
-  // const [isUploading, setIsUploading] = useState(false) // TODO uploading, not reading – separately for every upload
 
   const onFormSubmit = e => {
-    console.log("submit?")
     e.preventDefault()
-    console.log("submit? after prevent default")
     if (!uploads.length) return false
     onUpload(uploads)
   }
@@ -75,6 +74,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           type: file.type,
           extension: getFileExtension(file.name).toLowerCase(),
         })
+
       reader.readAsDataURL(file)
     })
   }
@@ -96,6 +96,11 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
       .post(url, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: e => {
+          let progress = (e.loaded / e.total) * 100
+          console.log(Math.round(progress))
+          setProgress(Math.round(progress))
         },
       })
       .then(res => {
@@ -140,6 +145,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
             >
               přetáhněte soubory z počítače
             </span>
+            {(progress > 0 && !response) && <ProgressBar progress={progress} />}
           </div>
           <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${guid}`}>
             <div css={[(isItemOverDropArea || isReadingFiles) && tw`invisible`]}>
@@ -174,33 +180,65 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
             <span css={[!isReadingFiles && tw`hidden`]}>čtení souborů…</span>
           </form>
         </div>
-      ) : (
-        // TODO extract at least this to separate component
-        // Also make one for error state.
-        // Add styles.
-        <div>{response.data.length && "Soubory byly v pořádku uloženy na server."}</div>
-      )}
+      ) : // TODO extract at least this to separate component, ie "SuccessMessage"
+      // Also make one for error state.
+      // Add close callback!!
+      response.data.length ? (
+        <div tw="flex flex-col items-center justify-center h-full pb-4">
+          <div tw="flex pb-4">
+            <SvgCheck tw="w-8 stroke-green-400 mr-1" />
+            <span tw="font-medium text-gray-600 text-xl">
+              Soubory byly v pořádku uloženy na server.
+            </span>
+          </div>
+          <div>
+            <button tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)">
+              OK
+            </button>
+          </div>
+        </div>
+      ) : null}
       <div>
         <ul tw="flex flex-wrap pt-4">
-          {uploads.map((item, i) => (
+          {uploads.map((file, i) => (
             <li key={uuidv4()} tw="p-4 overflow-hidden" style={{ flex: "0 1 33.3%" }}>
               <div tw="flex">
-                <div
-                  tw="w-8"
-                  style={{
-                    backgroundImage: `url(${item.icon})`,
-                    backgroundRepeat: "no-repeat",
-                    minWidth: "4rem",
-                  }}
-                ></div>
-                <div>
+                {file.type.includes("image") ? (
+                  <div
+                    tw="rounded bg-gray-300"
+                    style={{
+                      backgroundImage: `url(${file.content})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "contain",
+                      backgroundPosition: "center",
+                      minWidth: "4rem",
+                    }}
+                  ></div>
+                ) : (
+                  <div
+                    tw="w-8 p-3 rounded bg-gray-300"
+                    style={{
+                      minWidth: "4rem",
+                    }}
+                  >
+                    <div
+                      style={{
+                        backgroundImage: `url(${file.icon})`,
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                        height: "100%",
+                      }}
+                    ></div>
+                  </div>
+                )}
+                <div tw="py-2 pl-2 pr-4 flex-grow">
                   <span
-                    tw="block overflow-hidden whitespace-no-wrap"
+                    tw="block overflow-hidden whitespace-no-wrap text-gray-600 text-sm font-medium"
                     style={{ maxWidth: 960, textOverflow: "ellipsis" }}
                   >
-                    {item.name}
+                    {file.name}
                   </span>
-                  <span tw="block text-gray-600 text-sm font-medium">{filesize(item.size)}</span>
+                  <span tw="block text-gray-500 text-xs font-medium">{filesize(file.size)}</span>
                   <span onClick={() => removeFile(i)}>Remove</span>
                 </div>
               </div>
