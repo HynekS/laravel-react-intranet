@@ -1,76 +1,71 @@
+// @ts-check
+/** @jsx jsx */
 import React from "react"
 import fileDownload from "js-file-download"
+import { jsx } from "@emotion/core"
+import tw from "twin.macro"
 
-import Http from "../../../utils/axiosWithDefaults"
+import client from "../../../utils/axiosWithDefaults"
 import getFileExtension from "../../../utils/getFileExtension"
 
-/* This is a quick bugfix, but there is still missing the date and owner of the file – need to fix it way above */
-/* UPDATE: should remove, dead code now. All inputs should be objects. */
-const getFilePath = input => {
-  if (input instanceof Object && input.file_path) {
-    return input.file_path
-  }
-  if (typeof input === "string") {
-    return input
-  }
-  return null
+const onDownload = path => {
+  client.get(`/download/${path}`, {
+    responseType: "blob",
+  })
+    .then(response => {
+      fileDownload(response.data, path)
+    })
+    .catch(error => console.log(error))
 }
 
 const File = ({ file }) => {
-  const path = getFilePath(file)
-  console.log(path)
-  // const icon = file?.file_path ? String(getFileExtension(file.file_path)).toLowerCase() : "fallback"
+  const path = file?.file_path
   const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
+  
   return path ? (
-    <div style={{ padding: "1rem", display: "inline-block" }}>
+    <div tw="pr-4 pb-4" style={{ flex: "0 1 20%", minWidth: "20%" }}>
       <button
-        style={{ width: 50 }}
-        onClick={() =>
-          Http.get(`/download/${path}`, {
-            responseType: "blob",
-          })
-            .then(response => {
-              console.log(response)
-              fileDownload(response.data, path)
-            })
-            .catch(error => console.log(error))
-        }
+        onClick={() => onDownload(path)}
+        tw="flex w-full text-left rounded bg-white bg-opacity-50"
+        style={{
+          boxShadow: "0 0 8px -2px rgba(5, 10, 29, 0.2)",
+          padding: 2,
+        }}
       >
-        <span
-          style={{
-            display: "block",
-            background: `url(/images/fileIcons/${icon}.svg) top center no-repeat`,
-            border: "none",
-            cursor: "pointer",
-            padding: "1rem",
-            width: 50,
-            height: 40,
-            backgroundSize: "contain",
-            backgroundPosition: "50% 0",
-          }}
-        ></span>
-
-        <span
-          style={{
-            display: "block",
-            height: "3rem",
-            lineHeight: 1,
-            MsWordBreak: "break-all",
-            wordBreak: "break-word",
-            textOverflow: "ellipsis",
-            overflow: "hidden",
-          }}
-        >
-          <small>{path}</small>
+        <span tw="p-3 bg-gray-400 rounded">
+          <span
+            style={{
+              display: "block",
+              backgroundImage: `url(/images/fileIcons/${icon}.svg)`,
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              cursor: "pointer",
+              minWidth: "3rem",
+              height: "3rem",
+            }}
+          ></span>
         </span>
-        <span>
-          <small>{new Date(file.vlozeno).toLocaleDateString("cs-CZ")}</small>
+        <span tw="py-1 px-2 pr-4 ">
+          <span
+            tw="block text-gray-600 text-sm font-medium overflow-hidden break-all"
+            style={{
+              msWordBreak: "break-all",
+              wordBreak: "break-word",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {path.split("/").pop()}
+          </span>
+          <span tw="block text-gray-500 text-xs font-medium">
+            {new Date(file.vlozeno).toLocaleDateString("cs-CZ")}
+          </span>
         </span>
       </button>
     </div>
-  ) : (
-    <div>No file</div>
-  )
+  ) : null
 }
 
 export default File
