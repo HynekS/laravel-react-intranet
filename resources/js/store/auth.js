@@ -36,7 +36,6 @@ export default function reducer(state = initialState, action = {}) {
         authError: null,
       }
     case LOGIN_SUCCESS:
-      console.log(action.user)
       return {
         ...state,
         isAuthPending: false,
