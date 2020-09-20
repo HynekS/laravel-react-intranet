@@ -1,3 +1,4 @@
+// @ts-check
 /** @jsx jsx */
 import React from "react"
 import { jsx } from "@emotion/core"
@@ -17,27 +18,28 @@ const InvoicePage = ({ detail }) => {
     rozpocet_A: rozpocet_vyzkum,
   } = detail || {}
 
-  return console.log(typeof rozpocet_dohled, typeof rozpocet_vyzkum) || (
+  const fakturyDohledSum = faktury_dohled.reduce((acc, item) => acc + item.castka, 0)
+  const fakturyVyzkumSum = faktury_vyzkum.reduce((acc, item) => acc + item.castka, 0)
+
+  return (
     <DetailWrapper>
       {detail ? (
         <div>
-          {!!faktury_dohled.length && <Invoices invoices={faktury_dohled} label="dohledy" />}
-          {!!faktury_vyzkum.length && <Invoices invoices={faktury_vyzkum} label="výzkum" />}
-          {faktury_dohled.length + faktury_vyzkum.length === 0 && (
-            <div tw="pb-4">K této akci nebyly nalezeny žádné faktury.</div>
-          )}
-          {!!rozpocet_dohled && (
-            <div key={rozpocet_dohled}> 
-              rozpočet dohledy: {rozpocet_dohled.toLocaleString("cs-CZ")}<br />
-              fakturováno: {faktury_dohled.reduce((acc, item) => acc + item.castka, 0).toLocaleString("cs-CZ")}
+          <div tw="flex flex-wrap">
+            <div style={{ flex: "0 0 62%" /* 62 is approximately 100/golden ratio */ }}>
+              {!!faktury_dohled.length && <Invoices invoices={faktury_dohled} label="dohledy" />}
+              {!!faktury_vyzkum.length && <Invoices invoices={faktury_vyzkum} label="výzkum" />}
+              {faktury_dohled.length + faktury_vyzkum.length === 0 && (
+                <div tw="pb-4">K této akci nebyly nalezeny žádné faktury.</div>
+              )}
             </div>
-          )}
-          {!!rozpocet_vyzkum && (
-            <div key={rozpocet_vyzkum}>
-              rozpočet dohledy: {rozpocet_vyzkum.toLocaleString("cs-CZ")}<br />
-              fakturováno: {faktury_vyzkum.reduce((acc, item) => acc + item.castka, 0).toLocaleString("cs-CZ")}
-            </div>
-          )}
+            {!!rozpocet_dohled && (
+              <InvoiceSummary budget={rozpocet_dohled} sum={fakturyDohledSum} label="Dohledy" />
+            )}
+            {!!rozpocet_vyzkum && (
+              <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
+            )}
+          </div>
           <Button>
             <SvgPlus tw="w-5 mr-1" />
             Nová faktura
@@ -50,8 +52,30 @@ const InvoicePage = ({ detail }) => {
   )
 }
 
+const InvoiceSummary = ({ budget, sum, label, ...props }) => (
+  <div tw="p-4">
+    <div key={label} tw="p-8 text-gray-600 font-medium rounded-lg shadow">
+      <dl>
+        <h3 tw="text-lg text-gray-700 font-medium pb-4">{label}</h3>
+        <div tw="flex justify-between">
+          <dt tw="text-gray-500 pr-4">rozpočet: </dt>
+          <dd>{budget.toLocaleString("cs-CZ")},–</dd>
+        </div>
+        <div tw="flex justify-between border-b">
+          <dt tw="text-gray-500 pr-4">fakturováno: </dt>
+          <dd>{sum.toLocaleString("cs-CZ")},–</dd>
+        </div>
+        <div tw="flex justify-between pt-2">
+          <dt tw="text-gray-600 pr-4">zbývá: </dt>
+          <dd>{(budget - sum).toLocaleString("cs-CZ")},–</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+)
+
 const Invoices = ({ invoices, label }) => (
-  <div tw="pb-8">
+  <div tw="pb-8 pr-8">
     <h2>Faktury {label}</h2>
     <table>
       <thead>
