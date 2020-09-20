@@ -1,3 +1,4 @@
+// @ts-check
 import React from "react"
 
 import Layout from "../components/authenticatedApp/Layout"
@@ -11,7 +12,7 @@ const HomePage = props => {
     return <Layout />
   }
   if (loading) {
-    return <div>Loading user…</div>
+    return null
   }
   return <LoginPage />
 }
