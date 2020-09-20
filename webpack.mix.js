@@ -45,7 +45,7 @@ const removePlugin = new RemovePlugin({
 mix
   .webpackConfig({
     plugins: [removePlugin],
-    ...(mix.inProduction && {
+    ...(mix.inProduction() && {
       resolve: {
         alias: {
           react: "preact/compat",
