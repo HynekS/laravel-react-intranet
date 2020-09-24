@@ -20,11 +20,11 @@ const initialState = {
 }
 
 // Actions
-const FETCH_PROJECTS_OF_ONE_YEAR_INITIALIZED = year =>
+const FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED = year =>
   `[projects] Fetching projects of year ${year} has started`
-const FETCH_PROJECTS_OF_ONE_YEAR_SUCCESS = year =>
+const FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS = year =>
   `[projects] Fetching projects of year ${year} was succesful`
-const FETCH_PROJECTS_OF_ONE_YEAR_FAILURE = "[projects] Fetching projects of one year has failed"
+const FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE = year => `[projects] Fetching projects of year ${year} has failed`
 
 const FETCH_ALL_PROJECTS_INITIALIZED = "[projects] Fetching all projects has started"
 const FETCH_ALL_PROJECTS_SUCCESS = "[projects] Fetching all projects was succesful"
@@ -54,12 +54,12 @@ export default function reducer(state = initialState, action = {}) {
         isFetchingAll: false,
         fetchingAllError: action.error,
       }
-    case FETCH_PROJECTS_OF_ONE_YEAR_INITIALIZED(action.year):
+    case FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED(action.year):
       return {
         ...state,
         isFetchingOneYear: true,
       }
-    case FETCH_PROJECTS_OF_ONE_YEAR_SUCCESS(action.year):
+    case FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(action.year):
       return {
         ...state,
         isFetchingOneYear: false,
@@ -73,7 +73,7 @@ export default function reducer(state = initialState, action = {}) {
           ],
         },
       }
-    case FETCH_PROJECTS_OF_ONE_YEAR_FAILURE:
+    case FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(action.year):
       console.log(action.error)
       return {
         ...state,
@@ -87,19 +87,20 @@ export default function reducer(state = initialState, action = {}) {
 
 // Action creators
 const fetchProjectsOfOneYearInit = year => ({
-  type: FETCH_PROJECTS_OF_ONE_YEAR_INITIALIZED(year),
+  type: FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED(year),
   year,
 })
 
 const fetchProjectsOfOneYearSuccess = (projectsOfOneYear, year) => ({
-  type: FETCH_PROJECTS_OF_ONE_YEAR_SUCCESS(year),
+  type: FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(year),
   projectsOfOneYear,
   year,
 })
 
 const fetchProjectsOfOneYearFailure = error => ({
-  type: FETCH_PROJECTS_OF_ONE_YEAR_FAILURE,
+  type: FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(year, error),
   error,
+  year,
 })
 
 const fetchAllProjectsInit = () => ({
@@ -122,7 +123,7 @@ export const fetchProjectsOfOneYear = year => async dispatch => {
     const response = await client.get(`akce/${year}`)
     dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
   } catch (error) {
-    dispatch(fetchProjectsOfOneYearFailure(error))
+    dispatch(fetchProjectsOfOneYearFailure(year, error))
   }
   if (!store.getState().projects.isFetchingAll) loadProgressBar({ progress: false })
 }
