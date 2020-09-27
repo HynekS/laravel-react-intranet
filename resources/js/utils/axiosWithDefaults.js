@@ -1,10 +1,8 @@
 import axios from "axios"
-/*
-import { loadProgressBar } from "axios-progress-bar"
-import "axios-progress-bar/dist/nprogress.css"
 
-loadProgressBar()
-*/
+import store from "../store/configuredStore"
+import { clearLoggedInUser } from "../store/auth"
+
 const API_URL =
   process.env.NODE_ENV === "test"
     ? process.env.BASE_URL || `http://localhost:${process.env.PORT}/api/`
@@ -27,8 +25,8 @@ axios.interceptors.response.use(
        it causes this bug. */
       localStorage.removeItem("oauth_token")
       localStorage.removeItem("expires_at")
+      store.dispatch(clearLoggedInUser())
       history.pushState({}, "Pueblo intranet", "/")
-      // TODO force delete user (can not do it via logout because this route is protected. See comment above)
     }
     return Promise.reject(error)
   },
