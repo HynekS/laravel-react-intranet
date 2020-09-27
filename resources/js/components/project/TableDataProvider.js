@@ -9,7 +9,7 @@ import { fetchProjectsOfOneYear, fetchAllProjects } from "../../store/projects"
 
 const getYear = (_, year) => year
 
-const getProjectIdsByYear = (state, year) => state.projects.IdsByYear[year]
+const getProjectIdsByYear = (state, year) => state.projects.idsByYear[year]
 const getProjectsById = state => state.projects.byId
 
 const getIsFetchingAll = state => state.projects.isFetchingAll
