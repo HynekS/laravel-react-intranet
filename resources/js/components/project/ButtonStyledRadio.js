@@ -11,19 +11,14 @@ const InputWrapper = tw.div`md:w-2/3`
 const Radio = ({ name, options, label, register }) => {
   const renderRadioButtons = (key, index, { length } = list) => {
     return (
-      <span key={key}>
+      <span key={key} tw="relative">
         <input
           type="radio"
           id={`${name}-${index}`}
           name={name}
           value={String(options[key])}
           ref={register}
-          css={css`
-            display: none;
-            &:checked ~ label {
-              ${tw`bg-green-200`}
-            }
-          `}
+          tw="absolute w-0"
         />
         <label
           htmlFor={`${name}-${index}`}
@@ -45,7 +40,25 @@ const Radio = ({ name, options, label, register }) => {
         <LabelWrapper>
           <StyledLabel>{label}</StyledLabel>
         </LabelWrapper>
-        <InputWrapper>{options && Object.keys(options).map(renderRadioButtons)}</InputWrapper>
+        <InputWrapper
+          css={css`
+            ${tw`text-gray-500`}
+            & input[value="null"]:checked + label {
+              ${tw`text-gray-700 bg-gray-200 border-transparent`}
+              box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.7);
+            }
+            & input[value="0"]:checked + label {
+              ${tw`text-orange-700 bg-orange-200 border-transparent`}
+              box-shadow: 0 0 0 1px rgba(192, 86, 33, 0.7);
+            }
+            & input[value="1"]:checked + label {
+              ${tw`text-green-700 bg-green-200 border-transparent`}
+              box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.7);
+            }
+          `}
+        >
+          {options && Object.keys(options).map(renderRadioButtons)}
+        </InputWrapper>
       </RowWrapper>
     )
   }
