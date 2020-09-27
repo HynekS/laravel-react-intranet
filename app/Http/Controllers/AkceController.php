@@ -16,25 +16,6 @@ class AkceController extends Controller
         and performance wise – it does make much more sense to request each year separately (in parallel Promise.all). 
         */
         return Akce::WithAll()->get();
-        /*
-        $years = [];
-        $allProjectsByYear = new \stdClass;
-
-        $distinctYears = Akce::distinct()->get(['rok_per_year']);
-        foreach ($distinctYears as $key => $value) {
-            $years[] = $value->rok_per_year;
-        }
-
-        foreach ($years as $year) {
-            $projectsOfAYear = Akce::year($year)->WithAll()->get();
-            $transformed = $projectsOfAYear->map(function ($item) {
-                return AkceTransformer::transformResponse($item);
-            });
-            $allProjectsByYear->$year = $transformed;
-        }
-
-        return json_encode($allProjectsByYear);
-        */
     }
 
     public function show(Akce $akce)
@@ -44,7 +25,7 @@ class AkceController extends Controller
         return $wrapper;
     }
 
-    public function store(AkceRequest $request)
+    public function store(Request $request)
     {
         // TODO need transform at least the 'nalez' field types
         $akce = new Akce($request->validated());
