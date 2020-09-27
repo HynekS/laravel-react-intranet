@@ -26,6 +26,8 @@ const LOGOUT_INITIALIZED = "[auth] Logout was initialized"
 const LOGOUT_SUCCESS = "[auth] Logout was succesful"
 const LOGOUT_FAILURE = "[auth] Logout has failed"
 
+const CLEAR_LOGGED_IN_USER = "[auth] Clearing logged in user"
+
 // Reducer
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
@@ -81,10 +83,15 @@ export default function reducer(state = initialState, action = {}) {
         isLogoutPending: false,
         logoutError: action.error,
       }
+    case CLEAR_LOGGED_IN_USER:
+      return {
+        ...initialState,
+      }
     default:
       return state
   }
 }
+
 
 // Action creators
 export const loginInit = () => ({ type: LOGIN_INITIALIZED })
@@ -108,6 +115,9 @@ export const logoutInit = () => ({ type: LOGOUT_INITIALIZED })
 export const logoutSuccess = () => ({ type: LOGOUT_SUCCESS })
 
 export const logoutFailure = error => ({ type: LOGOUT_FAILURE, error })
+
+export const clearLoggedInUser = () => ({ type: CLEAR_LOGGED_IN_USER })
+
 
 // Thunks
 export const checkForValidToken = () => {
