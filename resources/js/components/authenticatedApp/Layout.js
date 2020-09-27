@@ -1,15 +1,13 @@
 import React from "react"
-import { Routes, Route } from "react-router-dom"
 
 import Header from "./Header"
 import Nav from "./Nav"
 import Main from "./Main"
-import Dashboard from "../dashboard/Dashboard"
 import RootFlexWrapper from "./RootFlexWrapper"
 import HeaderFlexWrapper from "./HeaderFlexWrapper"
 import ContentFlexWrapper from "./ContentFlexWrapper"
-const TableDataProvider = React.lazy(() => import("../project/TableDataProvider"))
-const DetailProvider = React.lazy(() => import("../project/DetailProvider"))
+
+import AuthenticatedRoutes from "./Routes"
 
 const Layout = props => {
   return (
@@ -21,14 +19,7 @@ const Layout = props => {
       </HeaderFlexWrapper>
       <ContentFlexWrapper>
         <Main>
-          <React.Suspense fallback={<div>I aM tHe SusPEnSE !!!</div>}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/akce" element={<TableDataProvider />} />
-              <Route path="/akce/:year" element={<TableDataProvider />} />
-              <Route path="/akce/:year/:num/*" element={<DetailProvider />} />
-            </Routes>
-          </React.Suspense>
+          <AuthenticatedRoutes />
         </Main>
       </ContentFlexWrapper>
     </RootFlexWrapper>
