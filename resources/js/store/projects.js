@@ -11,9 +11,9 @@ const initialState = {
   isFetchingOneYear: false,
   fetchingOneYearError: null,
   byYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: {} }))),
-  ById: {},
-  AllIds: [],
-  IdsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
+  byId: {},
+  allIds: [],
+  idsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
   isFetchingAll: false,
   isAllFetched: false,
   fetchingAllError: null,
@@ -24,7 +24,8 @@ const FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED = year =>
   `[projects] Fetching projects of year ${year} has started`
 const FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS = year =>
   `[projects] Fetching projects of year ${year} was succesful`
-const FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE = year => `[projects] Fetching projects of year ${year} has failed`
+const FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE = year =>
+  `[projects] Fetching projects of year ${year} has failed`
 
 const FETCH_ALL_PROJECTS_INITIALIZED = "[projects] Fetching all projects has started"
 const FETCH_ALL_PROJECTS_SUCCESS = "[projects] Fetching all projects was succesful"
@@ -33,6 +34,10 @@ const FETCH_ALL_PROJECTS_FAILURE = "[projects] Fetching all projects has failed"
 const FETCH_SINGLE_PROJECT_INITIALIZED = "[projects] Fetching single project has started"
 const FETCH_SINGLE_PROJECT_SUCCESS = "[projects] Fetching single project was succesful"
 const FETCH_SINGLE_PROJECT_FAILURE = "[projects] Fetching single project has failed"
+
+const UPDATE_PROJECT_INITIALIZED = "[projects] Updating project has started"
+const UPDATE_PROJECT_SUCCESS = "[projects] Updating projects was succesful"
+const UPDATE_PROJECT_FAILURE = "[projects] Updating project has failed"
 
 // Reducer
 export default function reducer(state = initialState, action = {}) {
@@ -64,21 +69,31 @@ export default function reducer(state = initialState, action = {}) {
         ...state,
         isFetchingOneYear: false,
         byId: Object.assign({}, state.byId, action.projectsOfOneYear),
-        AllIds: state.AllIds.concat(Object.keys(action.projectsOfOneYear)),
-        IdsByYear: {
-          ...state.IdsByYear,
+        allIds: state.allIds.concat(Object.keys(action.projectsOfOneYear)),
+        idsByYear: {
+          ...state.idsByYear,
           [action.year]: [
             // BEWARE: this throws error (luckily catchable) if year has no projects
-            ...new Set([...state.IdsByYear[action.year], ...Object.keys(action.projectsOfOneYear)]),
+            ...new Set([...state.idsByYear[action.year], ...Object.keys(action.projectsOfOneYear)]),
           ],
         },
       }
     case FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(action.year):
-      console.log(action.error)
       return {
         ...state,
         isFetchingOneYear: false,
         fetchingOneYearError: action.error,
+      }
+    case UPDATE_PROJECT_SUCCESS:
+      return {
+        ...state,
+        byId: {
+          ...state.byId,
+          [action.id]: {
+            ...state.byId[action.id],
+            ...action.updatedProject,
+          },
+        },
       }
     default:
       return state
@@ -111,15 +126,26 @@ const fetchAllProjectsSuccess = () => ({
   type: FETCH_ALL_PROJECTS_SUCCESS,
 })
 
-const fetchAllProjectsFailure = error => {
-  type: fetchAllProjectsFailure, error
-}
+const fetchAllProjectsFailure = error => ({
+  type: FETCH_ALL_PROJECTS_FAILURE,
+  error,
+})
+
+const updateProjectInit = () => ({ type: UPDATE_PROJECT_INITIALIZED })
+
+const updateProjectSuccess = (id, updatedProject) => ({
+  type: UPDATE_PROJECT_SUCCESS,
+  id,
+  updatedProject,
+})
+
+const updateProjectFailure = error => ({ type: UPDATE_PROJECT_FAILURE, error })
 
 // Thunks
 export const fetchProjectsOfOneYear = year => async dispatch => {
+  dispatch(fetchProjectsOfOneYearInit(year))
   try {
     if (!store.getState().projects.isFetchingAll) loadProgressBar({}, client)
-    dispatch(fetchProjectsOfOneYearInit(year))
     const response = await client.get(`akce/${year}`)
     dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
   } catch (error) {
@@ -129,14 +155,29 @@ export const fetchProjectsOfOneYear = year => async dispatch => {
 }
 
 export const fetchAllProjects = () => async dispatch => {
+  dispatch(fetchAllProjectsInit())
   try {
     loadProgressBar({}, client)
-    dispatch(fetchAllProjectsInit())
     Promise.all(yearsSince2013.map(async year => dispatch(fetchProjectsOfOneYear(year)))).then(_ =>
       dispatch(fetchAllProjectsSuccess()),
     )
   } catch (error) {
     dispatch(fetchAllProjectsFailure(error))
+  }
+  loadProgressBar({ progress: false })
+}
+
+export const updateProject = ({ id, ...project }) => async dispatch => {
+  dispatch(updateProjectInit())
+  try {
+    loadProgressBar({}, client)
+    const response = await client.put(`akce/${id}`, { id_akce: id, ...project })
+    if (response) {
+      dispatch(updateProjectSuccess(id, response.data))
+    }
+  } catch (error) {
+    console.log(error)
+    dispatch(updateProjectFailure(error))
   }
   loadProgressBar({ progress: false })
 }
