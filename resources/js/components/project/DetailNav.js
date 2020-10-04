@@ -9,7 +9,7 @@ import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
 import SvgCurrencyDollar from "../../vendor/heroicons/outline/CurrencyDollar"
 import SvgAcademicCap from "../../vendor/heroicons/outline/AcademicCap"
 import SvgPaperClip from "../../vendor/heroicons/outline/PaperClip"
-import { Detail, Invoices, ExpertSheet, Files } from "./lazyImports"
+import { Detail, InvoiceView, ExpertSheet, Files } from "./lazyImports"
 
 const activeClassName = "active"
 
@@ -73,7 +73,7 @@ const DetailNav = ({ detail }) => {
             to="faktury"
             state={detail}
             activeClassName={activeClassName}
-            onMouseOver={() => Invoices.preload()}
+            onMouseOver={() => InvoiceView.preload()}
           >
             <SvgCurrencyDollar tw="flex w-6 mr-2" />
             <span>Faktury</span>
