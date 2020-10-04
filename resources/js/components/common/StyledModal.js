@@ -1,6 +1,7 @@
 import React from "react"
 import ReactModal from "react-modal"
 import styled from "@emotion/styled"
+import tw from "twin.macro"
 
 ReactModal.setAppElement("#app")
 
@@ -19,15 +20,10 @@ function ReactModalAdapter({ className, ...props }) {
 
 const StyledReactModal = styled(ReactModalAdapter)`
   &__overlay {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
+    ${tw`fixed inset-0 z-30 flex items-center justify-center pb-8 lg:(pb-16)`}
     &.ReactModal__Overlay {
       background-color: rgba(113, 128, 150, 0.75);
       transition: opacity 300ms ease-out;
-      z-index: 30;
     }
     &.ReactModal__Overlay--after-open {
       opacity: 1;
@@ -39,24 +35,13 @@ const StyledReactModal = styled(ReactModalAdapter)`
   }
 
   &__content {
-    max-width: 72rem;
-    margin: 0 auto;
-    position: absolute;
-    top: 40px;
-    left: 40px;
-    right: 40px;
-    bottom: 40px;
-    background: #fff;
-    overflow: auto;
-    border-radius: 4px;
+    ${tw`bg-white overflow-auto rounded-lg p-4 z-40 max-w-screen-sm lg:(max-w-6xl w-1/2 p-6 pt-4)`};
     outline: none;
-    padding: 20px;
     &.ReactModal__Content {
       box-shadow: 0 0 1rem rgba(0, 0, 0, 0.25);
       transform: translateY(1rem);
       transition: transform 300ms ease-out;
       -webkit-overflow-scrolling: touch;
-      z-index: 40;
     }
 
     &.ReactModal__Content--after-open {
