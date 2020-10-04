@@ -12,6 +12,7 @@ module.exports = {
       }),
       inset: {
         "2": "0.5rem",
+        full: "100%",
       },
       zIndex: {
         "-10": "-10",
