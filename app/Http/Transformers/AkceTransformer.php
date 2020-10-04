@@ -20,12 +20,6 @@ class AkceTransformer
 
   public static function transformRequest($request)
   {
-    // Is it neccessary? Would the type be cast anyway?
-    if ($request->nalez == "null") {
-      $request->nalez = null;
-    } else {
-      $request->nalez = (int) $request->nalez;
-    }
   }
 
   private static function tryToParseDate($raw_date, $outputFormat = "j. n. Y")
