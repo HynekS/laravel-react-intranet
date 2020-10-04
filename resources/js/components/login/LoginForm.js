@@ -1,13 +1,13 @@
-import React, { useState } from "react"
+// @ts-check
+import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
-import uniqueId from "lodash.uniqueid"
 import tw from "twin.macro"
 
 import Logo from "./Logo"
 import HiddenMessage from "../common/HiddenMessage"
 import { submitLoginData } from "../../store/auth"
-import handleEnter from "../../utils/handleEnterKey"
+import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
 
 const FormContainer = tw.div`w-full max-w-xs relative z-10`
 const Form = tw.form`bg-white shadow-xl rounded px-10 pt-8 pb-10 mb-4`
@@ -21,37 +21,35 @@ const LoginForm = () => {
   const error = useSelector(store => store.auth.authError)
   const dispatch = useDispatch()
   const { register, handleSubmit, errors } = useForm()
-  const uid = useState(() => uniqueId())
+  const formRef = useFocusNextOnEnter()
   const onSubmit = data => dispatch(submitLoginData(data))
 
   return (
     <FormContainer>
-      <Form onSubmit={handleSubmit(onSubmit)}>
+      <Form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
         <Logo />
         {error && <ErrorMessage>{error.message}</ErrorMessage>}
-        <Label htmlFor={"user_name" + uid}>Uživatelské jméno</Label>
+        <Label htmlFor={"user_name"}>Uživatelské jméno</Label>
         <Input
           type="text"
           name="user_name"
-          id={"user_name" + uid}
+          id={"user_name"}
           autoComplete="on"
           placeholder="Jan Novák"
           ref={register({ required: true })}
-          onKeyDown={handleEnter}
           autoFocus={true}
         />
         <HiddenMessage show={errors.user_name}>
           <ErrorMessage>Zadejte, prosím, uživatelské jméno.</ErrorMessage>
         </HiddenMessage>
-        <Label htmlFor={"password" + uid}>Heslo</Label>
+        <Label htmlFor={"password"}>Heslo</Label>
         <Input
           type="password"
           name="password"
-          id={"password" + uid}
+          id={"password"}
           autoComplete="on"
           placeholder="*******"
           ref={register({ required: true })}
-          onKeyDown={handleEnter}
         />
         <HiddenMessage show={errors.password}>
           <ErrorMessage>Zadejte, prosím, heslo.</ErrorMessage>
