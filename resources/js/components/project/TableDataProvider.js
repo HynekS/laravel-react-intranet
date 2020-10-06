@@ -1,65 +1,37 @@
 import React, { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { createSelector } from "reselect"
 
 import BaseTable from "./BaseTable"
 import "axios-progress-bar/dist/nprogress.css"
-import { fetchProjectsOfOneYear, fetchAllProjects } from "../../store/projects"
 
-const getYear = (_, year) => year
-
-const getProjectIdsByYear = (state, year) => state.projects.idsByYear[year]
-const getProjectsById = state => state.projects.byId
-
-const getIsFetchingAll = state => state.projects.isFetchingAll
-const getIsAllFetched = state => state.projects.isAllFetched
-
-const singleYearSelector = createSelector(
-  getProjectIdsByYear,
-  getProjectsById,
-  (projectIdsByYear, projectsById) => (projectIdsByYear || []).map(id => projectsById[id]),
-)
-
-// TODO clear up selector || render conditions, there are likely redundancies
-const allProjectsSelector = createSelector(
-  getIsFetchingAll,
-  getIsAllFetched,
-  getYear,
-  (isFetchingAll, isAllFetched, year) => isFetchingAll || (isAllFetched && !year),
-)
+import { yearsSince2013, fetchProjectsByYears } from "../../store/projects"
 
 const TableDataProvider = props => {
+  const { year } = useParams()
   const dispatch = useDispatch()
-  const { year } = useParams() || {}
 
-  const projectsOfOneYear = useSelector(state => singleYearSelector(state, year))
-  const allProjects = useSelector(state => allProjectsSelector(state, year))
-
-  const isAllFetched = useSelector(state => state.projects.isAllFetched)
+  const idsByYear = useSelector(store => store.projects.idsByYear)
   const allById = useSelector(state => state.projects.byId)
 
   useEffect(() => {
-    /* If the url is '/akce', then fetch all projects year after year.
-    TODO: add check if there are't some already to save bandwidth.
-    The 'else if' clause is not optimal, but it prevent the execution
-    of both conditions. I want to avoid return statement, because
-    it has special meaning inside useEffect function. */
-    if (year === undefined) {
-      if (!isAllFetched) dispatch(fetchAllProjects())
-    } else if (!projectsOfOneYear.length) {
-      dispatch(fetchProjectsOfOneYear(year))
+    const requestYearsNotFetchedAllready = requestYears.filter(year => !idsByYear[year]?.length)
+    if (requestYearsNotFetchedAllready.length) {
+      dispatch(fetchProjectsByYears(requestYearsNotFetchedAllready))
     }
   }, [year])
 
-  /*
-  TODO Handle better case where year has no projects (it doesn't break anything – the error is caught
-  and the result is blank table, which is not bad, but a message would be better.)
-  */
-  if (allProjects) {
-    return isAllFetched ? <BaseTable rawData={Object.values(allById)} {...props} /> : "Loading…"
-  }
-  return projectsOfOneYear ? <BaseTable rawData={projectsOfOneYear} {...props} /> : "Loading…"
+  const requestYears = year === undefined ? yearsSince2013 : [year]
+
+  return (
+    <BaseTable
+      rawData={requestYears
+        .flatMap(year => idsByYear[year])
+        .map(id => allById[id])
+        .filter(Boolean)}
+      {...props}
+    />
+  )
 }
 
 export default TableDataProvider
