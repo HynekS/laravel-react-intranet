@@ -20,7 +20,7 @@ export default function useFocusNextOnEnter() {
       if (e.key === "Enter" || e.keyCode === 13) {
         const fields = Array.from(e.target.form.elements).filter(filterFormElements)
         const index = fields.indexOf(e.target)
-        if (fields[index + 1]) {
+        if (index > -1 && fields[index + 1]) {
           fields[index + 1].focus()
           e.preventDefault()
         }
