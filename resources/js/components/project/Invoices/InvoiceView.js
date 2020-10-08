@@ -6,13 +6,18 @@ import tw from "twin.macro"
 
 import DetailWrapper from "../DetailWrapper"
 import InvoiceList from "./InvoiceList"
+import InvoiceCreateForm from "./InvoiceCreateForm"
+import InvoiceUpdateForm from "./InvoiceUpdateForm"
+import InvoiceDestroyDialog from "./InvoiceDestroyDialog"
 import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"
+import { modalStatus } from "./InvoiceModalStatus"
 
 import SvgPlus from "../../../vendor/heroicons/outline/Plus"
 
 const InvoicePage = ({ detail, ...props }) => {
-  const [modalState, setModalState] = useState(false)
+  const [modalState, setModalState] = useState({ status: modalStatus.CLOSED, data: null })
+  console.log(modalState)
 
   const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:(outline-none shadow-outline)`
 
@@ -57,19 +62,25 @@ const InvoicePage = ({ detail, ...props }) => {
               <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
             )}
           </div>
-          <Button onClick={_ => setModalState("createModal")}>
+          <Button
+            onClick={_ => setModalState({ ...modalState, status: modalStatus.CREATE })}
+          >
             <SvgPlus tw="w-5 mr-1" />
             Nová faktura
           </Button>
           <Modal
-            isOpen={modalState}
+            isOpen={modalState.status !== modalStatus.CLOSED}
             shouldCloseOnOverlayClick={true}
-            onRequestClose={() => setModalState(false)}
+            onRequestClose={() => setModalState({ ...modalState, status: modalStatus.CLOSED })}
             closeTimeoutMS={500}
             {...props}
           >
-            <ModalCloseButton handleClick={_ => setModalState(false)} />
-            {modalState}
+            <ModalCloseButton
+              handleClick={_ => setModalState({ status: modalStatus.CLOSED, data: null })}
+            />
+            {modalState.status === modalStatus.CREATE && <InvoiceCreateForm />}
+            {modalState.status === modalStatus.UPDATE && <InvoiceUpdateForm />}
+            {modalState.status === modalStatus.DESTROY && <InvoiceDestroyDialog />}
           </Modal>
         </div>
       ) : (
