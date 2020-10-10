@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useParams } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 
@@ -23,15 +23,16 @@ const TableDataProvider = props => {
 
   const requestYears = year === undefined ? yearsSince2013 : [year]
 
-  return (
-    <BaseTable
-      rawData={requestYears
+  const result = useMemo(
+    () => console.log("running memo") ||
+      requestYears
         .flatMap(year => idsByYear[year])
         .map(id => allById[id])
-        .filter(Boolean)}
-      {...props}
-    />
+        .filter(Boolean),
+    [year, requestYears, allById],
   )
+
+  return <BaseTable rawData={result} {...props} />
 }
 
 export default TableDataProvider
