@@ -1,12 +1,16 @@
+// @ts-check
 /** @jsx jsx */
 import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { useWindowHeight } from "@react-hook/window-size"
+import { jsx, css } from "@emotion/core"
+import tw from "twin.macro"
 import BaseTable, { Column, AutoResizer, SortOrder } from "react-base-table"
 import "react-base-table/styles.css"
-import { Link } from "react-router-dom"
-import { jsx } from "@emotion/core"
-import tw, { css } from "twin.macro"
 
+import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
+import { Detail } from "../project/lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
 import SvgCheck from "../../vendor/heroicons/outline/Check"
 import SvgPencil from "../../vendor/heroicons/outline/Pencil"
@@ -14,27 +18,61 @@ import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
 import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
 
 const Table = ({ rawData }) => {
-  const [data, setData] = useState([])
-  const { year } = useParams() || {}
+  const filters = React.useRef({})
 
-  const [sortBy, setSortBy] = useState({ key: "c_akce", order: SortOrder.ASC })
+  const [data, setData] = useState([])
+  const { year } = useParams()
+  const currentHeight = useWindowHeight()
+
+  const [sortBy, setSortBy] = useState({ key: null, order: null })
 
   useEffect(() => {
-    setData(rawData)
+    setData(applyFilters(sortData(rawData, { ...sortBy })))
   }, [rawData])
 
-  const onColumnSort = ({ column, key, order }) => {
-    const dataToSort = data
-    // Sort non-numeric values usin local compare. Warning: TODO need to take care 'undefined'
-    const sortedList = [...dataToSort].sort((a, b) => {
+  /*
+    filtering
+  */
+  const filterData = ({ dataKey }, e) => {
+    const { value } = e.target
+
+    const wasDeletion = filters.current[dataKey] && filters.current[dataKey].length > value.length
+    filters.current[dataKey] = value
+    const filteredData = wasDeletion ? applyFilters(rawData) : applyFilters(data)
+
+    setData(filteredData)
+  }
+
+  const applyFilters = inputData => {
+    let result = inputData.slice(0)
+    for (let [column, query] of Object.entries(filters.current)) {
+      const stringToFind = new RegExp(query, "i")
+      result = result.filter(row => stringToFind.test(String(row[column])))
+    }
+    return result
+  }
+
+  /*
+    sorting
+  */
+  const sortData = (data, { key, order }) => {
+    const defaultSort = (a, b) => {
       let sortCache = a[key] - b[key]
       return isNaN(sortCache) ? String(a[key]).localeCompare(b[key]) : sortCache
-    })
+    }
+
+    const sortedList =
+      key === "c_akce" ? sortIdSlashYear(data.slice(0), key) : data.slice(0).sort(defaultSort)
+
     if (order === "desc") {
       sortedList.reverse()
     }
-    setSortBy({ column, key, order })
-    setData(sortedList)
+    return sortedList
+  }
+
+  const onColumnSort = ({ key, order }) => {
+    setSortBy({ key, order })
+    setData(applyFilters(sortData(data, { key, order })))
   }
 
   const columns = [
@@ -44,17 +82,18 @@ const Table = ({ rawData }) => {
       dataKey: "c_akce",
       width: 80,
       cellRenderer: ({ cellData: c_akce, rowData }) => (
-        <div>
-          <div>
+        <div onMouseOver={() => Detail.preload()}>
+          <div key="numberPerYear">
             <strong>{c_akce}</strong>
           </div>
           <Link
+            key="linkToDetail"
             to={`/akce/${year}/${c_akce.split("/")[0]}`}
             state={rowData}
             aria-label={`odkaz na detail akce č. ${year}/${c_akce.split("/")[0]}`}
           >
             <div tw="flex items-center justify-center p-1 px-2 bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white rounded">
-              <SvgPencil width="1rem" />
+              <SvgPencil tw="w-4" />
             </div>
           </Link>
         </div>
@@ -68,6 +107,19 @@ const Table = ({ rawData }) => {
       width: 240,
       sortable: true,
       resizable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Dohledy",
@@ -124,6 +176,19 @@ const Table = ({ rawData }) => {
       key: "investor_jmeno",
       dataKey: "investor_jmeno",
       width: 180,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Kontakt",
@@ -137,6 +202,19 @@ const Table = ({ rawData }) => {
       dataKey: "kraj",
       width: 80,
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Katastr",
@@ -190,8 +268,7 @@ const Table = ({ rawData }) => {
     <div
       style={{
         width: "100%",
-        height: (() =>
-          window.innerHeight - (document.getElementById("header").offsetHeight || 57))(),
+        height: currentHeight - (document.getElementById("header").offsetHeight || 0),
       }}
     >
       <AutoResizer>
@@ -216,6 +293,7 @@ const Table = ({ rawData }) => {
             `}
             data={data}
             rowHeight={90}
+            headerHeight={[60, 30]}
             width={width}
             height={height}
             sortBy={sortBy}
@@ -228,9 +306,22 @@ const Table = ({ rawData }) => {
                 return "negative"
               }
             }}
+            rowKey="id_akce"
+            emptyRenderer={<div tw="flex items-center justify-center h-full">Table is empty!</div>}
+            headerRenderer={({ cells, headerIndex }) =>
+              headerIndex === 0 ? (
+                <div tw="flex h-full">
+                  {cells.map(cell => (
+                    <div>{cell}</div>
+                  ))}
+                </div>
+              ) : (
+                <div>Nalezeno {data && data.length} akcí.</div>
+              )
+            }
           >
             {columns.map(column => (
-              <Column {...column} />
+              <Column data={data} rawData={rawData} {...column} />
             ))}
           </BaseTable>
         )}
