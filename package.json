@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@emotion/babel-plugin-jsx-pragmatic": "^0.1.5",
+    "@react-hook/window-size": "^3.0.7",
     "@types/react": "^16.9.48",
     "D": "^1.0.0",
     "axios-progress-bar": "git+https://github.com/HynekS/progress-bar-4-axios-updated.git#master",
