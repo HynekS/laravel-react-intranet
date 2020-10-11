@@ -4,10 +4,13 @@ import React from "react"
 import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
+// Todo move DetailPage out of project (it is a layout stuff)
+import DetailPage from "../project/DetailPage"
+
 const Dashboard = () => {
   return (
-    <div tw="w-full p-8">
-      <div tw="p-8 bg-white rounded-lg">
+    <DetailPage>
+      <div tw="p-4 bg-white rounded-lg lg:(p-8)">
         <h1 tw="text-xl">Dashboard</h1>
         <section tw="pb-8">
           <form action="">
@@ -25,7 +28,7 @@ const Dashboard = () => {
           <h2 tw="text-lg">Statistiky</h2>
         </section>
       </div>
-    </div>
+    </DetailPage>
   )
 }
 
