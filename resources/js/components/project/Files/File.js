@@ -23,7 +23,7 @@ const File = ({ file }) => {
   const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
   
   return path ? (
-    <div tw="pr-4 pb-4" style={{ flex: "0 1 20%", minWidth: "20%" }}>
+    <div tw="pr-4 pb-4" style={{ flex: "1 1 20rem", width: 0 }}>
       <button
         onClick={() => onDownload(path)}
         tw="flex w-full text-left rounded bg-white bg-opacity-50"
