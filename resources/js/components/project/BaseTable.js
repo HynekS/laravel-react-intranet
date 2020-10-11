@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 import { useWindowHeight } from "@react-hook/window-size"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
 import BaseTable, { Column, AutoResizer, SortOrder } from "react-base-table"
 import "react-base-table/styles.css"
 
+import { setSortBy, updateFilters, clearFilters } from "../../store/table"
 import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
 import { Detail } from "../project/lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
@@ -18,26 +20,28 @@ import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
 import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
 
 const Table = ({ rawData }) => {
-  const filters = React.useRef({})
+  const dispatch = useDispatch()
+  const formRef = React.useRef()
 
   const [data, setData] = useState([])
   const { year } = useParams()
   const currentHeight = useWindowHeight()
 
-  const [sortBy, setSortBy] = useState({ key: null, order: null })
+  const sortBy = useSelector(store => store.table.sortBy)
+  const filters = useSelector(store => store.table.filters)
 
   useEffect(() => {
     setData(applyFilters(sortData(rawData, { ...sortBy })))
-  }, [rawData])
+  }, [rawData, filters])
 
   /*
     filtering
   */
   const filterData = ({ dataKey }, e) => {
     const { value } = e.target
+    dispatch(updateFilters({ ...filters, [dataKey]: value }))
 
-    const wasDeletion = filters.current[dataKey] && filters.current[dataKey].length > value.length
-    filters.current[dataKey] = value
+    const wasDeletion = filters[dataKey] && filters[dataKey].length > value.length
     const filteredData = wasDeletion ? applyFilters(rawData) : applyFilters(data)
 
     setData(filteredData)
@@ -45,7 +49,8 @@ const Table = ({ rawData }) => {
 
   const applyFilters = inputData => {
     let result = inputData.slice(0)
-    for (let [column, query] of Object.entries(filters.current)) {
+
+    for (let [column, query] of Object.entries(filters)) {
       const stringToFind = new RegExp(query, "i")
       result = result.filter(row => stringToFind.test(String(row[column])))
     }
@@ -64,14 +69,14 @@ const Table = ({ rawData }) => {
     const sortedList =
       key === "c_akce" ? sortIdSlashYear(data.slice(0), key) : data.slice(0).sort(defaultSort)
 
-    if (order === "desc") {
+    if (order === SortOrder.DESC) {
       sortedList.reverse()
     }
     return sortedList
   }
 
   const onColumnSort = ({ key, order }) => {
-    setSortBy({ key, order })
+    dispatch(setSortBy({ key, order }))
     setData(applyFilters(sortData(data, { key, order })))
   }
 
@@ -113,6 +118,10 @@ const Table = ({ rawData }) => {
           <input
             tw="relative"
             type="text"
+            name={column.key}
+            autoComplete="off"
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
             onClick={e => {
               e.stopPropagation()
             }}
@@ -170,6 +179,23 @@ const Table = ({ rawData }) => {
       width: 60,
       align: Column.Alignment.RIGHT,
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            name={column.key}
+            autoComplete="off"
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Investor",
@@ -182,6 +208,9 @@ const Table = ({ rawData }) => {
           <input
             tw="relative"
             type="text"
+            name={column.key}
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
             onClick={e => {
               e.stopPropagation()
             }}
@@ -208,6 +237,9 @@ const Table = ({ rawData }) => {
           <input
             tw="relative"
             type="text"
+            name={column.key}
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
             onClick={e => {
               e.stopPropagation()
             }}
@@ -293,7 +325,7 @@ const Table = ({ rawData }) => {
             `}
             data={data}
             rowHeight={90}
-            headerHeight={[60, 30]}
+            headerHeight={[60, Object.values(filters).filter(Boolean).length ? 30 : 0]}
             width={width}
             height={height}
             sortBy={sortBy}
@@ -310,13 +342,25 @@ const Table = ({ rawData }) => {
             emptyRenderer={<div tw="flex items-center justify-center h-full">Table is empty!</div>}
             headerRenderer={({ cells, headerIndex }) =>
               headerIndex === 0 ? (
-                <div tw="flex h-full">
+                <form tw="flex h-full" key="primaryHeader" ref={formRef}>
                   {cells.map(cell => (
                     <div>{cell}</div>
                   ))}
-                </div>
+                </form>
               ) : (
-                <div>Nalezeno {data && data.length} akcí.</div>
+                <div role="cell" key="secondaryHeader">
+                  Nalezeno {data && data.length} akcí.
+                  <button
+                    onClick={() => {
+                      dispatch(clearFilters())
+                      if (formRef && formRef.current) {
+                        formRef.current.reset()
+                      }
+                    }}
+                  >
+                    Zrušit všechny filtry
+                  </button>
+                </div>
               )
             }
           >
