@@ -4,9 +4,11 @@ import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
 import Modal from "../../common/StyledModal"
+import ModalCloseButton from "../../common/ModalCloseButton"
 import File from "./File"
 import FileUpload from "../FileUpload/FileUpload"
-import SvgX from "../../../vendor/heroicons/outline/X"
+
+
 
 const FilesList = ({ subgroup, detail, ...props }) => {
   const { publicName, data, key } = subgroup || {}
@@ -44,9 +46,10 @@ const FilesList = ({ subgroup, detail, ...props }) => {
               <span>{publicName}</span>
             </h2>
 
-            <button onClick={() => setIsModalOpen(false)}>
+            {/*<button onClick={() => setIsModalOpen(false)}>
               <SvgX tw="w-6" />
-            </button>
+  </button>*/}
+            <ModalCloseButton handleClick={_ => setIsModalOpen(false)}/>
           </header>
           <FileUpload model={key} id={detail.id_akce} />
         </section>
