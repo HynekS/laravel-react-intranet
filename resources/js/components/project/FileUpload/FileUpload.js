@@ -3,8 +3,8 @@
 import React, { useState } from "react"
 import uuidv4 from "uuid/v4"
 import filesize from "filesize.js"
-import { jsx } from "@emotion/core"
-import tw, { css } from "twin.macro"
+import { jsx, css } from "@emotion/core"
+import tw from "twin.macro"
 
 import client from "../../../utils/axiosWithDefaults"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
@@ -45,6 +45,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
       .then(values =>
         Promise.all(
           values.map(item =>
+            // TODO this is probably pointless, jst use two background images (extension, fallback)
             getImageOrFallback(getIconUrl(item.extension), fallbackIconUrl).then(result => ({
               ...item,
               icon: result,
@@ -130,7 +131,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           }}
           onDragLeave={() => setIsItemOverDropArea(false)}
           css={[
-            tw`relative z-0 flex flex-grow flex-col justify-center -m-2 p-8 text-center rounded-lg transition transition-all duration-300`,
+            tw`relative z-0 flex flex-grow flex-col justify-center -m-2 p-16 text-center rounded-lg transition transition-all duration-300`,
             isItemOverDropArea && tw`bg-blue-500`,
           ]}
         >
@@ -141,11 +142,14 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
             ]}
           >
             <span
-              css={[tw`h-full flex items-center justify-center text-white text-2xl font-medium `]}
+              css={[
+                tw`hidden h-full flex items-center justify-center text-white text-2xl font-medium`,
+                isItemOverDropArea && tw`visible border-white`,
+              ]}
             >
               přetáhněte soubory z počítače
             </span>
-            {(progress > 0 && !response) && <ProgressBar progress={progress} />}
+            {progress > 0 && !response && <ProgressBar progress={progress} />}
           </div>
           <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${guid}`}>
             <div css={[(isItemOverDropArea || isReadingFiles) && tw`invisible`]}>
