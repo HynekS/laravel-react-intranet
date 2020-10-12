@@ -7,9 +7,11 @@ import { useSelector, useDispatch } from "react-redux"
 import { useWindowHeight } from "@react-hook/window-size"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
+import deburr from "lodash.deburr"
 import BaseTable, { Column, AutoResizer, SortOrder } from "react-base-table"
 import "react-base-table/styles.css"
 
+import { projectStatus } from "../../store/projects"
 import { setSortBy, updateFilters, clearFilters } from "../../store/table"
 import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
 import { Detail } from "../project/lazyImports"
@@ -27,6 +29,7 @@ const Table = ({ rawData }) => {
   const { year } = useParams()
   const currentHeight = useWindowHeight()
 
+  const status = useSelector(store => store.projects.status)
   const sortBy = useSelector(store => store.table.sortBy)
   const filters = useSelector(store => store.table.filters)
 
@@ -51,8 +54,8 @@ const Table = ({ rawData }) => {
     let result = inputData.slice(0)
 
     for (let [column, query] of Object.entries(filters)) {
-      const stringToFind = new RegExp(query, "i")
-      result = result.filter(row => stringToFind.test(String(row[column])))
+      const stringToFind = new RegExp(deburr(query), "i")
+      result = result.filter(row => stringToFind.test(deburr(String(row[column]))))
     }
     return result
   }
@@ -339,7 +342,19 @@ const Table = ({ rawData }) => {
               }
             }}
             rowKey="id_akce"
-            emptyRenderer={<div tw="flex items-center justify-center h-full">Table is empty!</div>}
+            emptyRenderer={() => {
+              console.log(status)
+              switch (status) {
+                case projectStatus.LOADING:
+                  return <div tw="flex items-center justify-center h-full">Načítám data…</div>
+                case projectStatus.SUCCESS:
+                  return <div tw="flex items-center justify-center h-full">Zadaným parametrům neodpovídá žádná akce 🤔.</div>
+                case projectStatus.ERROR:
+                  return <div>Ajaj! Někde se stala chyba… 😬</div>
+                default:
+                  return null
+              }
+            }}
             headerRenderer={({ cells, headerIndex }) =>
               headerIndex === 0 ? (
                 <form tw="flex h-full" key="primaryHeader" ref={formRef}>
