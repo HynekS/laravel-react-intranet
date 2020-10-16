@@ -8,8 +8,6 @@ import ModalCloseButton from "../../common/ModalCloseButton"
 import File from "./File"
 import FileUpload from "../FileUpload/FileUpload"
 
-
-
 const FilesList = ({ subgroup, detail, ...props }) => {
   const { publicName, data, key } = subgroup || {}
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -45,11 +43,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
               <span tw="text-gray-500">nahrát soubory: </span>
               <span>{publicName}</span>
             </h2>
-
-            {/*<button onClick={() => setIsModalOpen(false)}>
-              <SvgX tw="w-6" />
-  </button>*/}
-            <ModalCloseButton handleClick={_ => setIsModalOpen(false)}/>
+            <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
           </header>
           <FileUpload model={key} id={detail.id_akce} />
         </section>
