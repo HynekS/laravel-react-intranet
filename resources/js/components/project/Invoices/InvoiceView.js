@@ -62,9 +62,7 @@ const InvoicePage = ({ detail, ...props }) => {
               <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
             )}
           </div>
-          <Button
-            onClick={_ => setModalState({ ...modalState, status: modalStatus.CREATE })}
-          >
+          <Button onClick={_ => setModalState({ ...modalState, status: modalStatus.CREATE })}>
             <SvgPlus tw="w-5 mr-1" />
             Nová faktura
           </Button>
@@ -75,9 +73,16 @@ const InvoicePage = ({ detail, ...props }) => {
             closeTimeoutMS={500}
             {...props}
           >
-            <ModalCloseButton
-              handleClick={_ => setModalState({ status: modalStatus.CLOSED, data: null })}
-            />
+            <header tw="flex justify-between pb-4">
+              <h2 tw="text-lg font-medium">
+                {modalState.status === modalStatus.CREATE && "Vytvořit fakturu"}
+                {modalState.status === modalStatus.UPDATE && "Upravit fakturu"}
+                {modalState.status === modalStatus.DESTROY && "Odstranit fakturu"}
+              </h2>
+              <ModalCloseButton
+                handleClick={() => setModalState({ status: modalStatus.CLOSED, data: null })}
+              />
+            </header>
             {modalState.status === modalStatus.CREATE && <InvoiceCreateForm />}
             {modalState.status === modalStatus.UPDATE && <InvoiceUpdateForm />}
             {modalState.status === modalStatus.DESTROY && <InvoiceDestroyDialog />}
