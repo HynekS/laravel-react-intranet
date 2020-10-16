@@ -143,8 +143,8 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
           >
             <span
               css={[
-                tw`hidden h-full flex items-center justify-center text-white text-2xl font-medium`,
-                isItemOverDropArea && tw`visible border-white`,
+                tw`h-full flex items-center justify-center text-white text-2xl font-medium`,
+                isItemOverDropArea ? tw`visible border-white` : tw`invisible`,
               ]}
             >
               přetáhněte soubory z počítače
@@ -165,7 +165,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*" }) => {
                 accept={fileTypes}
                 onChange={onChange}
                 css={css`
-                  ${tw`w-0`}
+                  ${tw`w-0 invisible`}
                   &:focus + label {
                     ${tw`outline-none shadow-outline transition-shadow duration-300`}
                   }
