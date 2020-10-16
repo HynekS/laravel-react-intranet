@@ -5,7 +5,7 @@ import tw from "twin.macro"
 
 ReactModal.setAppElement("#app")
 
-function ReactModalAdapter({ className, ...props }) {
+function ReactModalAdapter({ className = "", ...props }) {
   const contentClassName = `${className}__content`
   const overlayClassName = `${className}__overlay`
   return (
@@ -35,7 +35,7 @@ const StyledReactModal = styled(ReactModalAdapter)`
   }
 
   &__content {
-    ${tw`bg-white overflow-auto rounded-lg p-4 z-40 max-w-screen-sm lg:(max-w-6xl w-1/2 p-6 pt-4)`};
+    ${tw`bg-white rounded-lg p-4 z-40 max-w-screen-sm lg:(max-w-6xl w-1/2 p-6 pt-4)`};
     outline: none;
     &.ReactModal__Content {
       box-shadow: 0 0 1rem rgba(0, 0, 0, 0.25);
