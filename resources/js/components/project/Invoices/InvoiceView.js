@@ -17,9 +17,13 @@ import SvgPlus from "../../../vendor/heroicons/outline/Plus"
 
 const InvoicePage = ({ detail, ...props }) => {
   const [modalState, setModalState] = useState({ status: modalStatus.CLOSED, data: null })
-  console.log(modalState)
 
-  const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:(outline-none shadow-outline)`
+  const onModalClose = e => {
+    e && e.preventDefault()
+    setModalState({ status: modalStatus.CLOSED, data: null })
+  }
+
+  const Button = tw.button`flex items-center bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)`
 
   const {
     faktury_dohled,
@@ -62,30 +66,34 @@ const InvoicePage = ({ detail, ...props }) => {
               <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
             )}
           </div>
-          <Button onClick={_ => setModalState({ ...modalState, status: modalStatus.CREATE })}>
+          <Button onClick={() => setModalState({ ...modalState, status: modalStatus.CREATE })}>
             <SvgPlus tw="w-5 mr-1" />
             Nová faktura
           </Button>
           <Modal
             isOpen={modalState.status !== modalStatus.CLOSED}
             shouldCloseOnOverlayClick={true}
-            onRequestClose={() => setModalState({ ...modalState, status: modalStatus.CLOSED })}
+            onRequestClose={onModalClose}
             closeTimeoutMS={500}
             {...props}
           >
-            <header tw="flex justify-between pb-4">
+            <header tw="flex justify-between p-6">
               <h2 tw="text-lg font-medium">
                 {modalState.status === modalStatus.CREATE && "Vytvořit fakturu"}
                 {modalState.status === modalStatus.UPDATE && "Upravit fakturu"}
                 {modalState.status === modalStatus.DESTROY && "Odstranit fakturu"}
               </h2>
-              <ModalCloseButton
-                handleClick={() => setModalState({ status: modalStatus.CLOSED, data: null })}
-              />
+              <ModalCloseButton handleClick={onModalClose} />
             </header>
-            {modalState.status === modalStatus.CREATE && <InvoiceCreateForm />}
-            {modalState.status === modalStatus.UPDATE && <InvoiceUpdateForm />}
-            {modalState.status === modalStatus.DESTROY && <InvoiceDestroyDialog />}
+            {modalState.status === modalStatus.CREATE && (
+              <InvoiceCreateForm modalState={modalState} onModalClose={onModalClose} />
+            )}
+            {modalState.status === modalStatus.UPDATE && (
+              <InvoiceUpdateForm modalState={modalState} onModalClose={onModalClose} />
+            )}
+            {modalState.status === modalStatus.DESTROY && (
+              <InvoiceDestroyDialog modalState={modalState} onModalClose={onModalClose} />
+            )}
           </Modal>
         </div>
       ) : (
