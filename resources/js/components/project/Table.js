@@ -97,13 +97,13 @@ const Table = ({ rawData }) => {
       sortable: true,
     },
     {
-      header: ({ onClick }) => <div className="header-cell">Dohledy</div>,
+      header: () => <div className="header-cell">Dohledy</div>,
       key: "rozpocet_B",
       width: 100,
       cell: ({ row }) => budgetCellRenderer({ row, key: "rozpocet_B" }),
     },
     {
-      header: ({ onClick }) => <div className="header-cell">Výzkum</div>,
+      header: () => <div className="header-cell">Výzkum</div>,
       key: "rozpocet_A",
       width: 100,
       cell: ({ row }) => budgetCellRenderer({ row, key: "rozpocet_A" }),
