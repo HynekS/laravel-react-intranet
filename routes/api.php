@@ -39,7 +39,14 @@ Route::group(['prefix' => 'akce', 'middleware' => 'auth:api'], function () {
 
     Route::post('/', 'AkceController@store');
     Route::put('/{akce}', 'AkceController@update');
-    Route::delete('/{akce}', 'AkceController@delete');
+    Route::delete('/{akce}', 'AkceController@destroy');
+});
+
+Route::group(['prefix' => 'invoices', 'middleware' => 'auth:api'], function () {
+
+    Route::post('/', 'InvoiceController@store');
+    Route::put('/{invoice}', 'InvoiceController@update');
+    Route::delete('/{invoice}', 'InvoiceController@destroy');
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
