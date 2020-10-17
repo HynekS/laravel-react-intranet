@@ -39,7 +39,7 @@ class AkceController extends Controller
         return response()->json($akce, 200);
     }
 
-    public function delete(Akce $akce)
+    public function destroy(Akce $akce)
     {
         $akce->delete();
         return response()->json(null, 204);
