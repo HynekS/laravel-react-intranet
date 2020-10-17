@@ -1,17 +1,12 @@
 /** @jsx jsx */
 import React from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
-import DayPickerInput from "react-day-picker/DayPickerInput"
 import "react-day-picker/lib/style.css"
 
-import { monthsCZ, daysCZ, daysShortCZ } from "../../../services/Date/terms_cs-CZ"
-import isValidDate from "../../../services/Date/isValidDate"
-import swapCzDateToISODate from "../../../services/Date/swapCzDateToISODate"
-import czechDateRegexp from "../../../services/Date/czechDateRegexp"
-
 import Input from "../../common/Input"
+import Select from "../../common/Select"
 
 const styles = css`
   fieldset {
@@ -56,7 +51,7 @@ const styles = css`
   }
 `
 
-const InvoiceCreateForm = ({ ...props }) => {
+const InvoiceCreateForm = ({ modalState, onModalClose, ...props }) => {
   const { register, control, handleSubmit, errors } = useForm()
 
   const onSubmit = data => console.log(data)
@@ -64,43 +59,44 @@ const InvoiceCreateForm = ({ ...props }) => {
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)} css={styles}>
-        <Input label="číslo faktury" name="c_faktury" register={register({ pattern: /\d+/ })} />
-        <div className="fieldWrapper">
-          <div className="labelWrapper">
-            <label>datum počátku</label>
-          </div>
-          <div className="inputWrapper">
-            <Controller
-              as={DayPickerInput}
-              control={control}
-              rules={{ pattern: czechDateRegexp }}
-              name="datum_vlozeni"
-              format="d. M. yyyy"
-              formatDate={date => new Intl.DateTimeFormat("cs-CZ").format(date)}
-              parseDate={date => {
-                if (date.match(czechDateRegexp)) {
-                  let testDate = new Date(swapCzDateToISODate(date))
-                  return isValidDate(testDate) && testDate
-                }
-              }}
-              placeholder="dd. mm. yyyy"
-              dayPickerProps={{
-                locale: "cs-CZ",
-                months: monthsCZ,
-                weekdaysLong: daysCZ,
-                weekdaysShort: daysShortCZ,
-                firstDayOfWeek: 1,
-              }}
-            />
-          </div>
+        <div tw="p-6">
+          <Select
+            name="typ_castky"
+            label="typ částky"
+            options={[
+              { label: "Dohled", value: 0 },
+              { label: " Výzkum", value: 1 },
+            ]}
+            register={register({ required: true })}
+          />
+          <Input
+            label="číslo faktury"
+            name="c_faktury"
+            register={register({
+              pattern: { value: /^[0-9]+$/, message: "pole může obsahovat pouze čísla" },
+            })}
+            error={errors}
+          />
+          <Input
+            label="částka"
+            name="castka"
+            register={register({
+              pattern: { value: /^[0-9]+$/, message: "pole může obsahovat pouze čísla" },
+            })}
+            error={errors}
+          />
         </div>
-        <Input label="částka" name="castka" register={register({ pattern: /\d+/ })} />
-        <button
-          type="submit"
-          tw="bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline focus:transition-shadow focus:duration-300"
-        >
-          Vytvořit fakturu
-        </button>
+        <footer tw="flex justify-end bg-gray-100 p-6 rounded-lg rounded-t-none">
+          <button
+            tw="bg-gray-100 transition-colors duration-300 text-gray-500 font-medium py-2 px-4  ml-4 rounded hover:(bg-gray-300) focus:(outline-none shadow-outline transition-shadow duration-300)"
+            onClick={onModalClose}
+          >
+            Zrušit
+          </button>
+          <button tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4  ml-4 rounded hover:(bg-blue-700) focus:(outline-none shadow-outline transition-shadow duration-300)">
+            Vytvořit fakturu
+          </button>
+        </footer>
       </form>
     </div>
   )
