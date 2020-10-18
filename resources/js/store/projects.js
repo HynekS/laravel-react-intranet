@@ -147,7 +147,9 @@ export const fetchProjectsOfOneYear = year => async dispatch => {
   try {
     if (!store.getState().projects.isFetching) loadProgressBar({}, client)
     const response = await client.get(`akce/${year}`)
-    dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
+    if (response) {
+      dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
+    }
   } catch (error) {
     console.log({ year })
     dispatch(fetchProjectsOfOneYearFailure(year, error))
