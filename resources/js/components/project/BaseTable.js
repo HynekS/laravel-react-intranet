@@ -8,6 +8,7 @@ import { useWindowHeight } from "@react-hook/window-size"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
 import deburr from "lodash.deburr"
+import Highlighter from "react-highlight-words"
 import BaseTable, { Column, AutoResizer, SortOrder } from "react-base-table"
 import "react-base-table/styles.css"
 
@@ -115,6 +116,24 @@ const Table = ({ rawData }) => {
       width: 240,
       sortable: true,
       resizable: true,
+      cellRenderer: ({ cellData, column: { key } }) => (
+        <Highlighter
+          textToHighlight={cellData}
+          sanitize={deburr}
+          searchWords={[filters[key] || ""]}
+          highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */}}
+          style={{
+            wordBreak: "break-word",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {cellData}
+        </Highlighter>
+      ),
       headerRenderer: ({ column }) => (
         <div>
           <div>{column.title}</div>
@@ -221,7 +240,18 @@ const Table = ({ rawData }) => {
           />
         </div>
       ),
+      cellRenderer: ({ cellData, column: { key } }) => (
+        <Highlighter
+          textToHighlight={cellData}
+          sanitize={deburr}
+          searchWords={[filters[key] || ""]}
+          highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */}}
+        >
+          {cellData}
+        </Highlighter>
+      ),
     },
+
     {
       title: "Kontakt",
       key: "investor_kontakt",
@@ -249,6 +279,16 @@ const Table = ({ rawData }) => {
             onChange={e => filterData(column, e)}
           />
         </div>
+      ),
+      cellRenderer: ({ cellData, column: { key } }) => (
+        <Highlighter
+          textToHighlight={cellData}
+          sanitize={deburr}
+          searchWords={[filters[key] || ""]}
+          highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */}}
+        >
+          {cellData}
+        </Highlighter>
       ),
     },
     {
@@ -311,13 +351,13 @@ const Table = ({ rawData }) => {
           <BaseTable
             css={css`
               .BaseTable__row.negative {
-                ${tw`bg-red-100`}
+                ${tw`bg-red-100 text-red-900`}
                 &:hover {
                   ${tw`bg-red-200 bg-opacity-50`}
                 }
               }
               .BaseTable__row.positive {
-                ${tw`bg-green-100`}
+                ${tw`bg-green-100 text-green-900`}
                 &:hover {
                   ${tw`bg-green-200 bg-opacity-50`}
                 }
@@ -348,7 +388,11 @@ const Table = ({ rawData }) => {
                 case projectStatus.LOADING:
                   return <div tw="flex items-center justify-center h-full">Načítám data…</div>
                 case projectStatus.SUCCESS:
-                  return <div tw="flex items-center justify-center h-full">Zadaným parametrům neodpovídá žádná akce 🤔.</div>
+                  return (
+                    <div tw="flex items-center justify-center h-full">
+                      Zadaným parametrům neodpovídá žádná akce 🤔.
+                    </div>
+                  )
                 case projectStatus.ERROR:
                   return <div>Ajaj! Někde se stala chyba… 😬</div>
                 default:
