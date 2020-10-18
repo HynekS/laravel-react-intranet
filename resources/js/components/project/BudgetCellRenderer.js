@@ -16,7 +16,18 @@ const budgetCellRenderer = ({ row, key }) => {
       <div style={{ width: "inherit", textAlign: "right" }}>
         <div style={{ display: "inline-block" }}>
           <div key="budget">{budget.toLocaleString("cs-CZ")}</div>
-          <div key="spent" style={{ borderBottom: "1px solid #ddd", lineHeight: 1.3 }}>
+          <div key="spent" style={{ lineHeight: 1.3, position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                height: 1,
+                left: 0,
+                right: 0,
+                top: "100%",
+                borderBottom: "1px solid currentcolor",
+                opacity: 0.3,
+              }}
+            ></div>
             -{sum.toLocaleString("cs-CZ")}
           </div>
           <div
