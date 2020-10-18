@@ -1,5 +1,7 @@
 import React from "react"
 
+import SvgExclamationCircle from "../../vendor/heroicons/solid/ExclamationCircle"
+
 const Input = ({ name, label, register, error={}, placeholder = "", type = "text", ...props }) => {
   return (
     <div className="fieldWrapper">
@@ -16,7 +18,7 @@ const Input = ({ name, label, register, error={}, placeholder = "", type = "text
           className={error[name] ? "hasError" : ""}
           {...props}
         />
-        {error[name] && <div className="errorMessage">{error[name].message}</div>}
+        {error[name] && <div className="errorMessage"><SvgExclamationCircle/>{error[name].message}</div>}
       </div>
     </div>
   )
