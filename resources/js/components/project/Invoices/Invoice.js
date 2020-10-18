@@ -26,7 +26,7 @@ const Invoice = ({ invoice, modalOpenCallback }) => {
         <td tw="text-right px-2 py-2">{invoice.castka.toLocaleString("cs-CZ")},–</td>
         <td tw="text-right px-2 py-2">
           <div ref={innerRef} tw="relative">
-            <button tw="flex items-center" onClick={_ => setIsMenuOpen(true)}>
+            <button tw="flex items-center" onClick={() => setIsMenuOpen(true)}>
               <SvgDotsHorizontalSolid tw="flex w-5 opacity-50" />
             </button>
             <div
