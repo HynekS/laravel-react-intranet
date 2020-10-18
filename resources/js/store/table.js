@@ -1,10 +1,19 @@
 // @ts-check
-//import { SortOrder } from "react-base-table"
+
+/*
+  The below object is copied straight from react-base-table source code,
+  because importing it caused to include the whole react-base-table
+  in the main, 'entry point' bundle
+*/
+const SortOrder = {
+  ASC: 'asc',
+  DESC: 'desc',
+}
 
 const initialState = {
   sortBy: {
     key: null,
-    order: "asc",
+    order: SortOrder.ASC,
   },
   filters: {},
 }
@@ -42,4 +51,4 @@ export const setSortBy = ({ key, order }) => ({ type: SET_SORT_BY(key, order), k
 
 export const updateFilters = filters => ({ type: UPDATE_FILTERS, filters })
 
-export const clearFilters = filters => ({ type: CLEAR_FILTERS })
+export const clearFilters = () => ({ type: CLEAR_FILTERS })
