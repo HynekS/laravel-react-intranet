@@ -88,9 +88,9 @@ export const deleteInvoiceFailure = () => ({ type: DELETE_INVOICE_FAILURE })
 
 // Thunks
 export const createInvoice = data => async dispatch => {
-  dispatch(createInvoiceInit())
   try {
-    let response = await client.post("/invoices/", {})
+    dispatch(createInvoiceInit())
+    let response = await client.post("/invoices", data)
     if (response) {
       dispatch(createInvoiceSuccess(response.data))
     }
@@ -100,9 +100,8 @@ export const createInvoice = data => async dispatch => {
 }
 
 export const updateInvoice = ({ id, ...data }) => async dispatch => {
-  dispatch(updateInvoiceInit())
-  console.log({ id, ...data })
   try {
+    dispatch(updateInvoiceInit())
     let response = await client.put(`/invoices/${id}`, { ...data })
     if (response) {
       dispatch(updateInvoiceSuccess(response.data))
@@ -113,9 +112,9 @@ export const updateInvoice = ({ id, ...data }) => async dispatch => {
 }
 
 export const deleteInvoice = ({ id }) => async dispatch => {
-  dispatch(deleteInvoiceInit())
   try {
-    let response = await client.delete(`/invoices/${id}`, {})
+    dispatch(deleteInvoiceInit())
+    let response = await client.delete(`/invoices/${id}`)
     if (response) {
       dispatch(deleteInvoiceSuccess(response.data))
     }
