@@ -7,23 +7,23 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    public function create()
-    {
-        //
-    }
+    public $rules = [
+        'castka' => 'required|numeric',
+        'c_faktury' => 'required|numeric',
+        'typ_castky' => 'required|in:"0","1"',
+    ];
 
     public function store(Request $request)
     {
-        //
+        $request->validate($this->rules);
+        $invoice = Faktura::create($request->all());
+        $invoice->save();
+        return $invoice;
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'castka' => 'required|numeric',
-            'c_faktury' => 'required|numeric',
-            'typ_castky' => 'required|in:"0","1"',
-        ]);
+        $request->validate($this->rules);
         $invoice = Faktura::find($id);
         $invoice->update([
             'castka' => $request->castka,
@@ -32,9 +32,11 @@ class InvoiceController extends Controller
         ]);
         return $invoice;
     }
-    
+
     public function destroy($id)
     {
-        //
+        $invoice = Faktura::find($id);
+        $invoice->delete();
+        return $invoice;
     }
 }
