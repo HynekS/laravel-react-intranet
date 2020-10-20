@@ -10,10 +10,10 @@ import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
 
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) => {
   const dispatch = useDispatch()
-  const { c_faktury = "", castka = "" } = data
+  const { id_zaznam: id, c_faktury = "", castka = "" } = data
 
   const handleClick = () => {
-    console.log(data)
+    dispatch(deleteInvoice({ id }))
   }
 
   return (
@@ -23,7 +23,8 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) 
           <SvgExclamation tw="w-6 stroke-current" />
         </div>
         <div tw="px-4">
-          Skutečně chcete odstranit fakturu č. {c_faktury} v hodnotě {castka.toLocaleString("cs-CZ")} Kč?
+          Skutečně chcete odstranit fakturu č. {c_faktury} v hodnotě{" "}
+          {castka.toLocaleString("cs-CZ")} Kč?
         </div>
       </div>
       <footer tw="flex justify-end bg-gray-100 p-6 rounded-lg rounded-t-none">
@@ -33,7 +34,8 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) 
         >
           Zrušit
         </button>
-        <button tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
+        <button
+          tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
           onClick={handleClick}
         >
           Odstranit fakturu
