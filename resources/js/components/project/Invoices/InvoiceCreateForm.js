@@ -60,13 +60,13 @@ const styles = css`
   }
 `
 
-const InvoiceCreateForm = ({ modalState, onModalClose, ...props }) => {
+const InvoiceCreateForm = ({ modalState: { data }, onModalClose, ...props }) => {
   const { register, handleSubmit, errors } = useForm()
   const dispatch = useDispatch()
+  const { c_akce, id_akce } = data
 
-  const onSubmit = data => {
-    console.log(data)
-    dispatch(createInvoice(data))
+  const onSubmit = formData => {
+    dispatch(createInvoice({ ...formData, c_akce, akce_id: id_akce }))
   }
 
   return (
@@ -97,7 +97,7 @@ const InvoiceCreateForm = ({ modalState, onModalClose, ...props }) => {
           <Input
             label="částka (Kč)"
             name="castka"
-            inputmode="numeric"
+            inputMode="numeric"
             register={register({
               pattern: { value: /^[0-9]+$/, message: "pole smí obsahovat pouze čísla" },
             })}
@@ -106,7 +106,8 @@ const InvoiceCreateForm = ({ modalState, onModalClose, ...props }) => {
         </div>
         <footer tw="flex justify-end bg-gray-100 p-6 rounded-lg rounded-t-none">
           <button
-            tw="bg-gray-200 transition-colors duration-300 text-gray-500 font-medium py-2 px-4 ml-4 rounded hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
+            tw="bg-gray-200 transition-colors duration-300 text-gray-500 font-medium py-2 px-4 ml-4 rounded hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
+            tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
             onClick={onModalClose}
           >
             Zrušit
