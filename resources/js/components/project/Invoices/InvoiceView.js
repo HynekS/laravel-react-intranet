@@ -66,7 +66,7 @@ const InvoicePage = ({ detail, ...props }) => {
               <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
             )}
           </div>
-          <Button onClick={() => setModalState({ ...modalState, status: modalStatus.CREATE })}>
+          <Button onClick={() => setModalState({ status: modalStatus.CREATE, data: detail })}>
             <SvgPlus tw="w-5 mr-1" />
             Nová faktura
           </Button>
