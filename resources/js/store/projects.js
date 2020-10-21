@@ -1,6 +1,10 @@
+// @ts-check
 import { loadProgressBar } from "axios-progress-bar"
 import client from "../utils/axiosWithDefaults"
-import store from "./configuredStore"
+
+import invoiceReducer from "./invoices"
+
+import { CREATE_INVOICE_SUCCESS, UPDATE_INVOICE_SUCCESS, DELETE_INVOICE_SUCCESS } from "./invoices"
 
 export const yearsSince2013 = Array.from(
   { length: new Date().getFullYear() - 2013 + 1 },
@@ -46,9 +50,24 @@ const UPDATE_PROJECT_FAILURE = "[projects] Updating project has failed"
 export default function reducer(state = initialState, action = {}) {
   switch (action.type) {
     case FETCH_PROJECTS_BY_YEARS_INITIALIZED:
+    case FETCH_SINGLE_PROJECT_INITIALIZED:
       return {
         ...state,
         status: projectStatus.LOADING,
+      }
+    case FETCH_SINGLE_PROJECT_SUCCESS:
+      return {
+        ...state,
+        status: projectStatus.SUCCESS,
+        byId: {
+          ...state.byId,
+          [action.project.id_akce]: { ...action.project },
+        },
+      }
+    case FETCH_SINGLE_PROJECT_FAILURE:
+      return {
+        ...state,
+        status: projectStatus.ERROR,
       }
     case FETCH_PROJECTS_BY_YEARS_SUCCESS:
       return {
@@ -84,56 +103,86 @@ export default function reducer(state = initialState, action = {}) {
           },
         },
       }
+    case CREATE_INVOICE_SUCCESS:
+    case UPDATE_INVOICE_SUCCESS:
+    case DELETE_INVOICE_SUCCESS:
+      let invoiceType = ["faktury_dohled", "faktury_vyzkum"][action.typ_castky]
+      return {
+        ...state,
+        byId: {
+          ...state.byId,
+          [action.id_akce]: {
+            ...state.byId[action.id_akce],
+            [invoiceType]: invoiceReducer(state.byId[action.id_akce][invoiceType], action),
+          },
+        },
+      }
     default:
       return state
   }
 }
 
 // Action creators
-const fetchProjectByYearsInit = () => ({
+export const fetchProjectByYearsInit = () => ({
   type: FETCH_PROJECTS_BY_YEARS_INITIALIZED,
 })
 
-const fetchProjectByYearsSuccess = () => ({
+export const fetchProjectByYearsSuccess = () => ({
   type: FETCH_PROJECTS_BY_YEARS_SUCCESS,
 })
 
-const fetchProjectByYearsFailure = error => ({
+export const fetchProjectByYearsFailure = error => ({
   type: FETCH_PROJECTS_BY_YEARS_FAILURE,
   error,
 })
 
-const fetchProjectsOfOneYearInit = year => ({
+export const fetchProjectsOfOneYearInit = year => ({
   type: FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED(year),
   year,
 })
 
-const fetchProjectsOfOneYearSuccess = (projectsOfOneYear, year) => ({
+export const fetchProjectsOfOneYearSuccess = (projectsOfOneYear, year) => ({
   type: FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(year),
   projectsOfOneYear,
   year,
 })
 
-const fetchProjectsOfOneYearFailure = (year, error) => ({
+export const fetchProjectsOfOneYearFailure = (year, error) => ({
   type: FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(year, error),
   error,
   year,
 })
 
-const updateProjectInit = () => ({ type: UPDATE_PROJECT_INITIALIZED })
+export const updateProjectInit = () => ({ type: UPDATE_PROJECT_INITIALIZED })
 
-const updateProjectSuccess = (id, updatedProject) => ({
+export const updateProjectSuccess = (id, updatedProject) => ({
   type: UPDATE_PROJECT_SUCCESS,
   id,
   updatedProject,
 })
 
-const updateProjectFailure = error => ({ type: UPDATE_PROJECT_FAILURE, error })
+export const updateProjectFailure = error => ({ type: UPDATE_PROJECT_FAILURE, error })
+
+export const fetchSingleProjectInit = () => ({ type: FETCH_SINGLE_PROJECT_INITIALIZED })
+
+export const fetchSingleProjectSuccess = project => ({
+  type: FETCH_SINGLE_PROJECT_SUCCESS,
+  project,
+})
+
+export const fetchSingleProjectFailure = error => ({ type: FETCH_SINGLE_PROJECT_FAILURE, error })
+
+// export const manageInvoices = payload => ({ type: MANAGE_INVOICES, ...payload })
+export const manageInvoices = ({ type, response, ...payload }) => ({
+  type: type,
+  response,
+  ...payload,
+})
 
 // Thunks
 export const fetchProjectsByYears = years => async dispatch => {
-  dispatch(fetchProjectByYearsInit())
   try {
+    dispatch(fetchProjectByYearsInit())
     Promise.all(years.map(async year => dispatch(fetchProjectsOfOneYear(year)))).then(() =>
       dispatch(fetchProjectByYearsSuccess()),
     )
@@ -143,9 +192,8 @@ export const fetchProjectsByYears = years => async dispatch => {
 }
 
 export const fetchProjectsOfOneYear = year => async dispatch => {
-  dispatch(fetchProjectsOfOneYearInit(year))
   try {
-    if (!store.getState().projects.isFetching) loadProgressBar({}, client)
+    dispatch(fetchProjectsOfOneYearInit(year))
     const response = await client.get(`akce/${year}`)
     if (response) {
       dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
@@ -154,12 +202,26 @@ export const fetchProjectsOfOneYear = year => async dispatch => {
     console.log({ year })
     dispatch(fetchProjectsOfOneYearFailure(year, error))
   }
-  if (!store.getState().projects.isFetching) loadProgressBar({ progress: false })
+}
+
+export const fetchProject = ({ year, id }) => async dispatch => {
+  try {
+    dispatch(fetchSingleProjectInit())
+    loadProgressBar({}, client)
+    const response = await client.get(`akce/${year}/${id}`)
+    if (response) {
+      dispatch(fetchSingleProjectSuccess(response.data))
+    }
+  } catch (error) {
+    console.log(error)
+    dispatch(fetchSingleProjectFailure(error))
+  }
+  loadProgressBar({ progress: false })
 }
 
 export const updateProject = ({ id, ...project }) => async dispatch => {
-  dispatch(updateProjectInit())
   try {
+    dispatch(updateProjectInit())
     loadProgressBar({}, client)
     const response = await client.put(`akce/${id}`, { id_akce: id, ...project })
     if (response) {

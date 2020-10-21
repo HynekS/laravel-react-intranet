@@ -64,10 +64,10 @@ const styles = css`
 const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => {
   const { register, setValue, handleSubmit, errors } = useForm()
   const dispatch = useDispatch()
-  const { id_zaznam } = data
+  const { id_zaznam, akce_id } = data
 
   const onSubmit = formData => {
-    dispatch(updateInvoice({ id: id_zaznam, ...formData }))
+    dispatch(updateInvoice({ id: id_zaznam, id_akce: akce_id, ...formData }))
   }
   useEffect(() => {
     if (data) {
@@ -106,7 +106,7 @@ const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => 
           <Input
             label="částka (Kč)"
             name="castka"
-            inputmode="numeric"
+            inputMode="numeric"
             register={register({
               pattern: { value: /^[0-9]+$/, message: "pole smí obsahovat pouze čísla" },
               required: { value: true, message: "toto pole je třeba vyplnit" },

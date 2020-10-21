@@ -10,10 +10,10 @@ import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
 
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) => {
   const dispatch = useDispatch()
-  const { id_zaznam: id, c_faktury = "", castka = "" } = data
+  const { id_zaznam: id, akce_id: id_akce, typ_castky, c_faktury = "", castka = "" } = data
 
   const handleClick = () => {
-    dispatch(deleteInvoice({ id }))
+    dispatch(deleteInvoice({ id, id_akce, typ_castky }))
   }
 
   return (

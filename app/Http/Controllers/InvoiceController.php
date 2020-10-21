@@ -26,8 +26,8 @@ class InvoiceController extends Controller
         $request->validate($this->rules);
         $invoice = Faktura::find($id);
         $invoice->update([
-            'castka' => $request->castka,
-            'c_faktury' => $request->c_faktury,
+            'castka' => (int) $request->castka,
+            'c_faktury' => (int) $request->c_faktury,
             'typ_castky' => (int) $request->typ_castky
         ]);
         return $invoice;
