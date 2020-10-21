@@ -1,42 +1,36 @@
+// @ts-check
 import React, { useState, useEffect } from "react"
 import { useParams, useLocation } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 
-import client from "../../utils/axiosWithDefaults"
+import { fetchProject } from "../../store/projects"
 import DetailRoutes from "./DetailRoutes"
 import DetailNav from "./DetailNav"
 import DetailPage from "./DetailPage"
 
-const DetailProvider = ({ children }) => {
+const DetailProvider = () => {
   const [data, setData] = useState()
+  const dispatch = useDispatch()
 
   const { state } = useLocation()
   const params = useParams() || {}
 
+  // Using state from spreadsheet view link – old way, probably redundant, but maybe faster?
+  const projectFromLinkState = useSelector(store => store.projects.byId[state["id_akce"]])
+  // When accessing detail directly from url or refreshing browser
+  const projectFromUrl = useSelector(store =>
+    Object.values(store.projects.byId).find(
+      needle => needle.c_akce === `${params.num}/${params.year.slice(2)}`,
+    ),
+  )
+
   useEffect(() => {
-    let source = client.CancelToken.source()
-    async function fetchData() {
-      try {
-        const response = await client.get(`akce/${params.year}/${params.num}`, {
-          cancelToken: source.token,
-        })
-        setData(response.data)
-      } catch (err) {
-        if (client.isCancel(err)) {
-          console.log("api request cancelled")
-        } else {
-          console.log(err)
-        }
-      }
-    }
-    if (state) {
-      setData(state)
+    if (projectFromLinkState || projectFromUrl) {
+      setData(projectFromLinkState || projectFromUrl)
     } else {
-      fetchData()
+      dispatch(fetchProject({ year: params.year, id: params.num }))
     }
-    return () => {
-      source.cancel()
-    }
-  }, [params])
+  }, [params, projectFromLinkState, projectFromUrl])
 
   return data ? (
     <DetailPage>
