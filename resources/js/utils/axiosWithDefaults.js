@@ -1,4 +1,5 @@
-import axios from "axios"
+// changed from es6 import to supress TS errors:
+ const { default: axios } = require('axios');
 
 import store from "../store/configuredStore"
 import { clearLoggedInUser } from "../store/auth"
