@@ -13,7 +13,6 @@ const relations = [
     key: "teren_databaze",
     publicName: "terénní databáze",
     group: "teren",
-    partOfAkceTable: true,
   },
   {
     key: "teren_scan",
@@ -24,7 +23,6 @@ const relations = [
     key: "LAB_databaze",
     publicName: "databáze z laboratoře",
     group: "laborator",
-    partOfAkceTable: true,
   },
   {
     key: "digitalizace_nalez",
@@ -42,36 +40,10 @@ const relations = [
 ]
 
 const FilesProvider = ({ detail, ...props }) => {
-  /* OK I know tis is ugly, but it is neccessary for data normalization */
-  const withData = relations.map(item => {
-    if (item.partOfAkceTable) {
-      return {
-        ...item,
-        data:
-          detail[item.key] === "(NULL)" //WTF OMG
-            ? []
-            : [].concat([
-                {
-                  file_path: detail[item.key],
-                  id_akce: detail["id_akce"], // probably unnecessary
-                  vlozeno:
-                    item.key === "teren_databaze"
-                      ? detail["teren_databaze_vlozeno"]
-                      : detail["LAB_databaze_vlozeno"],
-                  vlozil:
-                    item.key === "teren_databaze"
-                      ? detail["teren_databaze_vlozil"]
-                      : detail["LAB_databaze_vlozil"],
-                },
-              ]),
-      }
-    } else {
-      return {
-        ...item,
-        data: detail[item.key] === null ? [] : [].concat(detail[item.key]),
-      }
-    }
-  })
+  const withData = relations.map(item => ({
+    ...item,
+    data: detail[item.key] === null ? [] : [].concat(detail[item.key]),
+  }))
 
   return detail ? (
     <DetailWrapper>
