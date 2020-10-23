@@ -1,8 +1,6 @@
 // @ts-check
 import client from "../utils/axiosWithDefaults"
-import { manageInvoices } from "./projects"
 
-// @ts-check
 export const invoiceStatus = {
   IDLE: "idle",
   LOADING: "loading",
@@ -55,30 +53,38 @@ export default function reducer(state = [], action = {}) {
 // Action creators
 export const createInvoiceInit = () => ({ type: CREATE_INVOICE_INITIALIZED })
 
-export const createInvoiceSuccess = newInvoice => ({ type: CREATE_INVOICE_SUCCESS, newInvoice })
+export const createInvoiceSuccess = ({ response, id_akce, ...data }) => ({
+  type: CREATE_INVOICE_SUCCESS,
+  response,
+  id_akce,
+  ...data,
+})
 
 export const createInvoiceFailure = error => ({ type: CREATE_INVOICE_FAILURE, error })
 
 export const updateInvoiceInit = () => ({ type: UPDATE_INVOICE_INITIALIZED })
 
-export const updateInvoiceSuccess = updatedInvoice => ({
+export const updateInvoiceSuccess = ({ response, ...data }) => ({
   type: UPDATE_INVOICE_SUCCESS,
-  updatedInvoice,
+  response,
+  ...data,
 })
 
 export const updateInvoiceFailure = error => ({ type: UPDATE_INVOICE_FAILURE, error })
 
 export const deleteInvoiceInit = () => ({ type: DELETE_INVOICE_INITIALIZED })
 
-export const deleteInvoiceSuccess = ({ projectId, invoiceId }) => ({
+export const deleteInvoiceSuccess = ({ response, id_akce, typ_castky }) => ({
   type: DELETE_INVOICE_SUCCESS,
-  projectId,
-  invoiceId,
+  response,
+  id_akce,
+  typ_castky,
 })
 
 export const deleteInvoiceFailure = error => ({ type: DELETE_INVOICE_FAILURE, error })
 
 // TODO All actions dispatched to all reducers!
+// Also, make a one shape from multiple 'id_akce', 'akce_id', 'id_zaznam' => projectId, invoiceId
 // Thunks
 export const createInvoice = ({ id_akce, ...data }) => async dispatch => {
   try {
@@ -86,8 +92,7 @@ export const createInvoice = ({ id_akce, ...data }) => async dispatch => {
     let response = await client.post("/invoices", { ...data })
     if (response) {
       dispatch(
-        manageInvoices({
-          type: CREATE_INVOICE_SUCCESS,
+        createInvoiceSuccess({
           response: response.data,
           id_akce,
           ...data,
@@ -106,8 +111,7 @@ export const updateInvoice = ({ id, ...data }) => async dispatch => {
     let response = await client.put(`/invoices/${id}`, { ...data })
     if (response) {
       dispatch(
-        manageInvoices({
-          type: UPDATE_INVOICE_SUCCESS,
+        updateInvoiceSuccess({
           response: response.data,
           ...data,
         }),
@@ -126,14 +130,13 @@ export const deleteInvoice = ({ id, id_akce, typ_castky }) => async dispatch => 
     if (response) {
       console.log(response)
       dispatch(
-        manageInvoices(
-          {
-            type: DELETE_INVOICE_SUCCESS,
-            response: response.data,
-            id_akce,
-            typ_castky,
-          },
-        ),
+        //manageInvoices({
+        deleteInvoiceSuccess({
+          // type: DELETE_INVOICE_SUCCESS,
+          response: response.data,
+          id_akce,
+          typ_castky,
+        }),
       )
     }
   } catch (error) {

@@ -172,13 +172,6 @@ export const fetchSingleProjectSuccess = project => ({
 
 export const fetchSingleProjectFailure = error => ({ type: FETCH_SINGLE_PROJECT_FAILURE, error })
 
-// export const manageInvoices = payload => ({ type: MANAGE_INVOICES, ...payload })
-export const manageInvoices = ({ type, response, ...payload }) => ({
-  type: type,
-  response,
-  ...payload,
-})
-
 // Thunks
 export const fetchProjectsByYears = years => async dispatch => {
   try {
