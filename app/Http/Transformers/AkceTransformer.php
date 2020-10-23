@@ -15,6 +15,24 @@ class AkceTransformer
     $response->datum_pocatku = self::tryToParseDate($response->datum_pocatku);
     $response->datum_ukonceni = self::tryToParseDate($response->datum_ukonceni);
 
+    $response->LAB_databaze = $response->LAB_databaze ? [
+      0 => [
+        'file_path' => $response->LAB_databaze,
+        'vlozeno' => $response->LAB_databaze_vlozeno,
+        'vlozil' => $response->LAB_databaze_vlozil,
+      ]
+    ] : [];
+
+    $response->teren_databaze = $response->teren_databaze ? [
+      0 => [
+        'file_path' => $response->teren_databaze,
+        'vlozeno' => $response->teren_databaze_vlozeno,
+        'vlozil' => $response->teren_databaze_vlozil,
+      ]
+    ] : [];
+
+    unset($response['LAB_databaze_vlozeno'], $response['LAB_databaze_vlozil'], $response['teren_databaze_vlozeno'], $response['teren_databaze_vlozil']);
+
     return $response;
   }
 
