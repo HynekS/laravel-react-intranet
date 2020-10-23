@@ -18,7 +18,11 @@ class InvoiceController extends Controller
         $request->validate($this->rules);
         $invoice = Faktura::create($request->all());
         $invoice->save();
-        return $invoice;
+        // The types are not properly casted when using $request->all()
+        // However, they are casted when saving into DB (strings->numbers, timestamp)
+        // refresh() metod retrieves saved, properly casted record  from DB
+        $record = $invoice->refresh();
+        return $record;
     }
 
     public function update(Request $request, $id)
