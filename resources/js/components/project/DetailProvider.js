@@ -16,7 +16,7 @@ const DetailProvider = () => {
   const params = useParams() || {}
 
   // Using state from spreadsheet view link – old way, probably redundant, but maybe faster?
-  const projectFromLinkState = useSelector(store => store.projects.byId[state["id_akce"]])
+  const projectFromLinkState = useSelector(store => state && store.projects.byId[state["id_akce"]])
   // When accessing detail directly from url or refreshing browser
   const projectFromUrl = useSelector(store =>
     Object.values(store.projects.byId).find(
