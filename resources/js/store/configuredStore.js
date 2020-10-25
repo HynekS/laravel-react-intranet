@@ -1,3 +1,4 @@
+// @ts-check
 import { createStore, applyMiddleware, compose } from "redux"
 import thunk from "redux-thunk"
 
@@ -9,20 +10,22 @@ const actionSanitizer = action =>
     : action
 
 const composeEnhancers =
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-    actionsBlacklist: ["[upload] uploadProgressUpdated"],
-    actionSanitizer,
-    stateSanitizer: state =>
-      state.ulpoad.filesToUpload.length
-        ? {
-            ...state,
-            files: {
-              ...state.ulpoad,
-              filesToUpload: state.ulpoad.filesToUpload.map(() => "<<LONG_BLOB>>"),
-            },
-          }
-        : state,
-  }) || compose
+  (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+      actionsBlacklist: ["[upload] uploadProgressUpdated"],
+      actionSanitizer,
+      stateSanitizer: state =>
+        state.upload.filesToUpload.length
+          ? {
+              ...state,
+              files: {
+                ...state.upload,
+                filesToUpload: state.upload.filesToUpload.map(() => "<<LONG_BLOB>>"),
+              },
+            }
+          : state,
+    })) ||
+  compose
 const configuredStore = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)))
 
 export default configuredStore

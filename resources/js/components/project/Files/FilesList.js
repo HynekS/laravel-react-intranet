@@ -9,7 +9,7 @@ import File from "./File"
 import FileUpload from "../FileUpload/FileUpload"
 
 const FilesList = ({ subgroup, detail, ...props }) => {
-  const { publicName, data, key } = subgroup || {}
+  const { publicName, data, model } = subgroup || {}
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
@@ -18,7 +18,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         <div tw="p-4 pt-2 bg-gray-200 rounded">
           <h4 tw="pb-4 text-gray-600 font-semibold">{publicName}</h4>
           <div tw="flex flex-1 flex-wrap">
-            {data.length > 0 && data.map((file, i) => <File file={file} key={i} />)}
+            {data.length > 0 && data.map((file, i) => <File file={file} key={file.file_path + i} model={model} projectId={file.id_akce} fileId={file.id} />)}
           </div>
           <div tw="flex-1">
             <button
@@ -45,7 +45,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
             </h2>
             <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
           </header>
-          <FileUpload model={key} id={detail.id_akce} modalCloseCallback={() => setIsModalOpen(false)}/>
+          <FileUpload model={model} id={detail.id_akce} modalCloseCallback={() => setIsModalOpen(false)}/>
         </section>
       </Modal>
     </div>

@@ -8,41 +8,41 @@ import DetailWrapper from "../DetailWrapper"
 import FilesListGroup from "./FilesListGroup"
 
 const relations = [
-  { key: "teren_foto", publicName: "terénní foto", group: "teren" },
+  { model: "teren_foto", publicName: "terénní foto", group: "teren" },
   {
-    key: "teren_databaze",
+    model: "teren_databaze",
     publicName: "terénní databáze",
     group: "teren",
   },
   {
-    key: "teren_scan",
+    model: "teren_scan",
     publicName: "scany terénní dokumentace",
     group: "teren",
   },
   {
-    key: "LAB_databaze",
+    model: "LAB_databaze",
     publicName: "databáze z laboratoře",
     group: "laborator",
   },
   {
-    key: "digitalizace_nalez",
+    model: "digitalizace_nalez",
     publicName: "dokumentace nálezů",
     group: "digitalizace",
   },
   {
-    key: "digitalizace_plan",
+    model: "digitalizace_plan",
     publicName: "plánová dokumentace",
     group: "digitalizace",
   },
-  { key: "geodet_plan", publicName: "geodetické plány", group: "geodezie" },
-  { key: "geodet_bod", publicName: "geodetické souřadnice", group: "geodezie" },
-  { key: "analyza", publicName: "odborné analýzy", group: "analyzy" },
+  { model: "geodet_plan", publicName: "geodetické plány", group: "geodezie" },
+  { model: "geodet_bod", publicName: "geodetické souřadnice", group: "geodezie" },
+  { model: "analyza", publicName: "odborné analýzy", group: "analyzy" },
 ]
 
 const FilesProvider = ({ detail, ...props }) => {
   const withData = relations.map(item => ({
     ...item,
-    data: detail[item.key] === null ? [] : [].concat(detail[item.key]),
+    data: detail[item.model] === null ? [] : [].concat(detail[item.model]),
   }))
 
   return detail ? (

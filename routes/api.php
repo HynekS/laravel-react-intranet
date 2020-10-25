@@ -53,4 +53,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/meta/users', 'MetaController@active_users');
     Route::post('/upload', 'UploadController@upload');
     Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
+    Route::delete('/file', 'FileController@destroy');
 });

@@ -4,26 +4,32 @@ import React from "react"
 import fileDownload from "js-file-download"
 import { jsx } from "@emotion/core"
 import tw from "twin.macro"
+import { useDispatch } from "react-redux"
 
+import { deleteFile } from "../../../store/files"
 import client from "../../../utils/axiosWithDefaults"
 import getFileExtension from "../../../utils/getFileExtension"
 
 const onDownload = path => {
-  client.get(`/download/${path}`, {
-    responseType: "blob",
-  })
+  client
+    .get(`/download/${path}`, {
+      responseType: "blob",
+    })
     .then(response => {
       fileDownload(response.data, path)
     })
     .catch(error => console.log(error))
 }
 
-const File = ({ file }) => {
+const File = ({ file, model, projectId, fileId }) => {
+  const dispatch = useDispatch()
+
   const path = file?.file_path
   const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
-  
+
   return path ? (
     <div tw="pr-4 pb-4" style={{ flex: "1 1 20rem", width: 0 }}>
+      <button onClick={() => dispatch(deleteFile({ model, projectId, fileId }))}>Delete</button>
       <button
         onClick={() => onDownload(path)}
         tw="flex w-full text-left rounded bg-white bg-opacity-50"
