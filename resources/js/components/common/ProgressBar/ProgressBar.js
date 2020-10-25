@@ -1,7 +1,6 @@
 // @ts-check
 /** @jsx jsx */
 import React from "react"
-// import "./ProgressBar.css";
 import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
@@ -15,7 +14,6 @@ export const Filler = ({ progress }) => (
   <div
     tw="bg-blue-400 h-full"
     style={{
-      // width: `${progress}%`
       borderRadius: "inherit",
       transform: `scaleX(${progress / 100})`,
       transformOrigin: "left",
