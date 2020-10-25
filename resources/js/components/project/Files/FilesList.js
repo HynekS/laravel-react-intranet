@@ -38,14 +38,14 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         {...props}
       >
         <section tw="flex flex-1 flex-col h-full">
-          <header tw="flex justify-between pb-4">
+          <header tw="flex justify-between p-6">
             <h2 tw="text-lg font-medium">
               <span tw="text-gray-500">nahrát soubory: </span>
               <span>{publicName}</span>
             </h2>
             <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
           </header>
-          <FileUpload model={key} id={detail.id_akce} />
+          <FileUpload model={key} id={detail.id_akce} modalCloseCallback={() => setIsModalOpen(false)}/>
         </section>
       </Modal>
     </div>
