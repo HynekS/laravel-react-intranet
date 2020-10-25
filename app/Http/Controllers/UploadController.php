@@ -26,6 +26,7 @@ class UploadController extends Controller
             $akce = Akce::find($data->id);
             $firstFilePath = $data->path . $data->filesToUpload[0]->name;
             $akce[$data->model] = $firstFilePath;
+            $akce[$data->model . "_vlozil"] = $data->userId;
             $akce->save();
 
             return "Seems we have a {$data->model} which path is {$firstFilePath}";
@@ -41,6 +42,7 @@ class UploadController extends Controller
             $record = new $Model();
             $record->file_path = $data->path . $file->name;
             $record->id_akce = $data->id;
+            $record->vlozil = $data->userId;
             $record->save();
 
             $savedFiles[] = $record;
@@ -49,7 +51,7 @@ class UploadController extends Controller
     }
 
     public function upload(Request $request)
-    {
+    {       
         $data = json_decode($request->data);
         $uploadedFiles = $data->filesToUpload;
         $path = $data->id . "/";
