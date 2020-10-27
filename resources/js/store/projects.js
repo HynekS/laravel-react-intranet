@@ -3,8 +3,11 @@ import { loadProgressBar } from "axios-progress-bar"
 import client from "../utils/axiosWithDefaults"
 
 import invoiceReducer from "./invoices"
+import fileReducer from "./files"
 
 import { CREATE_INVOICE_SUCCESS, UPDATE_INVOICE_SUCCESS, DELETE_INVOICE_SUCCESS } from "./invoices"
+import { DELETE_FILE_SUCCESS } from "./files"
+import { BATCH_UPLOAD_FILES_DONE } from "./upload"
 
 export const yearsSince2013 = Array.from(
   { length: new Date().getFullYear() - 2013 + 1 },
@@ -106,6 +109,7 @@ export default function reducer(state = initialState, action = {}) {
     case CREATE_INVOICE_SUCCESS:
     case UPDATE_INVOICE_SUCCESS:
     case DELETE_INVOICE_SUCCESS:
+      // TODO normalize the shape (id_akce => projectId etc...)
       let invoiceType = ["faktury_dohled", "faktury_vyzkum"][action.typ_castky]
       return {
         ...state,
@@ -114,6 +118,18 @@ export default function reducer(state = initialState, action = {}) {
           [action.id_akce]: {
             ...state.byId[action.id_akce],
             [invoiceType]: invoiceReducer(state.byId[action.id_akce][invoiceType], action),
+          },
+        },
+      }
+    case DELETE_FILE_SUCCESS:
+    case BATCH_UPLOAD_FILES_DONE:
+      return {
+        ...state,
+        byId: {
+          ...state.byId,
+          [action.projectId]: {
+            ...state.byId[action.projectId],
+            [action.model]: fileReducer(state.byId[action.projectId][action.model], action),
           },
         },
       }
@@ -148,7 +164,7 @@ export const fetchProjectsOfOneYearSuccess = (projectsOfOneYear, year) => ({
 })
 
 export const fetchProjectsOfOneYearFailure = (year, error) => ({
-  type: FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(year, error),
+  type: FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(year),
   error,
   year,
 })
