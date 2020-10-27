@@ -20,6 +20,8 @@ const REMOVE_FILE_FROM_UPLOADS = "[upload] A file is being removed from the uplo
 const SET_UPLOAD_PROGRESS = "[upload] uploadProgressUpdated"
 const SET_INITIAL_STATE = "[upload] A state is being cleared"
 
+export { BATCH_UPLOAD_FILES_DONE }
+
 export const filesStatus = {
   IDLE: "idle",
   READING: "reading",
@@ -124,9 +126,10 @@ export const batchUploadFilesInit = count => ({
   count,
 })
 
-export const batchUploadFilesDone = responses => ({
+export const batchUploadFilesDone = ({ model, projectId, responses }) => ({
   type: BATCH_UPLOAD_FILES_DONE,
-  filesToUpload: [],
+  model,
+  projectId,
   responses,
 })
 
@@ -183,16 +186,16 @@ export const readSingleFile = file => {
   }
 }
 
-export const uploadMultipleFiles = ({ filesToUpload, model, id, userId }) => async dispatch => {
+export const uploadMultipleFiles = ({ filesToUpload, model, projectId, userId }) => async dispatch => {
   try {
     dispatch(batchUploadFilesInit(filesToUpload.length))
     const responses = await Promise.all(
       filesToUpload.map(async (file, i, { length }) =>
-        dispatch(uploadSingleFile({ file, model, id, userId, i, length })),
+        dispatch(uploadSingleFile({ file, model, projectId, userId, i, length })),
       ),
     )
     if (responses) {
-      dispatch(batchUploadFilesDone(responses))
+      dispatch(batchUploadFilesDone({ model, projectId, responses}))
     }
   } catch (error) {
     console.log(error)
@@ -200,14 +203,14 @@ export const uploadMultipleFiles = ({ filesToUpload, model, id, userId }) => asy
   }
 }
 
-export const uploadSingleFile = ({ file, model, id, userId, i, length }) => async dispatch => {
+export const uploadSingleFile = ({ file, model, projectId, userId, i, length }) => async dispatch => {
   try {
     dispatch(uploadSingleFileInit())
     const formData = new FormData()
     const data = {
-      filesToUpload: [file],
+      file,
       model,
-      id,
+      projectId,
       userId,
     }
     formData.append("data", JSON.stringify(data))
