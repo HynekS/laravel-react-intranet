@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App \ {
+use App\{
     Akce,
     Analyza,
     DigitalizaceNalez,
@@ -21,22 +21,34 @@ class FileController extends Controller
 {
     public function destroy(Request $request)
     {
+
         if (in_array($request->model, ["LAB_databaze", "teren_databaze"])) {
             $akce = Akce::find($request->projectId);
-            
-            Storage::delete($akce[$request->model]);
+
+            // We can't  be sure the file does exist in storage
+            try {
+                Storage::disk('local')->delete($request->model);
+            } catch (Exception $e) {
+            }
+
             $akce[$request->model] = null;
             $akce[$request->model . "_vlozil"] = null;
             $akce[$request->model . "_vlozeno"] = null;
 
-            return "test response";
+            $akce->save();
+
+            return ["model" => $akce[$request->model], "author" => $akce[$request->model . "_vlozil"], "created" => $akce[$request->model . "_vlozeno"]];
         }
 
         $model_name = Str::studly(Str::singular($request->model));
         $Model = 'App\\' . $model_name;
 
         $record = $Model::find($request->fileId);
-        Storage::delete($record->file_path);
+        // We can't  be sure the file does exist in storage
+        try {
+            Storage::disk('local')->delete($record->file_path);
+        } catch (Exception $e) {
+        }
 
         $record->delete();
         return $record;
