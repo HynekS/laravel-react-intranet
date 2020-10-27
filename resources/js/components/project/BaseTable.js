@@ -402,7 +402,7 @@ const Table = ({ rawData }) => {
               headerIndex === 0 ? (
                 <form tw="flex h-full" key="primaryHeader" ref={formRef}>
                   {cells.map(cell => (
-                    <div>{cell}</div>
+                    <div key={cell.key}>{cell}</div>
                   ))}
                 </form>
               ) : (
