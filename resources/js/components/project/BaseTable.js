@@ -383,7 +383,6 @@ const Table = ({ rawData }) => {
             }}
             rowKey="id_akce"
             emptyRenderer={() => {
-              console.log(status)
               switch (status) {
                 case projectStatus.LOADING:
                   return <div tw="flex items-center justify-center h-full">Načítám data…</div>
