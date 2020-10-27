@@ -18,7 +18,7 @@ import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import SvgDropFiles from "./DropFiles"
 import SvgCheck from "../../../vendor/heroicons/outline/Check"
 
-const FileUpload = ({ model, id, fileTypes = "*/*", modalCloseCallback }) => {
+const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalCloseCallback }) => {
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
 
   const dispatch = useDispatch()
@@ -34,13 +34,15 @@ const FileUpload = ({ model, id, fileTypes = "*/*", modalCloseCallback }) => {
   const onFormSubmit = e => {
     e.preventDefault()
     if (!filesToUpload.length) return false
-    dispatch(uploadMultipleFiles({ filesToUpload, model, id, userId }))
+    dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }))
   }
 
   const onChange = e => {
     e.preventDefault()
     setIsItemOverDropArea(false)
-    let files = [...(e.target.files || e.dataTransfer.files)]
+    let files = isSingular
+      ? [...(e.target.files || e.dataTransfer.files)].slice(-1)
+      : [...(e.target.files || e.dataTransfer.files)]
     if (!files.length) return
 
     dispatch(batchReadFiles(files))
@@ -77,7 +79,7 @@ const FileUpload = ({ model, id, fileTypes = "*/*", modalCloseCallback }) => {
                   isItemOverDropArea ? tw`visible border-white` : tw`invisible`,
                 ]}
               >
-                přetáhněte soubory z počítače
+                přetáhněte soubor{!isSingular && "y"} z počítače
               </span>
             </div>
             <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${model}`}>
@@ -85,12 +87,12 @@ const FileUpload = ({ model, id, fileTypes = "*/*", modalCloseCallback }) => {
                 <div tw="text-gray-400 text-center pointer-events-none">
                   <SvgDropFiles tw="w-24 pb-2 fill-gray-400 inline-block" />
                 </div>
-                <span tw="block text-lg">přetáhněte soubory</span>
+                <span tw="block text-lg">přetáhněte soubor{!isSingular && "y"}</span>
                 <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
                 <input
                   type="file"
                   id={`fileElem-${model}`}
-                  multiple
+                  multiple={!isSingular}
                   accept={fileTypes}
                   onChange={onChange}
                   css={css`
@@ -203,7 +205,6 @@ const FileUpload = ({ model, id, fileTypes = "*/*", modalCloseCallback }) => {
             </span>
             <div tw="flex">
               <button
-                // TODO modal close callback
                 tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
                 onClick={() => {
                   dispatch(setInitialState())
