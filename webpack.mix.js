@@ -1,5 +1,6 @@
 const mix = require("laravel-mix")
 require("laravel-mix-bundle-analyzer")
+require("laravel-mix-react-typescript-extension")
 
 /*
  |--------------------------------------------------------------------------
@@ -63,7 +64,7 @@ mix
       port: 8082,
     },
   })
-  .react("resources/js/app.js", "public/js")
+  .reactTypeScript("resources/js/app.js", "public/js")
   .copyDirectory("resources/images/", "public/images/", false)
   .sourceMaps(false, "source-map")
   .browserSync("localhost:8000")
