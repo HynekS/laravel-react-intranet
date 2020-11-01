@@ -3,9 +3,10 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 
 import { createInvoice } from "../../../store/invoices"
+import { invoiceStatus } from "../../../store/projects"
 
 import Input from "../../common/Input"
 import Select from "../../common/Select"
@@ -62,11 +63,12 @@ const styles = css`
 
 const InvoiceCreateForm = ({ modalState: { data }, onModalClose, ...props }) => {
   const { register, handleSubmit, errors } = useForm()
+  const isLoading = useSelector(store => store.projects.invoiceStatus === invoiceStatus.LOADING)
   const dispatch = useDispatch()
-  const { c_akce, id_akce } = data
+  const { c_akce, id_akce: projectId } = data
 
   const onSubmit = formData => {
-    dispatch(createInvoice({ ...formData, c_akce, akce_id: id_akce, id_akce }))
+    dispatch(createInvoice({ ...formData, c_akce, projectId }))
   }
 
   return (
@@ -112,7 +114,10 @@ const InvoiceCreateForm = ({ modalState: { data }, onModalClose, ...props }) => 
           >
             Zrušit
           </button>
-          <button tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4  ml-4 rounded hover:(bg-blue-700) focus:(outline-none shadow-outline transition-shadow duration-300)">
+          <button
+            tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4  ml-4 rounded hover:(bg-blue-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
+            className={`${isLoading ? "spinner" : ""}`}
+          >
             Vytvořit fakturu
           </button>
         </footer>

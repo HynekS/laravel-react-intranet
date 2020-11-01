@@ -1,19 +1,22 @@
+//@ts-check
 /** @jsx jsx */
 import React from "react"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 
 import { deleteInvoice } from "../../../store/invoices"
+import { invoiceStatus } from "../../../store/projects"
 
 import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
 
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) => {
   const dispatch = useDispatch()
-  const { id_zaznam: id, akce_id: id_akce, typ_castky, c_faktury = "", castka = "" } = data
+  const isLoading = useSelector((store) => store.projects.invoiceStatus === invoiceStatus.LOADING)
+  const { id_zaznam: invoiceId, akce_id: projectId, typ_castky, c_faktury = "", castka = "" } = data
 
   const handleClick = () => {
-    dispatch(deleteInvoice({ id, id_akce, typ_castky }))
+    dispatch(deleteInvoice({ invoiceId, projectId, typ_castky }))
   }
 
   return (
@@ -37,6 +40,7 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) 
         <button
           tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
           onClick={handleClick}
+          className={`${isLoading ? "spinner" : ""}`}
         >
           Odstranit fakturu
         </button>

@@ -4,9 +4,10 @@ import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { jsx, css } from "@emotion/core"
 import tw from "twin.macro"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 
 import { updateInvoice } from "../../../store/invoices"
+import { invoiceStatus } from "../../../store/projects"
 
 import Input from "../../common/Input"
 import Select from "../../common/Select"
@@ -63,11 +64,12 @@ const styles = css`
 
 const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => {
   const { register, setValue, handleSubmit, errors } = useForm()
+  const isLoading = useSelector(store => store.projects.invoiceStatus === invoiceStatus.LOADING)
   const dispatch = useDispatch()
-  const { id_zaznam, akce_id } = data
+  const { id_zaznam: invoiceId, akce_id: projectId } = data
 
   const onSubmit = formData => {
-    dispatch(updateInvoice({ id: id_zaznam, id_akce: akce_id, ...formData }))
+    dispatch(updateInvoice({ invoiceId, projectId, ...formData }))
   }
   useEffect(() => {
     if (data) {
@@ -123,6 +125,7 @@ const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => 
           </button>
           <button
             tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-blue-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
+            className={`${isLoading ? "spinner" : ""}`}
             type="submit"
           >
             Uložit změny
