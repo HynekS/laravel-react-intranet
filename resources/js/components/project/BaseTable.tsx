@@ -22,52 +22,76 @@ import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
 import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
 
 import type { AppState } from "../../store/rootReducer"
+import { Filters } from "../../store/table.d"
 
 const Table = ({ rawData }) => {
   const dispatch = useDispatch()
-  const formRef = useRef()
-  const tableRef = useRef()
+  const formRef = useRef<HTMLFormElement>()
+  const tableRef = useRef<BaseTable>()
   const scrollOffset = useRef(0)
+  const keydownIntervalRef: { current: number | null } = useRef()
 
   const [data, setData] = useState([])
   const { year } = useParams<{ year: string }>()
   const currentHeight = useWindowHeight()
 
-  const status = useSelector((store: AppState) => store.projects.status)
+  const status = useSelector((store: AppState) => store.projects.projectStatus)
   const sortBy = useSelector((store: AppState) => store.table.sortBy, shallowEqual)
-  const filters = useSelector((store: AppState) => store.table.filters, shallowEqual)
+  const filters: Filters = useSelector((store: AppState) => store.table.filters, shallowEqual)
 
   const handleKeyDown = e => {
-    if(!tableRef.current || scrollOffset.current === undefined) return false
-    console.log(scrollOffset.current)
-    if (e.code === "PageUp") {
-      scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
-        tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
-    }
-    if (e.code === "PageDown") {
-        (scrollOffset.current = Math.min(
-          scrollOffset.current + currentHeight,
+    if (tableRef.current === undefined || scrollOffset.current === undefined) return
+    console.log("keyDown")
+    if (["PageUp", "PageDown", "Home", "End"].includes(e.code)) {
+      if (keydownIntervalRef.current) {
+        window.clearInterval(keydownIntervalRef.current)
+        keydownIntervalRef.current = null
+      }
+      keydownIntervalRef.current = window.setInterval(() => {
+        console.log(keydownIntervalRef.current)
+        if (e.code === "PageUp") {
+          scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
+          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+        }
+        if (e.code === "PageDown") {
+          scrollOffset.current = Math.min(
+            scrollOffset.current + currentHeight,
+            // TODO must probably add header and table header height into the formula
+            tableRef.current.getTotalRowsHeight() - (currentHeight - (81 + 59)),
+          )
+          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+        }
+        if (e.code === "Home") {
+          scrollOffset.current = 0
+          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
+        }
+        if (e.code === "End") {
+          scrollOffset.current = tableRef.current.getTotalRowsHeight()
           // TODO must probably add header and table header height into the formula
-          tableRef.current.getTotalRowsHeight() - (currentHeight - 81 - 59),
-        ))
-        tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+          tableRef.current.scrollToPosition({
+            scrollLeft: 0,
+            scrollTop: scrollOffset.current - currentHeight + (81 + 59),
+          })
+        }
+      }, 20)
     }
-    if (e.code === "Home") {
-      scrollOffset.current = 0
-      tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
   }
-    if (e.code === "End") {
-      scrollOffset.current = tableRef.current.getTotalRowsHeight()
-      // TODO must probably add header and table header height into the formula
-      tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current - currentHeight + 81 + 59 })
+
+  const handleKeyUp = () => {
+    console.log("keyUp")
+    if (keydownIntervalRef.current) {
+      window.clearInterval(keydownIntervalRef.current)
+      keydownIntervalRef.current = null
     }
   }
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown)
+    document.addEventListener("keyup", handleKeyUp)
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
+      document.removeEventListener("keyup", handleKeyUp)
     }
   }, [])
 
@@ -110,7 +134,7 @@ const Table = ({ rawData }) => {
     const sortedList =
       key === "c_akce" ? sortIdSlashYear(data.slice(0), key) : data.slice(0).sort(defaultSort)
 
-    if (order === SortOrder.DESC) {
+    if (order === "desc") {
       sortedList.reverse()
     }
     return sortedList
@@ -458,22 +482,6 @@ const Table = ({ rawData }) => {
                 </div>
               )
             }
-            onScroll={({
-              scrollLeft,
-              scrollTop,
-              horizontalScrollDirection,
-              verticalScrollDirection,
-              scrollUpdateWasRequested,
-            }) =>
-              console.log(/*{
-                scrollLeft,
-                scrollTop,
-                horizontalScrollDirection,
-                verticalScrollDirection,
-                scrollUpdateWasRequested,
-              }*/)
-            }
-            onEndReached={({ distanceFromEnd }) => console.log({ distanceFromEnd })}
             ref={tableRef}
           >
             {columns.map(column => (
