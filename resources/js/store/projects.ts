@@ -1,4 +1,3 @@
-// @ts-check
 import { loadProgressBar } from "axios-progress-bar"
 import client from "../utils/axiosWithDefaults"
 
