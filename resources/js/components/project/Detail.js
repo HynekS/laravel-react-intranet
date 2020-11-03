@@ -135,11 +135,7 @@ const Detail = ({ detail }) => {
                 name="objednavka_cislo"
                 label="číslo objednávky"
                 placeholder="číslo objednávky"
-                error={errors}
-                // TEST
-                register={register({
-                  required: { value: true, message: "toto pole je třeba vyplnit" },
-                })}
+                register={register}
               />
               <Input
                 name="objednavka_info"
