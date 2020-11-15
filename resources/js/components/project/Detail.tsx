@@ -23,6 +23,8 @@ import Input from "../common/Input"
 import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
 
+import type { AppState } from "../../store/rootReducer"
+
 const styles = css`
   fieldset {
     border-bottom: 1px solid gray;
@@ -87,7 +89,7 @@ const transformFormValues = data => ({
 
 const Detail = ({ detail }) => {
   const dispatch = useDispatch()
-  const activeUsers = useSelector(store => store.meta.activeUsers)
+  const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
   const formRef = useFocusNextOnEnter()
   const { c_akce, id_akce: id } = detail || {}
