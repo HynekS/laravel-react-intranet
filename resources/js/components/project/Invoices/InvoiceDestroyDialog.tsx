@@ -10,9 +10,13 @@ import { invoiceStatus } from "../../../store/projects"
 
 import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
 
+import type { AppState } from "../../../store/rootReducer"
+
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) => {
   const dispatch = useDispatch()
-  const isLoading = useSelector((store) => store.projects.invoiceStatus === invoiceStatus.LOADING)
+  const isLoading = useSelector(
+    (store: AppState) => store.projects.invoiceStatus === invoiceStatus.LOADING,
+  )
   const { id_zaznam: invoiceId, akce_id: projectId, typ_castky, c_faktury = "", castka = "" } = data
 
   const handleClick = () => {

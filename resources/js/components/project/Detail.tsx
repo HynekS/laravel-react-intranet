@@ -8,13 +8,14 @@ import DayPickerInput from "react-day-picker/DayPickerInput"
 import "react-day-picker/lib/style.css"
 import { useSelector, useDispatch } from "react-redux"
 
+import dateFnsFormat from "date-fns/format"
+import dateFnsParse from "date-fns/parse"
+import { DateUtils } from "react-day-picker"
+
 import { updateProject } from "../../store/projects"
 import { fetchActiveUsers } from "../../store/meta"
 
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
-import isValidDate from "../../services/Date/isValidDate"
-import swapCzDateToISODate from "../../services/Date/swapCzDateToISODate"
-import czechDateRegexp from "../../services/Date/czechDateRegexp"
 
 import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
 
@@ -24,6 +25,7 @@ import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
 
 import type { AppState } from "../../store/rootReducer"
+import type { akce as Akce } from "../../types/model"
 
 const styles = css`
   fieldset {
@@ -79,25 +81,40 @@ const transformFormValues = data => ({
   nalez: data.nalez === "null" ? null : Number(data.nalez),
   user_id: Number(data.user_id),
   zaa_hlaseno: Number(data.zaa_hlaseno),
-  datum_pocatku:
-    data.datum_pocatku &&
-    new Date(swapCzDateToISODate(data.datum_pocatku)).toISOString().split("T")[0],
-  datum_ukonceni:
-    data.datum_ukonceni &&
-    new Date(swapCzDateToISODate(data.datum_ukonceni)).toISOString().split("T")[0],
+
+  datum_pocatku: data.datum_pocatku && data.datum_pocatku.toISOString().split("T")[0],
+  datum_ukonceni: data.datum_ukonceni && data.datum_ukonceni.toISOString().split("T")[0],
 })
 
-const Detail = ({ detail }) => {
+function parseDate(str, format, locale) {
+  const parsed = dateFnsParse(str, format, new Date(), { locale })
+  if (DateUtils.isDate(parsed)) {
+    return parsed
+  }
+  return undefined
+}
+
+function formatDate(date, format, locale) {
+  return dateFnsFormat(date, format, { locale })
+}
+
+type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
+
+const Detail = ({ detail }: DetailProps) => {
   const dispatch = useDispatch()
   const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
-  const formRef = useFocusNextOnEnter()
+  //const formRef = useFocusNextOnEnter()
   const { c_akce, id_akce: id } = detail || {}
 
   useEffect(() => {
     if (detail) {
       for (let [key, value] of Object.entries(detail)) {
-        setValue(key, value)
+        if (value && ["datum_pocatku", "datum_ukonceni"].includes(key)) {
+          setValue(key, new Date(value))
+        } else {
+          setValue(key, value)
+        }
       }
     }
   }, [detail])
@@ -118,7 +135,7 @@ const Detail = ({ detail }) => {
       <h1 tw="font-semibold text-gray-700 text-xl pb-4">
         {c_akce}&ensp;{boundTitle}
       </h1>
-      <form onSubmit={handleSubmit(onSubmit)} ref={formRef} css={styles}>
+      <form onSubmit={handleSubmit(onSubmit)} /*ref={formRef}*/ css={styles}>
         <div>
           <div>
             <fieldset>
@@ -259,29 +276,24 @@ const Detail = ({ detail }) => {
                   <Controller
                     as={DayPickerInput}
                     control={control}
-                    rules={{ pattern: czechDateRegexp }}
+                    //rules={{ pattern: czechDateRegexp }}
                     name="datum_pocatku"
                     format="d. M. yyyy"
-                    formatDate={date => new Intl.DateTimeFormat("cs-CZ").format(date)}
-                    parseDate={date => {
-                      if (date.match(czechDateRegexp)) {
-                        let testDate = new Date(swapCzDateToISODate(date))
-                        return isValidDate(testDate) && testDate
-                      }
+                    formatDate={formatDate}
+                    parseDate={parseDate}
+                    placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
+                    onDayChange={date => {
+                      setValue("datum_pocatku", date)
                     }}
-                    placeholder="dd. mm. yyyy"
-                    value={new Date(detail?.datum_pocatku)}
                     dayPickerProps={{
-                      locale: "cs-CZ",
                       months: monthsCZ,
                       weekdaysLong: daysCZ,
                       weekdaysShort: daysShortCZ,
                       firstDayOfWeek: 1,
+
                       selectedDays:
                         (dateValues.datum_pocatku || detail?.datum_pocatku) &&
-                        new Date(
-                          swapCzDateToISODate(dateValues.datum_pocatku || detail?.datum_pocatku),
-                        ),
+                        new Date(dateValues.datum_pocatku || detail?.datum_pocatku),
                     }}
                   />
                 </div>
@@ -300,28 +312,24 @@ const Detail = ({ detail }) => {
                   <Controller
                     as={DayPickerInput}
                     control={control}
-                    rules={{ pattern: czechDateRegexp }}
+                    //rules={{ pattern: czechDateRegexp }}
                     name="datum_ukonceni"
                     format="d. M. yyyy"
-                    formatDate={date => new Intl.DateTimeFormat("cs-CZ").format(date)}
-                    parseDate={date => {
-                      if (date.match(czechDateRegexp)) {
-                        let testDate = new Date(swapCzDateToISODate(date))
-                        return isValidDate(testDate) && testDate
-                      }
+                    formatDate={formatDate}
+                    parseDate={parseDate}
+                    placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
+                    onDayChange={date => {
+                      setValue("datum_ukonceni", date)
                     }}
-                    placeholder="dd. mm. yyyy"
                     dayPickerProps={{
-                      locale: "cs-CZ",
                       months: monthsCZ,
                       weekdaysLong: daysCZ,
                       weekdaysShort: daysShortCZ,
                       firstDayOfWeek: 1,
+
                       selectedDays:
-                        (dateValues.datum_pocatku || detail?.datum_pocatku) &&
-                        new Date(
-                          swapCzDateToISODate(dateValues.datum_pocatku || detail?.datum_pocatku),
-                        ),
+                        (dateValues.datum_ukonceni || detail?.datum_ukonceni) &&
+                        new Date(dateValues.datum_ukonceni || detail?.datum_ukonceni),
                     }}
                   />
                 </div>
@@ -331,16 +339,16 @@ const Detail = ({ detail }) => {
                 label="zajišťuje"
                 options={activeUsers
                   .map(user => ({
-                    label: user.full_name,
-                    value: user.id,
+                    label: user?.full_name,
+                    value: user?.id,
                   }))
                   // If owner of the project is not among active users, add him/her to options
                   .concat(
-                    activeUsers.find(user => user.id === detail.user.id)
+                    activeUsers.find(user => user.id === detail.user?.id)
                       ? []
                       : {
-                          label: detail.user.full_name,
-                          value: detail.user.id,
+                          label: detail.user?.full_name,
+                          value: detail.user?.id,
                         },
                   )}
                 register={register}
