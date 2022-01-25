@@ -1,9 +1,8 @@
-/** @jsx jsx */
-import React from "react"
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
+type Props = {
+  children: React.ReactNode
+}
 
-const Main = ({ children }) => {
+const Main = ({ children }: Props) => {
   return <main tw="flex flex-auto bg-gray-400 shadow-inner">{children}</main>
 }
 

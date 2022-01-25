@@ -1,15 +1,16 @@
-import React from "react"
-import tw from "twin.macro"
+import type { users as User } from "@/types/model"
 
-const Widget = tw.section`flex`
-const User = tw.section`py-2 px-4`
+type Props = {
+  user: User
+  children: React.ReactNode
+}
 
-const UserWidget = ({ user, children }) => {
+const UserWidget = ({ user, children }: Props) => {
   return (
-    <Widget>
-      <User>Přihlášený uživatel: {user.full_name}</User>
+    <section tw="flex">
+      <div tw="py-2 px-4">Přihlášený uživatel: {user.full_name}</div>
       {children}
-    </Widget>
+    </section>
   )
 }
 

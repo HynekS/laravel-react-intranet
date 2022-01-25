@@ -1,25 +1,30 @@
-import React from "react"
-import ReactModal from "react-modal"
+import Modal from "react-modal"
 import styled from "@emotion/styled"
 import tw from "twin.macro"
 
-ReactModal.setAppElement("#app")
+Modal.setAppElement("#app")
 
-function ReactModalAdapter({ className = "", ...props }) {
-  const contentClassName = `${className}__content`
-  const overlayClassName = `${className}__overlay`
-  return (
-    <ReactModal
-      portalClassName={className}
-      className={contentClassName}
-      overlayClassName={overlayClassName}
-      {...props}
-    />
-  )
+type ModalProps = {
+  className: string
+  isOpen: boolean
+  [key: string]: unknown
 }
 
-const StyledReactModal = styled(ReactModalAdapter)`
-  &__overlay {
+export const ModalDecorator = ({ className, ...props }: ModalProps): JSX.Element => {
+  const [name] = (className && className.split(" ")) || [""]
+  const styles = name
+    ? {
+        portalClassName: name,
+        overlayClassName: `${name}__Overlay`,
+        className: `${name}__Content`,
+      }
+    : {}
+
+  return <Modal {...styles} {...props} />
+}
+
+const StyledModal = styled(ModalDecorator)`
+  &__Overlay {
     ${tw`fixed inset-0 z-30 flex items-center justify-center pb-8 lg:(pb-16)`}
     &.ReactModal__Overlay {
       background-color: rgba(113, 128, 150, 0.75);
@@ -34,7 +39,7 @@ const StyledReactModal = styled(ReactModalAdapter)`
     }
   }
 
-  &__content {
+  &__Content {
     ${tw`bg-white rounded-lg z-40 max-w-screen-sm lg:(max-w-6xl w-1/2)`};
     outline: none;
     &.ReactModal__Content {
@@ -54,4 +59,5 @@ const StyledReactModal = styled(ReactModalAdapter)`
     }
   }
 `
-export default StyledReactModal
+
+export default StyledModal

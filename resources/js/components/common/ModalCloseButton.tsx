@@ -1,6 +1,5 @@
-/** @jsx jsx */
-import React from 'react'
-import { jsx } from "@emotion/core"
+import React from "react"
+import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import SvgX from "../../vendor/heroicons/outline/X"
@@ -8,8 +7,8 @@ import SvgX from "../../vendor/heroicons/outline/X"
 const ModalCloseButton = ({ handleClick }) => {
   return (
     <button onClick={handleClick}>
-    <SvgX tw="w-6" />
-  </button>
+      <SvgX tw="w-6" />
+    </button>
   )
 }
 

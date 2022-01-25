@@ -2,8 +2,8 @@ import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import { render } from "react-dom"
 import { Provider } from "react-redux"
-import { Global, css } from "@emotion/core"
-import "tailwindcss/dist/base.min.css"
+import { GlobalStyles } from "twin.macro"
+import { Global } from "@emotion/react"
 
 import configuredStore from "./store/configuredStore"
 import { checkForValidToken } from "./store/auth"
@@ -17,11 +17,8 @@ const App = () => {
   return (
     <Provider store={configuredStore}>
       <BrowserRouter>
-        <Global
-          styles={css`
-            ${globalStyles()}
-          `}
-        />
+        <GlobalStyles />
+        <Global styles={globalStyles} />
         <HomePage />
       </BrowserRouter>
     </Provider>

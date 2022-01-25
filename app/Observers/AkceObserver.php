@@ -5,16 +5,27 @@ namespace App\Observers;
 use App\Akce;
 use App\Update;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class AkceObserver
 {
     protected $request;
 
-    public function __construct(Request $request, Response $response)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->response = $response;
+    }
+
+    public function saveEvent(Akce $akce, string $type)
+    {
+        $update = new Update();
+        $update->akce_id = $this->request->id_akce;
+        $update->user_id = $this->request->userId; // current user id
+        $update->type = $type;
+        $update->description = json_encode($akce->getDirty());
+        $update->created_at = now();
+        $update->save();
+
+        $akce["update_id"] = $update->id;
     }
 
     /**
@@ -25,14 +36,7 @@ class AkceObserver
      */
     public function created(Akce $akce)
     {
-        $update = new Update();
-        $update->akce_id = $this->request->id_akce;
-        $update->user_id = $this->request->user_id;
-        $update->type = 'created';
-        $update->description = "test create";
-        $update->created_at = now();
-        $update->save();
-
+        $this->saveEvent($akce, 'created');
     }
 
     /**
@@ -43,15 +47,7 @@ class AkceObserver
      */
     public function updated(Akce $akce)
     {
-        $update = new Update();
-        $update->akce_id = $this->request->id_akce;
-        $update->user_id = $this->request->user_id;
-        $update->type = 'updated';
-        $update->description = json_encode($akce->getDirty());
-        $update->created_at = now();
-        $update->save();
-        
-        $akce["update_id"] = $update->id;
+        $this->saveEvent($akce, 'updated');
     }
     /**
      * Handle the akce "deleted" event.
@@ -61,7 +57,7 @@ class AkceObserver
      */
     public function deleted(Akce $akce)
     {
-        //
+        $this->saveEvent($akce, 'deleted');
     }
 
     /**
@@ -72,7 +68,7 @@ class AkceObserver
      */
     public function restored(Akce $akce)
     {
-        //
+        $this->saveEvent($akce, 'restored');
     }
 
     /**
@@ -83,6 +79,6 @@ class AkceObserver
      */
     public function forceDeleted(Akce $akce)
     {
-        //
+        $this->saveEvent($akce, 'force_deleted');
     }
 }

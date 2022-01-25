@@ -1,7 +1,5 @@
-// @ts-check
-/** @jsx jsx */
 import React from "react"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import SvgChevronDown from "../../vendor/heroicons/solid/ChevronDown"
@@ -9,7 +7,7 @@ import SvgExclamationCircle from "../../vendor/heroicons/solid/ExclamationCircle
 
 const DefaultChevron = ({ ...props }) => (
   <SvgChevronDown
-    tw="fill-current h-full w-4 mr-2 absolute inset-y-0 right-0 flex items-center"
+    tw="absolute inset-y-0 right-0 flex items-center w-4 h-full mr-2 fill-current"
     {...props}
   />
 )
@@ -47,11 +45,11 @@ const Select = ({
           <ChevronComponent {...props} />
         </div>
         {error[name] && (
-        <div className="errorMessage">
-          <SvgExclamationCircle />
-          {error[name].message}
-        </div>
-      )}
+          <div className="errorMessage">
+            <SvgExclamationCircle />
+            {error[name].message}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
-/** @jsx jsx */
 import React, { useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import styled from "@emotion/styled"
 import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
@@ -30,8 +29,9 @@ const CreateProjectView = props => {
   return (
     <div tw="w-full p-8">
       <div tw="p-8 bg-white rounded-lg">
-      <h1 tw="font-semibold text-gray-700 text-xl">{boundTitle?.length ? boundTitle : "Nová akce"}</h1>
-      
+        <h1 tw="text-xl font-semibold text-gray-700">
+          {boundTitle?.length ? boundTitle : "Nová akce"}
+        </h1>
       </div>
     </div>
   )

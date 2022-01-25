@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react"
-import useScript from "../../utils/useScript"
 import styled from "@emotion/styled"
 import tw from "twin.macro"
+
+import useScript from "../../utils/useScript"
 
 import DetailWrapper from "./DetailWrapper"
 

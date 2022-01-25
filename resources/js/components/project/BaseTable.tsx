@@ -1,10 +1,9 @@
-/** @jsx jsx */
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { useSelector, useDispatch, shallowEqual } from "react-redux"
 import { useWindowHeight } from "@react-hook/window-size"
-import { jsx, css } from "@emotion/core"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 import deburr from "lodash.deburr"
 import Highlighter from "react-highlight-words"
@@ -162,7 +161,7 @@ const Table = ({ rawData }) => {
             state={rowData}
             aria-label={`odkaz na detail akce č. ${year}/${c_akce.split("/")[0]}`}
           >
-            <div tw="flex items-center justify-center p-1 px-2 bg-blue-500 hover:bg-blue-700 transition-colors duration-300 text-white rounded">
+            <div tw="flex items-center justify-center p-1 px-2 text-white transition-colors duration-300 bg-blue-500 rounded hover:bg-blue-700">
               <SvgPencil tw="w-4" />
             </div>
           </Link>
@@ -412,13 +411,13 @@ const Table = ({ rawData }) => {
           <BaseTable
             css={css`
               .BaseTable__row.negative {
-                ${tw`bg-red-100 text-red-900`}
+                ${tw`text-red-900 bg-red-100`}
                 &:hover {
                   ${tw`bg-red-200 bg-opacity-50`}
                 }
               }
               .BaseTable__row.positive {
-                ${tw`bg-green-100 text-green-900`}
+                ${tw`text-green-900 bg-green-100`}
                 &:hover {
                   ${tw`bg-green-200 bg-opacity-50`}
                 }

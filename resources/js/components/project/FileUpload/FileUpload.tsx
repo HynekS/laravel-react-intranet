@@ -1,9 +1,7 @@
-// @ts-check
-/** @jsx jsx */
-import React, { useState } from "react"
+import { useState } from "react"
 import uuidv4 from "uuid/v4"
 import filesize from "filesize.js"
-import { jsx, css } from "@emotion/core"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
 
@@ -30,7 +28,10 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
   const filesToUpload = useSelector((store: AppState) => store.upload.filesToUpload)
   const status = useSelector((store: AppState) => store.upload.status)
   const uploadProgress = useSelector((store: AppState) =>
-    store.upload.uploadProgress.reduce((acc, val, _, { length }) => (acc + val) / length, 0),
+    store.upload.uploadProgress.reduce(
+      (acc: number, val: number, _: number, self: number[]) => (acc + val) / self.length,
+      0,
+    ),
   )
 
   const onFormSubmit = e => {
@@ -51,7 +52,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
   }
 
   return (
-    <div tw="flex flex-1 flex-col h-full">
+    <div tw="flex flex-col flex-1 h-full">
       {status !== filesStatus.UPLOADING && status !== filesStatus.UPLOADING_DONE && (
         <div tw="px-5 pb-5">
           <div
@@ -65,19 +66,19 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
             }}
             onDragLeave={() => setIsItemOverDropArea(false)}
             css={[
-              tw`relative z-0 flex flex-grow flex-col justify-center -m-2 p-16 text-center rounded-lg transition transition-all duration-300`,
+              tw`relative z-0 flex flex-col justify-center flex-grow p-16 -m-2 text-center transition-all transition duration-300 rounded-lg`,
               isItemOverDropArea && tw`bg-blue-500`,
             ]}
           >
             <div
               css={[
-                tw`absolute z--10 border-2 border-gray-400 border-dashed inset-2 rounded-lg pointer-events-none transition-all duration-300`,
+                tw`absolute transition-all duration-300 border-2 border-gray-400 border-dashed rounded-lg pointer-events-none z--10 inset-2`,
                 isItemOverDropArea && tw`border-white`,
               ]}
             >
               <span
                 css={[
-                  tw`h-full flex items-center justify-center text-white text-2xl font-medium`,
+                  tw`flex items-center justify-center h-full text-2xl font-medium text-white`,
                   isItemOverDropArea ? tw`visible border-white` : tw`invisible`,
                 ]}
               >
@@ -86,11 +87,11 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
             </div>
             <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${model}`}>
               <div css={[isItemOverDropArea && tw`invisible`]}>
-                <div tw="text-gray-400 text-center pointer-events-none">
-                  <SvgDropIcon tw="w-24 pb-2 fill-gray-400 inline-block" />
+                <div tw="text-center text-gray-400 pointer-events-none">
+                  <SvgDropIcon tw="inline-block w-24 pb-2 fill-gray-400" />
                 </div>
                 <span tw="block text-lg">přetáhněte soubor{!isSingular && "y"}</span>
-                <span tw="block text-gray-600 pb-4 leading-4"> nebo</span>
+                <span tw="block pb-4 leading-4 text-gray-600"> nebo</span>
                 <input
                   type="file"
                   id={`fileElem-${model}`}
@@ -100,14 +101,14 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
                   css={css`
                     ${tw`w-0 opacity-0`}
                     &:focus + label {
-                      ${tw`outline-none shadow-outline transition-shadow duration-300`}
+                      ${tw`transition-shadow duration-300 outline-none ring`}
                     }
                   `}
                 />
                 <label
                   htmlFor={`fileElem-${model}`}
                   css={[
-                    tw`inline-block bg-blue-600 mb-4 hover:bg-blue-700 transition-colors duration-300 text-white text-sm py-2 px-4 rounded`,
+                    tw`inline-block px-4 py-2 mb-4 text-sm text-white transition-colors duration-300 bg-blue-600 rounded hover:bg-blue-700`,
                     isItemOverDropArea ? tw`pointer-events-none` : tw`pointer-events-auto`,
                   ]}
                 >
@@ -121,7 +122,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
       )}
       {status === filesStatus.UPLOADING && (
         <div tw="p-4">
-          <div tw="text-center text-xl font-medium p-2">
+          <div tw="p-2 text-xl font-medium text-center">
             <span>nahrávání: {Math.round(uploadProgress)} %</span>
           </div>
           <ProgressBar progress={uploadProgress} />
@@ -130,14 +131,14 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
       {status === filesStatus.UPLOADING_DONE && (
         <div tw="flex flex-col items-center justify-center h-full pb-4">
           <div tw="flex pb-4">
-            <SvgCheck tw="w-8 stroke-green-400 mr-1" />
-            <span tw="font-medium text-gray-600 text-xl">
+            <SvgCheck tw="w-8 mr-1 stroke-green-400" />
+            <span tw="text-xl font-medium text-gray-600">
               Soubory byly v pořádku uloženy na server.
             </span>
           </div>
           <div>
             <button
-              tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)"
+              tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none ring)"
               onClick={() => {
                 modalCloseCallback()
                 dispatch(setInitialState())
@@ -156,7 +157,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
                 <div tw="flex">
                   {file.type.includes("image") ? (
                     <div
-                      tw="rounded bg-gray-300"
+                      tw="bg-gray-300 rounded"
                       style={{
                         backgroundImage: `url(${file.content})`,
                         backgroundRepeat: "no-repeat",
@@ -167,7 +168,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
                     ></div>
                   ) : (
                     <div
-                      tw="w-8 p-3 rounded bg-gray-300"
+                      tw="w-8 p-3 bg-gray-300 rounded"
                       style={{
                         minWidth: "4rem",
                       }}
@@ -182,14 +183,14 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
                       ></div>
                     </div>
                   )}
-                  <div tw="py-2 pl-2 pr-4 flex-grow">
+                  <div tw="flex-grow py-2 pl-2 pr-4">
                     <span
-                      tw="block overflow-hidden whitespace-no-wrap text-gray-600 text-sm font-medium"
+                      tw="block overflow-hidden text-sm font-medium text-gray-600 whitespace-nowrap"
                       style={{ maxWidth: 960, textOverflow: "ellipsis" }}
                     >
                       {file.name}
                     </span>
-                    <span tw="block text-gray-500 text-xs font-medium">{filesize(file.size)}</span>
+                    <span tw="block text-xs font-medium text-gray-500">{filesize(file.size)}</span>
                     <span onClick={() => dispatch(removeFileFromUploads(i))}>× odstranit</span>
                   </div>
                 </div>
@@ -199,15 +200,15 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
         </div>
       )}
       {filesToUpload.length > 0 && status !== filesStatus.UPLOADING && (
-        <footer tw="flex bg-gray-100 p-6 rounded-lg rounded-t-none">
-          <div tw="flex w-full justify-between items-center">
+        <footer tw="flex p-6 bg-gray-100 rounded-lg rounded-t-none">
+          <div tw="flex items-center justify-between w-full">
             <span tw="text-sm font-medium text-gray-700">
               <span tw="text-gray-500">celková velikost:</span>{" "}
               {filesize(filesToUpload.reduce((acc, file) => acc + file.size, 0))}
             </span>
             <div tw="flex">
               <button
-                tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
+                tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none ring transition-shadow duration-300)"
                 onClick={() => {
                   dispatch(setInitialState())
                   modalCloseCallback()
@@ -218,7 +219,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
               <button
                 form={`fileUpload-${model}`}
                 type="submit"
-                tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded focus:(outline-none shadow-outline)"
+                tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded focus:(outline-none ring)"
               >
                 uložit soubory
               </button>

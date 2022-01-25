@@ -44,6 +44,7 @@ class FileController extends Controller
         $Model = 'App\\' . $model_name;
 
         $record = $Model::find($request->fileId);
+
         // We can't  be sure the file does exist in storage
         try {
             Storage::disk('local')->delete($record->file_path);

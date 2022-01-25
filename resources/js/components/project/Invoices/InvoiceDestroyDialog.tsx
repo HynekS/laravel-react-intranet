@@ -1,7 +1,5 @@
-//@ts-check
-/** @jsx jsx */
 import React from "react"
-import { jsx, css } from "@emotion/core"
+import { jsx, css } from "@emotion/react"
 import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
 
@@ -34,15 +32,15 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) 
           {castka.toLocaleString("cs-CZ")} Kč?
         </div>
       </div>
-      <footer tw="flex justify-end bg-gray-100 p-6 rounded-lg rounded-t-none">
+      <footer tw="flex justify-end p-6 bg-gray-100 rounded-lg rounded-t-none">
         <button
-          tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none shadow-outline transition-shadow duration-300)"
+          tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none ring transition-shadow duration-300)"
           onClick={onModalClose}
         >
           Zrušit
         </button>
         <button
-          tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none shadow-outline transition-shadow duration-300)"
+          tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none ring transition-shadow duration-300)"
           onClick={handleClick}
           className={`${isLoading ? "spinner" : ""}`}
         >

@@ -1,6 +1,4 @@
-/** @jsx jsx */
-import React from "react"
-import { jsx, css } from "@emotion/core"
+import { jsx, css } from "@emotion/react"
 import tw from "twin.macro"
 
 const DefaultRootWrapper = ({ children }) => <div>{children}</div>
@@ -32,7 +30,7 @@ const ButtonStyledRadio = ({
         <label
           htmlFor={`${name}-${index}`}
           css={css`
-            ${tw`inline-block px-4 py-2 border border-l-0 border-solid border-gray-400`}
+            ${tw`inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid`}
             ${index === 0 && tw`border-l rounded-l-lg`}
             ${index === length - 1 && tw`rounded-r-lg`}
           `}

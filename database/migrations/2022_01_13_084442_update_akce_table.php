@@ -50,9 +50,16 @@ class UpdateAkceTable extends Migration
             ALTER TABLE `akce`
 	        CHANGE COLUMN `rok_per_year` `rok_per_year` INT NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `cislo_per_year`;
 
+            ALTER TABLE `akce` MODIFY COLUMN `EL_lokalita` VARCHAR(120) AFTER `datum_vytvoreni`;
+            ALTER TABLE `akce` MODIFY COLUMN `EL_datum` VARCHAR(120) AFTER `el_ulozeni`;
+
             ALTER TABLE `akce`
 	        CHANGE COLUMN `registrace_info` `registrace_info` VARCHAR(20) NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `registrovano_bit`;
 
+            ALTER TABLE `akce`
+	        CHANGE COLUMN `user_id` `owner_id` INT(11) NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `datum_ukonceni`;
+
+            /* TODO: Should probably updated ALL empty values to null (in all the columns) */
             UPDATE `akce`
             SET `registrace_info` = NULL WHERE `registrace_info` = '';
 

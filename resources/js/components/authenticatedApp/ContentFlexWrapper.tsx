@@ -1,9 +1,8 @@
-/** @jsx jsx */
-import React from "react"
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
+type Props = {
+  children: React.ReactNode
+}
 
-const ContentFlexWrapper = ({ children }) => (
+const ContentFlexWrapper = ({ children }: Props) => (
   <div tw="flex flex-col flex-auto overflow-y-auto">{children}</div>
 )
 

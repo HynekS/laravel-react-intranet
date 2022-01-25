@@ -35,7 +35,7 @@ class AkceController extends Controller
 
     public function update(Request $request, Akce $akce)
     {
-        $akce->update($request->all());
+        $akce->update($request->except(['userId']));
         return response()->json($akce, 200);
     }
 

@@ -1,5 +1,3 @@
-import React from "react"
-
 import Header from "./Header"
 import Nav from "./Nav"
 import Main from "./Main"
@@ -9,7 +7,7 @@ import ContentFlexWrapper from "./ContentFlexWrapper"
 
 import AuthenticatedRoutes from "./Routes"
 
-const Layout = props => {
+const Layout = () => {
   return (
     <RootFlexWrapper>
       <HeaderFlexWrapper>

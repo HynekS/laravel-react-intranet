@@ -1,14 +1,14 @@
-/** @jsx jsx */
 import React from "react"
 import { NavLink } from "react-router-dom"
 import { useSelector } from "react-redux"
 import styled from "@emotion/styled"
-import { jsx } from "@emotion/core"
 import tw from "twin.macro"
 
 import UserWidget from "./UserWidget"
 import LogoThumb from "../common/LogoThumb"
 import Logout from "./Logout"
+
+import type { RootState } from "../../store/configuredStore"
 
 const Container = tw.section`flex flex-wrap justify-between py-2 px-4 border-b`
 const StyledNavLink = styled(NavLink)`
@@ -19,8 +19,8 @@ const StyledNavLink = styled(NavLink)`
 `
 const NavContainer = tw.nav`py-2 px-4 flex flex-wrap`
 
-const Nav = ({ ...props }) => {
-  const user = useSelector(store => store.auth.user)
+const Nav = () => {
+  const user = useSelector((store: RootState) => store.auth.user)
 
   const currentYear = new Date().getFullYear()
   return (

@@ -1,7 +1,5 @@
-//@ts-check
-/** @jsx jsx */
-import React, { useState, useEffect } from "react"
-import { jsx } from "@emotion/core"
+import React, { useState } from "react"
+import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import Modal from "../../common/StyledModal"
@@ -19,8 +17,8 @@ const FilesList = ({ subgroup, detail, ...props }) => {
     <div>
       <div tw="pb-2">
         <div tw="p-4 pt-2 bg-gray-200 rounded">
-          <h4 tw="pb-4 text-gray-600 font-semibold">{publicName}</h4>
-          <div tw="flex flex-1 flex-wrap">
+          <h4 tw="pb-4 font-semibold text-gray-600">{publicName}</h4>
+          <div tw="flex flex-wrap flex-1">
             {data.length > 0 &&
               data.map((file, i) => (
                 <File
@@ -35,7 +33,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
           <div tw="flex-1">
             <button
               style={{ minWidth: "7rem" }}
-              tw="text-white text-sm px-2 py-1 bg-blue-600 rounded focus:(outline-none shadow-outline)"
+              tw="text-white text-sm px-2 py-1 bg-blue-600 rounded focus:(outline-none ring)"
               onClick={() => setIsModalOpen(true)}
             >
               Nahrát soubor{!isSingular && "y"}
@@ -50,7 +48,7 @@ const FilesList = ({ subgroup, detail, ...props }) => {
         closeTimeoutMS={500}
         {...props}
       >
-        <section tw="flex flex-1 flex-col h-full">
+        <section tw="flex flex-col flex-1 h-full">
           <header tw="flex justify-between p-6">
             <h2 tw="text-lg font-medium">
               <span tw="text-gray-500">nahrát soubor{!isSingular && "y"}: </span>

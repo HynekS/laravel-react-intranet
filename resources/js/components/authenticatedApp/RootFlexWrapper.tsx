@@ -1,12 +1,7 @@
-/** @jsx jsx */
-import React from 'react'
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
+type Props = {
+  children: React.ReactNode
+}
 
-const RootFlexWrapper = ({ children }) => (
-  <div tw="flex flex-col h-full">
-    {children}
-  </div>
-)
+const RootFlexWrapper = ({ children }: Props) => <div tw="flex flex-col h-full">{children}</div>
 
 export default RootFlexWrapper

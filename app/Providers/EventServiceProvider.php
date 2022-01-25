@@ -10,6 +10,22 @@ use Illuminate\Support\Facades\Event;
 use App\Akce;
 use App\Observers\AkceObserver;
 
+// Generic 'upload observer' for all uploads
+use App\{
+    Analyza,
+    DigitalizaceNalez,
+    DigitalizacePlan,
+    GeodetBod,
+    GeodetPlan,
+    TerenFoto,
+    TerenScan
+};
+use App\Observers\UploadObserver;
+
+use App\Faktura;
+
+use App\User;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -35,5 +51,13 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
         Akce::observe(AkceObserver::class);
+        
+        Analyza::observe(UploadObserver::class);
+        DigitalizaceNalez::observe(UploadObserver::class);
+        DigitalizacePlan::observe(UploadObserver::class);
+        GeodetBod::observe(UploadObserver::class);
+        GeodetPlan::observe(UploadObserver::class);
+        TerenFoto::observe(UploadObserver::class);
+        TerenScan::observe(UploadObserver::class);
     }
 }

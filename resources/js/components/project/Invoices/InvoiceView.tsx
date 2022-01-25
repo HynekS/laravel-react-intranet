@@ -1,7 +1,5 @@
-// @ts-check
-/** @jsx jsx */
 import React, { useState } from "react"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import DetailWrapper from "../DetailWrapper"
@@ -23,7 +21,7 @@ const InvoicePage = ({ detail, ...props }) => {
     setModalState({ status: modalStatus.CLOSED, data: null })
   }
 
-  const Button = tw.button`flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none shadow-outline)`
+  const Button = tw.button`flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none ring)`
 
   const {
     faktury_dohled,
@@ -105,19 +103,19 @@ const InvoicePage = ({ detail, ...props }) => {
 
 const InvoiceSummary = ({ budget, sum, label, ...props }) => (
   <div tw="p-4">
-    <div key={label} tw="p-8 text-gray-600 font-medium rounded-lg shadow">
+    <div key={label} tw="p-8 font-medium text-gray-600 rounded-lg shadow">
       <dl>
-        <h3 tw="text-lg text-gray-700 font-medium pb-4">{label}</h3>
+        <h3 tw="pb-4 text-lg font-medium text-gray-700">{label}</h3>
         <div tw="flex justify-between">
-          <dt tw="text-gray-500 pr-4">rozpočet: </dt>
+          <dt tw="pr-4 text-gray-500">rozpočet: </dt>
           <dd>{budget.toLocaleString("cs-CZ")},–</dd>
         </div>
         <div tw="flex justify-between border-b">
-          <dt tw="text-gray-500 pr-4">fakturováno: </dt>
+          <dt tw="pr-4 text-gray-500">fakturováno: </dt>
           <dd>{sum.toLocaleString("cs-CZ")},–</dd>
         </div>
         <div tw="flex justify-between pt-2">
-          <dt tw="text-gray-600 pr-4">zbývá: </dt>
+          <dt tw="pr-4 text-gray-600">zbývá: </dt>
           <dd>{(budget - sum).toLocaleString("cs-CZ")},–</dd>
         </div>
       </dl>

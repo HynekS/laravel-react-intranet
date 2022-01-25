@@ -49,9 +49,11 @@ Route::group(['prefix' => 'invoices', 'middleware' => 'auth:api'], function () {
     Route::delete('/{invoice}', 'InvoiceController@destroy');
 });
 
+
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/meta/users', 'MetaController@active_users');
     Route::post('/upload', 'UploadController@upload');
     Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
     Route::delete('/file', 'FileController@destroy');
+    Route::post('/report/{akce}', 'ReportController@generate_pdf');
 });

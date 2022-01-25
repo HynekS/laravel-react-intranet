@@ -1,18 +1,16 @@
-// @ts-check
-/** @jsx jsx */
-import React from "react"
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
+type Props = {
+  progress: number
+}
 
-export const ProgressBar = ({ progress }) => (
+export const ProgressBar = ({ progress }: Props) => (
   <div tw="h-2 rounded">
     <Filler progress={progress} />
   </div>
 )
 
-export const Filler = ({ progress }) => (
+export const Filler = ({ progress }: Props) => (
   <div
-    tw="bg-blue-400 h-full"
+    tw="h-full bg-blue-400"
     style={{
       borderRadius: "inherit",
       transform: `scaleX(${progress / 100})`,

@@ -1,11 +1,15 @@
-export default function globalStyles(props) {
-  return `html, body, #app {
+import { css } from "twin.macro"
+
+const globalStyles = css`
+  html,
+  body,
+  #app {
     height: 100%;
     margin: 0;
   }
 
   html {
-    color: #4A5568;
+    color: #4a5568;
     overflow-y: overlay;
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
@@ -39,5 +43,5 @@ export default function globalStyles(props) {
       transform: rotate(360deg);
     }
   }
-  `
-}
+`
+export default globalStyles

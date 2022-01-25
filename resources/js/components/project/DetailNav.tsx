@@ -1,8 +1,7 @@
-/** @jsx jsx */
 import React from "react"
 import { NavLink } from "react-router-dom"
 import styled from "@emotion/styled"
-import { jsx } from "@emotion/core"
+import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
@@ -46,7 +45,7 @@ const StyledNavLink = styled(NavLink)`
     padding-top: calc(0.5rem + 2px);
     margin-top: -2px;
     transition all 0s;
-    ${tw`bg-white z-10 rounded-t text-gray-700`}
+    ${tw`z-10 text-gray-700 bg-white rounded-t`}
     & svg {
       ${tw`opacity-50`}
     }

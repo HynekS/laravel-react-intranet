@@ -4,14 +4,20 @@ import { Routes, Route } from "react-router-dom"
 
 import Dashboard from "../dashboard/Dashboard"
 import CreateProjectView from "../project/CreateProjectView"
-const TableDataProvider = React.lazy(() => import(/* webpackChunkName: 'TableProvider' */ "../project/TableDataProvider"))
-const DetailProvider = React.lazy(() => import(/* webpackChunkName: 'DetailProvider' */ "../project/DetailProvider"))
+const TableDataProvider = React.lazy(
+  () => import(/* webpackChunkName: 'TableProvider' */ "../project/TableDataProvider"),
+)
+const DetailProvider = React.lazy(
+  () => import(/* webpackChunkName: 'DetailProvider' */ "../project/DetailProvider"),
+)
 
-const AuthenticatedRoutes = props => (
-  <React.Suspense fallback={<div>I aM tHe SusPEnSE !!!</div>}>
+const AuthenticatedRoutes = () => (
+  <React.Suspense
+    fallback={<div tw="h-full w-full flex items-center justify-center">Loading…</div>}
+  >
     <Routes>
       <Route path="/" element={<Dashboard />} />
-      <Route path="/vytvorit-akci" element={<CreateProjectView />}/>
+      <Route path="/vytvorit-akci" element={<CreateProjectView />} />
       <Route path="/akce" element={<TableDataProvider />} />
       <Route path="/akce/:year" element={<TableDataProvider />} />
       <Route path="/akce/:year/:num/*" element={<DetailProvider />} />

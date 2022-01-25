@@ -1,14 +1,24 @@
-import { Filters } from "./table.d"
+import type { AnyAction } from "redux"
+import type { akce as Akce } from "../types/model"
 
 /*
   The below object is copied straight from react-base-table source code,
   because importing it caused to include the whole react-base-table
   in the main, 'entry point' bundle
 */
-
 const SortOrder = {
   ASC: "asc",
   DESC: "desc",
+}
+
+export type Filters = {
+  // Is it really? check twice!
+  [Property in keyof Akce]: string
+}
+
+type SortBy = {
+  key: keyof Akce
+  order: keyof typeof SortOrder
 }
 
 const initialState = {
@@ -20,12 +30,13 @@ const initialState = {
 }
 
 // Actions
-const SET_SORT_BY = (key, order) => `[table] updated table sorting (key: ${key}, order: ${order})`
+const SET_SORT_BY = (key: string, order: keyof typeof SortOrder) =>
+  `[table] updated table sorting (key: ${key}, order: ${order})`
 const UPDATE_FILTERS = "[table] updating table filters"
 const CLEAR_FILTERS = "[table] all filters have been cleared"
 
 // Reducer
-export default function reducer(state = initialState, action = {}) {
+export default function reducer(state = initialState, action: AnyAction) {
   switch (action.type) {
     case SET_SORT_BY(action.key, action.order):
       return {
@@ -48,8 +59,8 @@ export default function reducer(state = initialState, action = {}) {
 }
 
 // Action creators
-export const setSortBy = ({ key, order }) => ({ type: SET_SORT_BY(key, order), key, order })
+export const setSortBy = ({ key, order }: SortBy) => ({ type: SET_SORT_BY(key, order), key, order })
 
-export const updateFilters = filters => ({ type: UPDATE_FILTERS, filters })
+export const updateFilters = (filters: Filters) => ({ type: UPDATE_FILTERS, filters })
 
 export const clearFilters = () => ({ type: CLEAR_FILTERS })

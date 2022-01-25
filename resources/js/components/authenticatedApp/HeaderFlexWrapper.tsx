@@ -1,12 +1,7 @@
-/** @jsx jsx */
-import React from 'react'
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
+type Props = {
+  children: React.ReactNode
+}
 
-const HeaderFlexWrapper = ({ children }) => (
-  <div tw="flex-initial">
-    {children}
-  </div>
-)
+const HeaderFlexWrapper = ({ children }: Props) => <div tw="flex-initial">{children}</div>
 
 export default HeaderFlexWrapper

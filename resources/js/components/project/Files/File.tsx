@@ -1,16 +1,36 @@
-// @ts-check
-/** @jsx jsx */
-import React from "react"
 import fileDownload from "js-file-download"
-import { jsx } from "@emotion/core"
-import tw from "twin.macro"
-import { useDispatch } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 
 import { deleteFile } from "../../../store/files"
 import client from "../../../utils/axiosWithDefaults"
 import getFileExtension from "../../../utils/getFileExtension"
 
-const onDownload = path => {
+import type { AppState } from "../../../store/rootReducer"
+import type {
+  analyzy,
+  digitalizace_nalez,
+  digitalizace_plany,
+  geodet_body,
+  geodet_plany,
+  kresleni_foto,
+  teren_foto,
+  teren_negativni_foto,
+  teren_scan,
+} from "../../../types/model"
+import type { TFile } from "../../../store/files"
+
+type TFileTable =
+  | analyzy
+  | digitalizace_nalez
+  | digitalizace_plany
+  | geodet_body
+  | geodet_plany
+  | kresleni_foto
+  | teren_foto
+  | teren_negativni_foto
+  | teren_scan
+
+const onDownload = (path: string) => {
   client
     .get(`/download/${path}`, {
       responseType: "blob",
@@ -21,18 +41,26 @@ const onDownload = path => {
     .catch(error => console.log(error))
 }
 
-const File = ({ file, model, projectId, fileId }) => {
+type TFileProps = TFile & {
+  file: TFileTable
+  // Maybe shoud be narrowed to a set of upload tables? But how?
+}
+
+const File = ({ file, model, projectId, fileId }: TFileProps) => {
+  const { id: userId } = useSelector((store: AppState) => store.auth.user)
   const dispatch = useDispatch()
 
   const path = file?.file_path
   const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
 
   return path ? (
-    <div tw="pr-4 pb-4" style={{ flex: "1 1 20rem", width: 0 }}>
-      <button onClick={() => dispatch(deleteFile({ model, projectId, fileId }))}>Delete</button>
+    <div tw="pb-4 pr-4" style={{ flex: "1 1 20rem", width: 0 }}>
+      <button onClick={() => dispatch(deleteFile({ model, projectId, fileId, userId }))}>
+        Delete
+      </button>
       <button
         onClick={() => onDownload(path)}
-        tw="flex w-full text-left rounded bg-white bg-opacity-50"
+        tw="flex w-full text-left bg-white bg-opacity-50 rounded"
         style={{
           boxShadow: "0 0 8px -2px rgba(5, 10, 29, 0.2)",
           padding: 2,
@@ -51,9 +79,9 @@ const File = ({ file, model, projectId, fileId }) => {
             }}
           ></span>
         </span>
-        <span tw="py-1 px-2 pr-4 ">
+        <span tw="px-2 py-1 pr-4 ">
           <span
-            tw="block text-gray-600 text-sm font-medium overflow-hidden break-all"
+            tw="block overflow-hidden text-sm font-medium text-gray-600 break-all"
             style={{
               msWordBreak: "break-all",
               wordBreak: "break-word",
@@ -65,7 +93,7 @@ const File = ({ file, model, projectId, fileId }) => {
           >
             {path.split("/").pop()}
           </span>
-          <span tw="block text-gray-500 text-xs font-medium">
+          <span tw="block text-xs font-medium text-gray-500">
             {new Date(file.vlozeno).toLocaleDateString("cs-CZ")}
           </span>
         </span>

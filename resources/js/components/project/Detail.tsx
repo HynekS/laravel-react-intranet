@@ -1,12 +1,10 @@
-// @ts-check
-/** @jsx jsx */
 import React, { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
-import { jsx, css } from "@emotion/core"
+import { useSelector, useDispatch } from "react-redux"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 import DayPickerInput from "react-day-picker/DayPickerInput"
 import "react-day-picker/lib/style.css"
-import { useSelector, useDispatch } from "react-redux"
 
 import dateFnsFormat from "date-fns/format"
 import dateFnsParse from "date-fns/parse"
@@ -17,7 +15,8 @@ import { fetchActiveUsers } from "../../store/meta"
 
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
 
-import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
+// import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
+import client from "../../utils/axiosWithDefaults"
 
 import DetailWrapper from "./DetailWrapper"
 import Input from "../common/Input"
@@ -46,7 +45,7 @@ const styles = css`
     & .DayPickerInput {
       position: relative;
       &::after {
-        ${tw`fill-current h-full w-4 mr-2 absolute inset-y-0 right-0 opacity-25`}
+        ${tw`absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current`}
         content: "";
         background: url(/images/calendar-solid.svg) no-repeat center;
       }
@@ -56,7 +55,7 @@ const styles = css`
       ${tw`bg-gray-200 appearance-none border-2 border-gray-200 rounded py-1 px-2 text-gray-700 leading-tight focus:(outline-none bg-white border-blue-500)`}
     }
     & input[type="checkbox"] {
-      ${tw`w-auto focus:(outline-none shadow-outline)`}
+      ${tw`w-auto focus:(outline-none ring)`}
     }
     & select {
       ${tw`block appearance-none border-2 w-full bg-white border-gray-300 p-2 pr-8 rounded leading-tight hover:(border-gray-400) focus:(outline-none bg-white border-blue-500)`}
@@ -66,7 +65,7 @@ const styles = css`
     }
   }
   .errorMessage {
-    ${tw`absolute inline-block z-10 left-0 top-full text-xs bg-white p-1 pr-2 rounded shadow-sm`}
+    ${tw`absolute left-0 z-10 inline-block p-1 pr-2 text-xs bg-white rounded shadow-sm top-full`}
   }
 `
 
@@ -79,14 +78,14 @@ const transformFormValues = data => ({
   registrovano_bit: Number(data.registrovano_bit),
   id_stav: Number(data.id_stav),
   nalez: data.nalez === "null" ? null : Number(data.nalez),
-  user_id: Number(data.user_id),
+  owner_id: Number(data.owner_id),
   zaa_hlaseno: Number(data.zaa_hlaseno),
 
   datum_pocatku: data.datum_pocatku && data.datum_pocatku.toISOString().split("T")[0],
   datum_ukonceni: data.datum_ukonceni && data.datum_ukonceni.toISOString().split("T")[0],
 })
 
-function parseDate(str, format, locale) {
+function parseDate(str: string, format: string, locale: Locale | undefined) {
   const parsed = dateFnsParse(str, format, new Date(), { locale })
   if (DateUtils.isDate(parsed)) {
     return parsed
@@ -94,7 +93,7 @@ function parseDate(str, format, locale) {
   return undefined
 }
 
-function formatDate(date, format, locale) {
+function formatDate(date: Date, format: string, locale: Locale | undefined) {
   return dateFnsFormat(date, format, { locale })
 }
 
@@ -102,6 +101,7 @@ type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } 
 
 const Detail = ({ detail }: DetailProps) => {
   const dispatch = useDispatch()
+  const userId = useSelector((store: AppState) => store.auth.user.id)
   const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
   //const formRef = useFocusNextOnEnter()
@@ -125,14 +125,44 @@ const Detail = ({ detail }: DetailProps) => {
     }
   }, [])
 
-  const onSubmit = data => dispatch(updateProject({ id, ...transformFormValues(data) }))
+  const onSubmit = data => dispatch(updateProject({ id, userId, ...transformFormValues(data) }))
 
   const boundTitle = watch("nazev_akce")
   const dateValues = watch(["datum_pocatku", "datum_ukonceni"])
 
   return (
     <DetailWrapper>
-      <h1 tw="font-semibold text-gray-700 text-xl pb-4">
+      <button
+        type="button"
+        onClick={async () => {
+          client({
+            url: `/report/${detail.id_akce}`,
+            method: "POST",
+            responseType: "blob",
+            data: {
+              ...detail,
+            },
+          }).then(response => {
+            console.log("get a response!")
+            const url = window.URL.createObjectURL(
+              new Blob([response.data], { type: "application/pdf" }),
+            )
+            const link = document.createElement("a")
+            link.href = url
+            link.setAttribute("download", "Examen.pdf")
+            link.target = "_blank"
+            link.download = `expertni_list_${
+              detail
+                ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….pdf`
+                : `.pdf`
+            }`
+            link.click()
+          })
+        }}
+      >
+        Test PDF
+      </button>
+      <h1 tw="pb-4 text-xl font-semibold text-gray-700">
         {c_akce}&ensp;{boundTitle}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)} /*ref={formRef}*/ css={styles}>
@@ -282,7 +312,7 @@ const Detail = ({ detail }: DetailProps) => {
                     formatDate={formatDate}
                     parseDate={parseDate}
                     placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
-                    onDayChange={date => {
+                    onDayChange={(date: Date) => {
                       setValue("datum_pocatku", date)
                     }}
                     dayPickerProps={{
@@ -318,7 +348,7 @@ const Detail = ({ detail }: DetailProps) => {
                     formatDate={formatDate}
                     parseDate={parseDate}
                     placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
-                    onDayChange={date => {
+                    onDayChange={(date: Date) => {
                       setValue("datum_ukonceni", date)
                     }}
                     dayPickerProps={{
@@ -335,7 +365,7 @@ const Detail = ({ detail }: DetailProps) => {
                 </div>
               </div>
               <Select
-                name="user_id"
+                name="owner_id"
                 label="zajišťuje"
                 options={activeUsers
                   .map(user => ({
@@ -356,7 +386,7 @@ const Detail = ({ detail }: DetailProps) => {
             </fieldset>
             <button
               type="submit"
-              tw="bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline focus:transition-shadow focus:duration-300"
+              tw="px-4 py-2 font-bold text-white transition-colors duration-300 bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:transition-shadow focus:duration-300"
             >
               Uložit změny
             </button>

@@ -1,41 +1,47 @@
-import React from "react";
-import { Transition } from "react-transition-group";
+import { Transition } from "react-transition-group"
 
-const HiddenMessage = ({ show, children, duration = 400, ...props }) => {
-    const defaultStyle = {
-        transition: `opacity ${duration}ms ease-in-out`,
-        opacity: 0,
-        visibility: `hidden`
-    };
+type Props = {
+  children: React.ReactNode
+  show: unknown
+  duration: number
+}
 
-    const setEnteringStyles = node => {
-        node.style.visibility = "visible";
-    };
+const HiddenMessage = ({ show, children, duration = 400, ...props }: Props) => {
+  const defaultStyle: React.CSSProperties = {
+    transition: `opacity ${duration}ms ease-in-out`,
+    opacity: 0,
+    visibility: `hidden`,
+  }
 
-    const setEnteredStyles = node => {
-        node.style.opacity = 1;
-    };
+  const setEnteringStyles = (node: HTMLElement) => {
+    node.style.visibility = "visible"
+  }
 
-    const setExitingStyle = node => {
-        node.style.opacity = 0;
-    };
+  const setEnteredStyles = (node: HTMLElement) => {
+    node.style.opacity = "1"
+  }
 
-    const setExitedStyle = node => {
-        node.style.visibility = "hidden";
-    };
+  const setExitingStyle = (node: HTMLElement) => {
+    node.style.opacity = "0"
+  }
 
-    return (
-        <Transition
-            onEntering={e => setEnteringStyles(e)}
-            onEntered={e => setEnteredStyles(e)}
-            onExiting={e => setExitingStyle(e)}
-            onExited={e => setExitedStyle(e)}
-            in={Boolean(show)}
-            timeout={duration}
-        >
-            <div style={{ ...defaultStyle }}>{children}</div>
-        </Transition>
-    );
-};
+  const setExitedStyle = (node: HTMLElement) => {
+    node.style.visibility = "hidden"
+  }
 
-export default HiddenMessage;
+  return (
+    <Transition
+      {...props}
+      onEntering={(node: HTMLElement) => setEnteringStyles(node)}
+      onEntered={(node: HTMLElement) => setEnteredStyles(node)}
+      onExiting={(node: HTMLElement) => setExitingStyle(node)}
+      onExited={(node: HTMLElement) => setExitedStyle(node)}
+      in={Boolean(show)}
+      timeout={duration}
+    >
+      <div style={{ ...defaultStyle }}>{children}</div>
+    </Transition>
+  )
+}
+
+export default HiddenMessage

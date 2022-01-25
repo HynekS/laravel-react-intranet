@@ -37,7 +37,7 @@ class Akce extends Model
     // Zajišťuje
     public function user()
     {
-        return $this->belongsTo('App\User', 'user_id', 'id');
+        return $this->belongsTo('App\User', 'owner_id', 'id');
     }
 
     // Dokumentace apod.

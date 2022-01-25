@@ -1,6 +1,6 @@
-import React from "react";
+import React from "react"
 
-const Logo = ({ ...props }) => (
+const Logo = () => (
   <svg
     version="1.1"
     id="logo-no-text"
@@ -8,8 +8,8 @@ const Logo = ({ ...props }) => (
     xmlnsXlink="http://www.w3.org/1999/xlink"
     x="0px"
     y="0px"
-    width='40'
-    height='40'
+    width="40"
+    height="40"
     viewBox="287.858 410.989 200 200.045"
     enableBackground="new 287.858 410.989 200 200.045"
     preserveAspectRatio="xMinYMin meet"
@@ -43,6 +43,6 @@ const Logo = ({ ...props }) => (
 	C432.241,513.193,415.631,513.172,399.02,513.183z"
     />
   </svg>
-);
+)
 
-export default Logo;
+export default Logo
