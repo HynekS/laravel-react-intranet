@@ -19,6 +19,7 @@
     "laravel/tinker": "^2.0",
     "laravel/ui": "^2.0",
     "lcobucci/jwt": "3.3.3",
+    "league/geotools": "@stable",
     "mmerian/doctrine-timestamp": "dev-master",
     "nunomaduro/collision": "^4.1"
   },
