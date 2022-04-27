@@ -1,5 +1,5 @@
 import { useState } from "react"
-import uuidv4 from "uuid/v4"
+import { v4 as uuidv4 } from "uuid"
 import filesize from "filesize.js"
 import { css } from "@emotion/react"
 import tw from "twin.macro"

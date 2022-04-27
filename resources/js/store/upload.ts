@@ -24,7 +24,7 @@ const SET_INITIAL_STATE = "[upload] A state is being cleared"
 
 export { BATCH_UPLOAD_FILES_DONE }
 
-type TFile = {
+type FileObject = {
   content: FileReader["result"]
   name: string
   size: number
@@ -38,9 +38,16 @@ export const filesStatus = {
   READING_DONE: "reading_done",
   UPLOADING: "uploading",
   UPLOADING_DONE: "uploading_done",
+} as const
+
+type InitialState = {
+  status: typeof filesStatus[keyof typeof filesStatus]
+  response: unknown // TODO: Type!
+  filesToUpload: FileObject[]
+  uploadProgress: number[]
 }
 
-const initialState = {
+const initialState: InitialState = {
   status: filesStatus.IDLE,
   response: null,
   filesToUpload: [],
@@ -60,7 +67,9 @@ export default function reducer(state = initialState, action: AnyAction) {
       return {
         ...state,
         filesToUpload: [
-          ...action.filesToUpload.filter((file: TFile) => !currentFileNames.includes(file.name)),
+          ...action.filesToUpload.filter(
+            (file: FileObject) => !currentFileNames.includes(file.name),
+          ),
           ...state.filesToUpload,
         ],
         status: filesStatus.READING_DONE,
@@ -106,7 +115,7 @@ export const batchReadFilesInit = () => ({
   type: BATCH_READ_FILES_INITIALIZED,
 })
 
-export const batchReadFilesDone = (filesToUpload: TFile[]) => ({
+export const batchReadFilesDone = (filesToUpload: FileObject[]) => ({
   type: BATCH_READ_FILES_DONE,
   filesToUpload,
 })
@@ -175,7 +184,7 @@ export const batchReadFiles = (files: File[]) => async (dispatch: AppDispatch) =
   }
 }
 
-export const readSingleFile = (file:) => {
+export const readSingleFile = (file: File) => {
   try {
     return new Promise(resolve => {
       let reader = new FileReader()
@@ -196,17 +205,14 @@ export const readSingleFile = (file:) => {
   }
 }
 
-export const uploadMultipleFiles = ({
-  filesToUpload,
-  model,
-  projectId,
-  userId,
-}) => async (dispatch: (...args: any) => void) => {
+export const uploadMultipleFiles = ({ filesToUpload, model, projectId, userId }) => async (
+  dispatch: (...args: any) => void,
+) => {
   try {
     dispatch(batchUploadFilesInit(filesToUpload.length))
     const responses = await Promise.all(
-      filesToUpload.map(async (file, i: number, self) =>
-        dispatch(uploadSingleFile({ file, model, projectId, userId, i, self.length })),
+      filesToUpload.map(async (file: FileObject, i: number, self: FileObject[]) =>
+        dispatch(uploadSingleFile({ file, model, projectId, userId, i, length: self.length })),
       ),
     )
     if (responses) {
@@ -218,14 +224,9 @@ export const uploadMultipleFiles = ({
   }
 }
 
-export const uploadSingleFile = ({
-  file,
-  model,
-  projectId,
-  userId,
-  i,
-  length,
-}) => async (dispatch: AppDispatch) => {
+export const uploadSingleFile = ({ file, model, projectId, userId, i, length }) => async (
+  dispatch: AppDispatch,
+) => {
   try {
     dispatch(uploadSingleFileInit())
     const formData = new FormData()

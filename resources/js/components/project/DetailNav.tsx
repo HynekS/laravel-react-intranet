@@ -1,14 +1,14 @@
-import React from "react"
 import { NavLink } from "react-router-dom"
 import styled from "@emotion/styled"
-import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
 import SvgCurrencyDollar from "../../vendor/heroicons/outline/CurrencyDollar"
 import SvgAcademicCap from "../../vendor/heroicons/outline/AcademicCap"
 import SvgPaperClip from "../../vendor/heroicons/outline/PaperClip"
-import { Detail, InvoiceView, ExpertSheet, Files } from "./lazyImports"
+import { Detail, InvoiceView, ApprovalSheet, Files, GeoFeatures } from "./lazyImports"
+
+import type { akce as Akce } from "../../types/model"
 
 const activeClassName = "active"
 
@@ -52,7 +52,9 @@ const StyledNavLink = styled(NavLink)`
   }
 `
 
-const DetailNav = ({ detail }) => {
+type DetailNavProps = { detail: Akce & { user: { id: number; full_name: string } } }
+
+const DetailNav = ({ detail }: DetailNavProps) => {
   return (
     <StyledNav>
       <ul>
@@ -60,7 +62,9 @@ const DetailNav = ({ detail }) => {
           <StyledNavLink
             to=""
             state={detail}
+            end
             activeClassName={activeClassName}
+            // className={({ isActive }) => (isActive ? 'active' : 'not-active')}
             onMouseOver={() => Detail.preload()}
           >
             <SvgClipboardList tw="flex w-6 mr-2" />
@@ -83,10 +87,21 @@ const DetailNav = ({ detail }) => {
             to="expertni-list"
             state={detail}
             activeClassName={activeClassName}
-            onMouseOver={() => ExpertSheet.preload()}
+            onMouseOver={() => ApprovalSheet.preload()}
           >
             <SvgAcademicCap tw="flex w-6 mr-2" />
             <span>Expertní list</span>
+          </StyledNavLink>
+        </li>
+        <li>
+          <StyledNavLink
+            to="lokalizace"
+            state={detail}
+            activeClassName={activeClassName}
+            onMouseOver={() => GeoFeatures.preload()}
+          >
+            <SvgAcademicCap tw="flex w-6 mr-2" />
+            <span>Lokalizace</span>
           </StyledNavLink>
         </li>
         <li>

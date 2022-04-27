@@ -31,7 +31,9 @@ const Nav = () => {
         </NavLink>
       </div>
       <NavContainer>
-        <StyledNavLink to={`/akce`}>vše</StyledNavLink>
+        <StyledNavLink to={`/akce`} end>
+          vše
+        </StyledNavLink>
         {Array.from({ length: currentYear - 2013 }, (_, i) => currentYear - i).map((year, i) => (
           <StyledNavLink
             to={`/akce/${year}`}

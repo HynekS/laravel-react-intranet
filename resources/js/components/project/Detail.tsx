@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { useSelector, useDispatch } from "react-redux"
 import { css } from "@emotion/react"
@@ -14,9 +14,6 @@ import { updateProject } from "../../store/projects"
 import { fetchActiveUsers } from "../../store/meta"
 
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
-
-// import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
-import client from "../../utils/axiosWithDefaults"
 
 import DetailWrapper from "./DetailWrapper"
 import Input from "../common/Input"
@@ -104,8 +101,9 @@ const Detail = ({ detail }: DetailProps) => {
   const userId = useSelector((store: AppState) => store.auth.user.id)
   const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
-  //const formRef = useFocusNextOnEnter()
   const { c_akce, id_akce: id } = detail || {}
+
+  console.log({ detail })
 
   useEffect(() => {
     if (detail) {
@@ -132,36 +130,6 @@ const Detail = ({ detail }: DetailProps) => {
 
   return (
     <DetailWrapper>
-      <button
-        type="button"
-        onClick={async () => {
-          client({
-            url: `/report/${detail.id_akce}`,
-            method: "POST",
-            responseType: "blob",
-            data: {
-              ...detail,
-            },
-          }).then(response => {
-            console.log("get a response!")
-            const url = window.URL.createObjectURL(
-              new Blob([response.data], { type: "application/pdf" }),
-            )
-            const link = document.createElement("a")
-            link.href = url
-            link.setAttribute("download", "Examen.pdf")
-            link.target = "_blank"
-            link.download = `expertni_list_${
-              detail
-                ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….pdf`
-                : `.pdf`
-            }`
-            link.click()
-          })
-        }}
-      >
-        Test PDF
-      </button>
       <h1 tw="pb-4 text-xl font-semibold text-gray-700">
         {c_akce}&ensp;{boundTitle}
       </h1>

@@ -4,33 +4,37 @@ import type { akce as Akce } from "../types/model"
 /*
   The below object is copied straight from react-base-table source code,
   because importing it caused to include the whole react-base-table
-  in the main, 'entry point' bundle
+  in the main, 'entry point' bundle.
+
+  Let's try import only the type…
 */
-const SortOrder = {
-  ASC: "asc",
-  DESC: "desc",
-}
+import type { SortOrder } from "react-base-table"
 
 export type Filters = {
   // Is it really? check twice!
-  [Property in keyof Akce]: string
+  [prop in keyof Akce]?: string
 }
 
 type SortBy = {
-  key: keyof Akce
-  order: keyof typeof SortOrder
+  key: keyof Akce | null
+  order: SortOrder
 }
 
-const initialState = {
+type InitialState = {
+  sortBy: SortBy
+  filters: Filters
+}
+
+const initialState: InitialState = {
   sortBy: {
     key: null,
-    order: SortOrder.ASC,
+    order: "asc",
   },
-  filters: <Filters>{},
+  filters: {},
 }
 
 // Actions
-const SET_SORT_BY = (key: string, order: keyof typeof SortOrder) =>
+const SET_SORT_BY = (key: SortBy["key"], order: SortOrder) =>
   `[table] updated table sorting (key: ${key}, order: ${order})`
 const UPDATE_FILTERS = "[table] updating table filters"
 const CLEAR_FILTERS = "[table] all filters have been cleared"
@@ -41,7 +45,10 @@ export default function reducer(state = initialState, action: AnyAction) {
     case SET_SORT_BY(action.key, action.order):
       return {
         ...state,
-        sortBy: { key: action.key, order: action.order },
+        sortBy: {
+          key: action.key,
+          order: action.order,
+        },
       }
     case UPDATE_FILTERS:
       return {

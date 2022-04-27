@@ -7,8 +7,9 @@ import { css } from "@emotion/react"
 import tw from "twin.macro"
 import deburr from "lodash.deburr"
 import Highlighter from "react-highlight-words"
-import BaseTable, { Column, AutoResizer, SortOrder } from "react-base-table"
+import BaseTable, { Column, AutoResizer, SortOrder, BaseTableProps } from "react-base-table"
 import "react-base-table/styles.css"
+import type { akce as Akce } from "@/types/model"
 
 import { projectStatus } from "../../store/projects"
 import { setSortBy, updateFilters, clearFilters } from "../../store/table"
@@ -21,14 +22,18 @@ import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
 import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
 
 import type { AppState } from "../../store/rootReducer"
-import { Filters } from "../../store/table.d"
+import { Filters } from "../../store/table"
 
-const Table = ({ rawData }) => {
+type Props = {
+  rawData: Akce[]
+}
+
+const Table = ({ rawData }: Props) => {
   const dispatch = useDispatch()
-  const formRef = useRef<HTMLFormElement>()
-  const tableRef = useRef<BaseTable>()
+  const formRef = useRef<HTMLFormElement>(null)
+  const tableRef = useRef<BaseTable<Akce>>(null)
   const scrollOffset = useRef(0)
-  const keydownIntervalRef: { current: number | null } = useRef()
+  const keydownIntervalRef = useRef<number | null>(null)
 
   const [data, setData] = useState([])
   const { year } = useParams<{ year: string }>()
@@ -38,39 +43,40 @@ const Table = ({ rawData }) => {
   const sortBy = useSelector((store: AppState) => store.table.sortBy, shallowEqual)
   const filters: Filters = useSelector((store: AppState) => store.table.filters, shallowEqual)
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (tableRef.current === undefined || scrollOffset.current === undefined) return
     console.log("keyDown")
     if (["PageUp", "PageDown", "Home", "End"].includes(e.code)) {
       if (keydownIntervalRef.current) {
-        window.clearInterval(keydownIntervalRef.current)
+        window.clearInterval(Number(keydownIntervalRef.current))
         keydownIntervalRef.current = null
       }
       keydownIntervalRef.current = window.setInterval(() => {
-        console.log(keydownIntervalRef.current)
-        if (e.code === "PageUp") {
-          scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
-          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
-        }
-        if (e.code === "PageDown") {
-          scrollOffset.current = Math.min(
-            scrollOffset.current + currentHeight,
+        if (tableRef && tableRef.current && tableRef.current.scrollToPosition) {
+          if (e.code === "PageUp") {
+            scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
+            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+          }
+          if (e.code === "PageDown") {
+            scrollOffset.current = Math.min(
+              scrollOffset.current + currentHeight,
+              // TODO must probably add header and table header height into the formula
+              tableRef.current.getTotalRowsHeight() - (currentHeight - (81 + 59)),
+            )
+            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+          }
+          if (e.code === "Home") {
+            scrollOffset.current = 0
+            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
+          }
+          if (e.code === "End") {
+            scrollOffset.current = tableRef.current.getTotalRowsHeight()
             // TODO must probably add header and table header height into the formula
-            tableRef.current.getTotalRowsHeight() - (currentHeight - (81 + 59)),
-          )
-          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
-        }
-        if (e.code === "Home") {
-          scrollOffset.current = 0
-          tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
-        }
-        if (e.code === "End") {
-          scrollOffset.current = tableRef.current.getTotalRowsHeight()
-          // TODO must probably add header and table header height into the formula
-          tableRef.current.scrollToPosition({
-            scrollLeft: 0,
-            scrollTop: scrollOffset.current - currentHeight + (81 + 59),
-          })
+            tableRef.current.scrollToPosition({
+              scrollLeft: 0,
+              scrollTop: scrollOffset.current - currentHeight + (81 + 59),
+            })
+          }
         }
       }, 20)
     }
@@ -101,7 +107,7 @@ const Table = ({ rawData }) => {
   /*
     filtering
   */
-  const filterData = ({ dataKey }, e) => {
+  const filterData = ({ dataKey }, e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     dispatch(updateFilters({ ...filters, [dataKey]: value }))
 
@@ -144,7 +150,7 @@ const Table = ({ rawData }) => {
     setData(applyFilters(sortData(data, { key, order })))
   }
 
-  const columns = [
+  const columns: BaseTableProps[] = [
     {
       title: "Číslo",
       key: "c_akce",
@@ -403,27 +409,45 @@ const Table = ({ rawData }) => {
     <div
       style={{
         width: "100%",
-        height: currentHeight - (document.getElementById("header").offsetHeight || 0),
+        height: currentHeight - (document.getElementById("header")?.offsetHeight || 0),
       }}
     >
       <AutoResizer>
         {({ width, height }) => (
           <BaseTable
             css={css`
+              .BaseTable__header-cell {
+                align-items: flex-start;
+                padding-top: 0.5em;
+              }
+              .BaseTable__header-cell--align-right {
+                ${tw`flex-row-reverse justify-start`}
+              }
+              .BaseTable__header-cell--sortable {
+              }
               .BaseTable__row.negative {
                 ${tw`text-red-900 bg-red-100`}
                 &:hover {
-                  ${tw`bg-red-200 bg-opacity-50`}
+                  ${tw`bg-red-200 bg-opacity-75`}
                 }
               }
               .BaseTable__row.positive {
                 ${tw`text-green-900 bg-green-100`}
                 &:hover {
-                  ${tw`bg-green-200 bg-opacity-50`}
+                  ${tw`bg-green-200 bg-opacity-75`}
                 }
               }
               .BaseTable__row {
                 border-bottom: none;
+              }
+              .BaseTable__header {
+                ${tw`shadow-lg`}
+              }
+              .BaseTable__header-row {
+                ${tw`bg-white`}
+              }
+              input {
+                ${tw`text-xs bg-gray-100 w-full rounded-sm border border-gray-300 border-b-gray-200 border-r-gray-200 p-1 h-5 mt-1`}
               }
             `}
             data={data}
@@ -431,15 +455,16 @@ const Table = ({ rawData }) => {
             headerHeight={[60, Object.values(filters).filter(Boolean).length ? 30 : 0]}
             width={width}
             height={height}
-            sortBy={sortBy}
+            sortBy={sortBy as { key: React.Key; order: SortOrder }}
             onColumnSort={onColumnSort}
-            rowClassName={({ rowData }) => {
-              if (rowData.nalez === "1") {
+            rowClassName={({ rowData }: { rowData: Akce }) => {
+              if (String(rowData.nalez) === "1") {
                 return "positive"
               }
-              if (rowData.nalez === "0") {
+              if (String(rowData.nalez) === "0") {
                 return "negative"
               }
+              return ""
             }}
             rowKey="id_akce"
             emptyRenderer={() => {
@@ -484,7 +509,7 @@ const Table = ({ rawData }) => {
             ref={tableRef}
           >
             {columns.map(column => (
-              <Column data={data} rawData={rawData} {...column} />
+              <Column data={data} key={column.data_key} rawData={rawData} {...column} />
             ))}
           </BaseTable>
         )}

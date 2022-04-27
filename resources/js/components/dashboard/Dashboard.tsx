@@ -1,6 +1,4 @@
-import React from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+import client from "../../utils/axiosWithDefaults"
 
 // Todo move DetailPage out of project (it is a layout stuff)
 import DetailPage from "../project/DetailPage"
@@ -24,6 +22,26 @@ const Dashboard = () => {
         </section>
         <section tw="pb-8">
           <h2 tw="text-lg">Statistiky</h2>
+          <button
+            type="button"
+            onClick={() =>
+              client("/updates/latest_id").then(res => {
+                console.log(res)
+              })
+            }
+          >
+            Test update state
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              client("/updates/last_month").then(res => {
+                console.log(res)
+              })
+            }
+          >
+            Get Last Month
+          </button>
         </section>
       </div>
     </DetailPage>
