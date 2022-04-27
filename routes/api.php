@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -49,6 +48,10 @@ Route::group(['prefix' => 'invoices', 'middleware' => 'auth:api'], function () {
     Route::delete('/{invoice}', 'InvoiceController@destroy');
 });
 
+Route::group(['prefix' => 'updates', 'middleware' => 'auth:api'], function () {
+    Route::get('/latest_id', 'UpdateController@latest_id');
+    Route::get('/last_month', 'UpdateController@get_last_month');
+});
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/meta/users', 'MetaController@active_users');

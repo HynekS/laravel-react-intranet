@@ -3,8 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
-use Illuminate\Support\Facades\DB;
 
 class Akce extends Model
 {
@@ -12,7 +10,6 @@ class Akce extends Model
     protected $table = 'akce';
     protected $primaryKey = 'id_akce';
     public $timestamps = false;
-    // protected $appends = ['invoice_sum'];
 
     /*
      * Relations to other tables
@@ -41,9 +38,9 @@ class Akce extends Model
     }
 
     // Dokumentace apod.
-    public function gps_point()
+    public function pointgroups()
     {
-        return $this->hasMany('App\GpsPoint', 'id_akce');
+        return $this->hasMany('App\Pointgroup', 'akce_id');
     }
 
     public function analyza()
@@ -94,7 +91,8 @@ class Akce extends Model
                 'user' => function ($q) {
                     return $q->select('id', 'full_name');
                 },
-                //'gps_point',
+                'pointgroups',
+                'pointgroups.points',
                 'analyza',
                 'digitalizace_nalez',
                 'digitalizace_plan',
