@@ -68,12 +68,6 @@ class SanitizeDatesInAkceTable extends Migration
                 $table->date("datum_{$modifier}")->nullable()->default(null)->change();
             });
         }
-
-        /*
-        Schema::table('akce', function (Blueprint $table) {
-            $table->date("datum_pocatku")->nullable()->default(null)->change();
-            $table->date("datum_ukonceni")->nullable()->default(null)->change();
-        });*/
     }
 
     /**
