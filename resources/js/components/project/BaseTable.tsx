@@ -11,7 +11,7 @@ import BaseTable, { Column, AutoResizer, SortOrder, BaseTableProps } from "react
 import "react-base-table/styles.css"
 import type { akce as Akce } from "@/types/model"
 
-import { projectStatus } from "../../store/projects"
+import { status } from "../../store/projects"
 import { setSortBy, updateFilters, clearFilters } from "../../store/table"
 import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
 import { Detail } from "../project/lazyImports"
@@ -19,6 +19,7 @@ import budgetCellRenderer from "./BudgetCellRenderer"
 import SvgCheck from "../../vendor/heroicons/outline/Check"
 import SvgPencil from "../../vendor/heroicons/outline/Pencil"
 import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
+import SvgX from "../../vendor/heroicons/outline/X"
 import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
 
 import type { AppState } from "../../store/rootReducer"
@@ -39,7 +40,7 @@ const Table = ({ rawData }: Props) => {
   const { year } = useParams<{ year: string }>()
   const currentHeight = useWindowHeight()
 
-  const status = useSelector((store: AppState) => store.projects.projectStatus)
+  const projectStatus = useSelector((store: AppState) => store.projects.projectStatus)
   const sortBy = useSelector((store: AppState) => store.table.sortBy, shallowEqual)
   const filters: Filters = useSelector((store: AppState) => store.table.filters, shallowEqual)
 
@@ -426,19 +427,22 @@ const Table = ({ rawData }: Props) => {
               .BaseTable__header-cell--sortable {
               }
               .BaseTable__row.negative {
-                ${tw`text-red-900 bg-red-100`}
+                ${tw`text-red-900 bg-red-50`}
                 &:hover {
-                  ${tw`bg-red-200 bg-opacity-75`}
+                  ${tw`bg-red-100 bg-opacity-75`}
                 }
               }
               .BaseTable__row.positive {
-                ${tw`text-green-900 bg-green-100`}
+                ${tw`text-green-900 bg-green-50`}
                 &:hover {
-                  ${tw`bg-green-200 bg-opacity-75`}
+                  ${tw`bg-green-100 bg-opacity-75`}
                 }
               }
               .BaseTable__row {
                 border-bottom: none;
+                &:hover {
+                  ${tw`bg-gray-50`}
+                }
               }
               .BaseTable__header {
                 ${tw`shadow-lg`}
@@ -448,11 +452,17 @@ const Table = ({ rawData }: Props) => {
               }
               input {
                 ${tw`text-xs bg-gray-100 w-full rounded-sm border border-gray-300 border-b-gray-200 border-r-gray-200 p-1 h-5 mt-1`}
+                &:focus:not(.focus-visible) {
+                  ${tw`outline-none focus:(ring ring-2 border-blue-500 bg-blue-100)`}
+                }
+                &:not([value=""]) {
+                  ${tw`bg-blue-100 border-blue-200`}
+                }
               }
             `}
             data={data}
             rowHeight={90}
-            headerHeight={[60, Object.values(filters).filter(Boolean).length ? 30 : 0]}
+            headerHeight={[60, Object.values(filters).filter(Boolean).length ? 39 : 0]}
             width={width}
             height={height}
             sortBy={sortBy as { key: React.Key; order: SortOrder }}
@@ -468,16 +478,16 @@ const Table = ({ rawData }: Props) => {
             }}
             rowKey="id_akce"
             emptyRenderer={() => {
-              switch (status) {
-                case projectStatus.LOADING:
+              switch (projectStatus) {
+                case status.LOADING:
                   return <div tw="flex items-center justify-center h-full">Načítám data…</div>
-                case projectStatus.SUCCESS:
+                case status.SUCCESS:
                   return (
                     <div tw="flex items-center justify-center h-full">
                       Zadaným parametrům neodpovídá žádná akce 🤔.
                     </div>
                   )
-                case projectStatus.ERROR:
+                case status.ERROR:
                   return <div>Ajaj! Někde se stala chyba… 😬</div>
                 default:
                   return null
@@ -491,16 +501,22 @@ const Table = ({ rawData }: Props) => {
                   ))}
                 </form>
               ) : (
-                <div role="cell" key="secondaryHeader">
-                  Nalezeno {data && data.length} akcí.
+                <div
+                  role="cell"
+                  key="secondaryHeader"
+                  tw="flex justify-between items-center px-4 w-full h-full bg-blue-50 py-1"
+                >
+                  <span tw="text-blue-600">Nalezeno {data && data.length} akcí.</span>
                   <button
+                    tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 px-2 rounded text-xs focus:(outline-none ring)"
                     onClick={() => {
-                      dispatch(clearFilters())
                       if (formRef && formRef.current) {
                         formRef.current.reset()
                       }
+                      dispatch(clearFilters())
                     }}
                   >
+                    <SvgX tw="w-3 mr-1" />
                     Zrušit všechny filtry
                   </button>
                 </div>
