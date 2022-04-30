@@ -1,16 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { css } from "@emotion/react"
-import tw from "twin.macro"
+import { useSelector, useDispatch } from "react-redux"
+import { v4 as uuidv4 } from "uuid"
 
 import useScript from "../../hooks/useScript"
 import findCenter from "../../services/geometry/findCenterOfCoords"
 import useGetCoordsFromWiki from "../../hooks/useGetCoordsFromWiki"
 
 import GeoFeaturesPointgroup from "./GeoFeaturesPointgroup"
-
 import DetailWrapper from "./DetailWrapper"
 
+import { createPointgroup } from "../../store/pointgroups"
+import { createPoint, updatePoint, deletePoint } from "../../store/points"
+
 import SvgPlus from "../../vendor/heroicons/outline/Plus"
+
+import type { AppState } from "../../store/rootReducer"
 
 declare global {
   interface Window {
@@ -23,7 +28,14 @@ declare global {
 }
 
 const GeoFeatures = ({ detail }) => {
-  const { pointgroups = [] } = detail || {}
+  const dispatch = useDispatch()
+  const { id: userId } = useSelector((store: AppState) => store.auth.user)
+  const { pointgroups = [], id_akce: projectId } = detail || {} // this is probably redundant with useEffect added
+
+  // redraw on new props
+  useEffect(() => {
+    setGeometryData((detail || {}).pointgroups || [])
+  }, [detail])
 
   const { coordinates: wikiCoordinates, error: wikiError } = useGetCoordsFromWiki(detail.katastr)
 
@@ -43,6 +55,8 @@ const GeoFeatures = ({ detail }) => {
   const [activeGroupIndex, setActiveGroupIndex] = useState(
     geometryData.length ? geometryData.length - 1 : undefined,
   )
+
+  console.log({ geometryData })
 
   // TODO: would reduce be cleaner, maybe?
   const allPoints = pointgroups
@@ -76,10 +90,9 @@ const GeoFeatures = ({ detail }) => {
     return () => {}
   }, [loaded, wikiCoordinates, wikiError])
 
+  // Rerender map contents on state change
   useEffect(() => {
     if (markerLayerRef.current && geometryLayerRef.current) {
-      console.log("rerendering")
-
       renderMarkersToMap(geometryData)
     }
   }, [geometryData])
@@ -174,13 +187,26 @@ const GeoFeatures = ({ detail }) => {
     let marker = new SMap.Marker(coords)
     marker.decorate(SMap.Marker.Feature.Draggable)
     markerLayerRef.current.addMarker(marker)
-
     const [longitude, latitude] = marker.getCoords().toWGS84()
 
+    setGeometryData(prevState => {
+      dispatch(
+        createPoint({
+          pointgroupId: prevState[activeGroupIndexRef.current || 0]?.id,
+          latitude,
+          longitude,
+          projectId,
+        }),
+      )
+      return prevState
+    })
+    /*
+    Allow for optimistic updates?
     setGeometryData(prevState => {
       const newPoint = {
         __id: marker.getId(),
         id: marker.getId(),
+        pointgroup_id: prevState[activeGroupIndexRef.current || 0]?.id,
         latitude,
         longitude,
       }
@@ -191,26 +217,33 @@ const GeoFeatures = ({ detail }) => {
             : pointgroup,
         )
       } else {
-        // Need to create a default pointgroup
+        // We don't have any pointgroup, so we need to create one
         activeGroupIndexRef.current = 0
         setActiveGroupIndex(prevState.length)
 
         return [
           {
-            akce_id: detail.id_akce,
+            akce_id: projectId,
             type: "line",
-            id: "TODO GENERATE OR SET USING REDUX",
+            id: uuidv4(),
             points: [newPoint],
           },
         ]
       }
-    })
+    })*/
   }
 
   const dragMarker = e => {
     const __id = e.target.__id
     const [longitude, latitude] = e.target.getCoords().toWGS84()
 
+    setGeometryData(prevState => {
+      dispatch(updatePoint({ pointId: __id, longitude, latitude, projectId }))
+      return prevState
+    })
+
+    /*
+    Allow for optimistic updates?
     setGeometryData(prevState => {
       const pointgoupIndex = prevState.findIndex(pointgroup =>
         pointgroup.points.some(point => point.id === __id),
@@ -226,7 +259,7 @@ const GeoFeatures = ({ detail }) => {
             }
           : pointgroup,
       )
-    })
+    })*/
   }
 
   const removeMarker = e => {
@@ -235,6 +268,13 @@ const GeoFeatures = ({ detail }) => {
 
     markerLayerRef.current.removeMarker(marker)
 
+    setGeometryData(prevState => {
+      dispatch(deletePoint({ pointId: __id, projectId }))
+      return prevState
+    })
+
+    /*
+     Allow for optimistic updates?
     setGeometryData(prevState => {
       const pointgoupIndex = prevState.findIndex(pointgroup =>
         pointgroup.points.some(point => point.id === __id),
@@ -245,7 +285,7 @@ const GeoFeatures = ({ detail }) => {
           ? { ...pointgroup, points: pointgroup.points.filter(point => point.id !== __id) }
           : pointgroup,
       )
-    })
+    })*/
   }
 
   const setupEventListeners = () => {
@@ -270,17 +310,12 @@ const GeoFeatures = ({ detail }) => {
           <div ref={mapContainerRef} style={{ height: 600 }} />
         </div>
         <div tw="w-1/6">
-          <div tw="flex justify-between items-center mb-2">
-            {activeGroupIndexRef.current}
+          <div tw="flex justify-between items-center mb-2 relative z-10">
             <h3 tw="font-bold">Dokumentační jednotky</h3>
             <button
               tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 pl-2 pr-3 text-sm rounded focus:(outline-none ring)"
               onClick={() => {
-                setGeometryData(prevState => {
-                  setActiveGroupIndex(prevState.length)
-                  activeGroupIndexRef.current = prevState.length
-                  return [...prevState, { id: "testIdTODOuuid?", type: "line", points: [] }]
-                })
+                dispatch(createPointgroup({ projectId }))
               }}
             >
               <SvgPlus tw="w-4 mr-1" />
@@ -292,6 +327,7 @@ const GeoFeatures = ({ detail }) => {
                 <GeoFeaturesPointgroup
                   type={type}
                   id={id}
+                  projectId={projectId}
                   points={points}
                   i={i}
                   setData={setGeometryData}

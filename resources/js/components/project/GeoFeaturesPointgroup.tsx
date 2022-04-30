@@ -1,7 +1,10 @@
 import { useState } from "react"
+import { useDispatch } from "react-redux"
 import tw from "twin.macro"
 
 import useOuterClick from "../../hooks/useOuterClick"
+
+import { deletePointgroup, updatePointgroup } from "../../store/pointgroups"
 
 import SvgLine from "../icons/SvgLine"
 import SvgPoint from "../icons/SvgPoint"
@@ -9,27 +12,32 @@ import SvgPolygon from "../icons/SvgPolygon"
 import SvgDotsHorizontalSolid from "../../vendor/heroicons/solid/DotsHorizontal"
 import SvgTrashSolid from "../../vendor/heroicons/solid/Trash.js"
 
+type FeatureType = "point" | "line" | "polygon"
+
 const GeoFeaturesPointgroup = ({
   type,
   id,
   points,
+  projectId,
   i,
   setData,
   activeIndexRef,
   activeIndex,
   rerenderOnActiveIndexChange,
 }) => {
+  const dispatch = useDispatch()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const innerRef = useOuterClick(() => {
     setIsMenuOpen(false)
   })
 
-  const switchType = type => {
+  const switchType = (type: FeatureType, id: number) => {
     setData(prevState =>
       prevState.map((pointgroup, i) =>
         i === activeIndexRef.current ? { ...pointgroup, type: type } : pointgroup,
       ),
     )
+    dispatch(updatePointgroup({ pointgroupId: id, type, projectId }))
   }
 
   return (
@@ -52,21 +60,21 @@ const GeoFeaturesPointgroup = ({
           <button
             title="změnit typ na bod"
             css={[tw`border`, type === "point" && tw`bg-blue-200 text-blue-800 border-blue-300`]}
-            onClick={() => switchType("point")}
+            onClick={() => switchType("point", id)}
           >
             <SvgPoint tw="w-6 h-6 p-0.5 fill-current" />
           </button>
           <button
             title="změnit typ na linii"
             css={[tw`border`, type === "line" && tw`bg-blue-200 text-blue-800 border-blue-300`]}
-            onClick={() => switchType("line")}
+            onClick={() => switchType("line", id)}
           >
             <SvgLine tw="w-6 h-6 p-0.5 fill-current" />
           </button>
           <button
             title="změnit typ na polygon"
             css={[tw`border`, type === "polygon" && tw`bg-blue-200 text-blue-800 border-blue-300`]}
-            onClick={() => switchType("polygon")}
+            onClick={() => switchType("polygon", id)}
           >
             <SvgPolygon tw="w-6 h-6 p-1 fill-current" />
           </button>
@@ -82,12 +90,19 @@ const GeoFeaturesPointgroup = ({
             >
               <button
                 tw="flex items-center w-full p-2 pr-4 rounded rounded-b-none focus:(outline-none) hocus:(bg-gray-200) transition-colors duration-300"
-                onClick={() =>
+                onClick={() => {
+                  // Does not work, sadly.
+                  //activeIndexRef.current = Math.max(i - 1, 0)
+                  // rerenderOnActiveIndexChange(Math.max(i - 1, 0))
+
+                  /*
                   setData(prevState => {
                     const index = prevState.findIndex(pointgroup => pointgroup.id === id)
                     return prevState.filter((_, i) => i !== index)
-                  })
-                }
+                  })*/
+
+                  dispatch(deletePointgroup({ pointgroupId: id, projectId }))
+                }}
               >
                 <SvgTrashSolid tw="flex w-5 mr-2 opacity-50" />
                 Odstranit
