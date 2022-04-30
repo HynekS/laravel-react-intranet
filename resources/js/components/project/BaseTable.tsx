@@ -46,7 +46,6 @@ const Table = ({ rawData }: Props) => {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (tableRef.current === undefined || scrollOffset.current === undefined) return
-    console.log("keyDown")
     if (["PageUp", "PageDown", "Home", "End"].includes(e.code)) {
       if (keydownIntervalRef.current) {
         window.clearInterval(Number(keydownIntervalRef.current))
@@ -84,7 +83,6 @@ const Table = ({ rawData }: Props) => {
   }
 
   const handleKeyUp = () => {
-    console.log("keyUp")
     if (keydownIntervalRef.current) {
       window.clearInterval(keydownIntervalRef.current)
       keydownIntervalRef.current = null
@@ -451,7 +449,7 @@ const Table = ({ rawData }: Props) => {
                 ${tw`bg-white`}
               }
               input {
-                ${tw`text-xs bg-gray-100 w-full rounded-sm border border-gray-300 border-b-gray-200 border-r-gray-200 p-1 h-5 mt-1`}
+                ${tw`w-full h-5 p-1 mt-1 text-xs bg-gray-100 border border-gray-300 rounded-sm border-b-gray-200 border-r-gray-200`}
                 &:focus:not(.focus-visible) {
                   ${tw`outline-none focus:(ring ring-2 border-blue-500 bg-blue-100)`}
                 }
@@ -504,7 +502,7 @@ const Table = ({ rawData }: Props) => {
                 <div
                   role="cell"
                   key="secondaryHeader"
-                  tw="flex justify-between items-center px-4 w-full h-full bg-blue-50 py-1"
+                  tw="flex items-center justify-between w-full h-full px-4 py-1 bg-blue-50"
                 >
                   <span tw="text-blue-600">Nalezeno {data && data.length} akcí.</span>
                   <button

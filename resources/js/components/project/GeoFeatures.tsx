@@ -56,8 +56,6 @@ const GeoFeatures = ({ detail }) => {
     geometryData.length ? geometryData.length - 1 : undefined,
   )
 
-  console.log({ geometryData })
-
   // TODO: would reduce be cleaner, maybe?
   const allPoints = pointgroups
     .map(group => {
@@ -81,7 +79,6 @@ const GeoFeatures = ({ detail }) => {
 
   // load map
   useEffect(() => {
-    console.log("Map loaded!")
     // This is ugly, but we need to try our best to get the center before we show the map
     if (loaded && (findCenter(allPoints) || wikiCoordinates || wikiError)) {
       window.Loader.async = true
@@ -158,8 +155,6 @@ const GeoFeatures = ({ detail }) => {
   }
 
   const renderGeometry = (coordinates, type) => {
-    console.log("rendering geometry")
-
     let { SMap } = window
 
     const types = {
@@ -300,7 +295,7 @@ const GeoFeatures = ({ detail }) => {
     <DetailWrapper>
       <div tw="flex gap-4">
         <div
-          tw="flex-1 relative"
+          tw="relative flex-1"
           css={css`
             & img {
               max-width: initial;
@@ -310,7 +305,7 @@ const GeoFeatures = ({ detail }) => {
           <div ref={mapContainerRef} style={{ height: 600 }} />
         </div>
         <div tw="w-1/6">
-          <div tw="flex justify-between items-center mb-2 relative z-10">
+          <div tw="relative z-10 flex items-center justify-between mb-2">
             <h3 tw="font-bold">Dokumentační jednotky</h3>
             <button
               tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 pl-2 pr-3 text-sm rounded focus:(outline-none ring)"

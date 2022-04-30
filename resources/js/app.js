@@ -32,6 +32,5 @@ if (document.getElementById("app")) {
 }
 
 if (module.hot) {
-  console.log("HMR enabled")
   module.hot.accept()
 }

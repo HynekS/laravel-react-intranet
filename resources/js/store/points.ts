@@ -115,8 +115,6 @@ export const updatePoint = ({ pointId, longitude, latitude, projectId }) => asyn
       projectId,
     })
     if (response) {
-      console.log({ response })
-
       dispatch(
         updatePointSuccess({
           response: response.data,

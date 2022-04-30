@@ -116,7 +116,6 @@ export const deleteInvoice = ({ invoiceId, projectId, typ_castky }) => async dis
     dispatch(deleteInvoiceInit())
     let response = await client.delete(`/invoices/${invoiceId}`)
     if (response) {
-      console.log(response)
       dispatch(
         deleteInvoiceSuccess({
           response: response.data,

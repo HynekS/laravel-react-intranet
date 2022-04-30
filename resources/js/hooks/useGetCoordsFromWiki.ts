@@ -12,8 +12,6 @@ function useGetCoordsFromWiki(locationString: string) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   function reducer(state, action) {
-    console.log({ state })
-
     switch (action.type) {
       case "loading":
         return initialState

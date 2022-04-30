@@ -322,7 +322,7 @@ export const fetchProjectsOfOneYear = (year: number) => async (dispatch: AppDisp
       dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
     }
   } catch (error) {
-    console.log({ year })
+    console.log(error)
     dispatch(fetchProjectsOfOneYearFailure(year, error as Error))
   }
 }

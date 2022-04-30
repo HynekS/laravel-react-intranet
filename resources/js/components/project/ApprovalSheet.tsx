@@ -100,7 +100,6 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
               ...detail,
             },
           }).then(response => {
-            console.log("get a response!")
             const url = window.URL.createObjectURL(
               new Blob([response.data], { type: "application/pdf" }),
             )

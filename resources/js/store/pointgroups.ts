@@ -117,8 +117,6 @@ export const updatePointgroup = ({ pointgroupId, type, projectId }) => async dis
     dispatch(updatePointgroupInit())
     let response = await client.put(`/pointgroup/${pointgroupId}`, { type })
     if (response) {
-      console.log({ response })
-
       dispatch(
         updatePointgroupSuccess({
           response: response.data,
