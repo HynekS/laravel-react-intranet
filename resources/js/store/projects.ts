@@ -3,11 +3,10 @@ import { loadProgressBar } from "axios-progress-bar"
 import type { akce as Akce } from "../types/model"
 
 import client from "../utils/axiosWithDefaults"
-import invoiceReducer from "./invoices"
-import fileReducer from "./files"
+
 import type { AppDispatch } from "../store/configuredStore"
 
-import {
+import invoiceReducer, {
   CREATE_INVOICE_INITIALIZED,
   UPDATE_INVOICE_INITIALIZED,
   DELETE_INVOICE_INITIALIZED,
@@ -18,40 +17,67 @@ import {
   UPDATE_INVOICE_FAILURE,
   DELETE_INVOICE_FAILURE,
 } from "./invoices"
-import { DELETE_FILE_SUCCESS } from "./files"
+import fileReducer, { DELETE_FILE_SUCCESS } from "./files"
 import { BATCH_UPLOAD_FILES_DONE } from "./upload"
+import pointgroupsReducer, {
+  CREATE_POINTGROUP_INITIALIZED,
+  CREATE_POINTGROUP_SUCCESS,
+  CREATE_POINTGROUP_FAILURE,
+  UPDATE_POINTGROUP_INITIALIZED,
+  UPDATE_POINTGROUP_SUCCESS,
+  UPDATE_POINTGROUP_FAILURE,
+  DELETE_POINTGROUP_INITIALIZED,
+  DELETE_POINTGROUP_FAILURE,
+  DELETE_POINTGROUP_SUCCESS,
+} from "./pointgroups"
+import pointReducer, {
+  CREATE_POINT_INITIALIZED,
+  CREATE_POINT_SUCCESS,
+  CREATE_POINT_FAILURE,
+  UPDATE_POINT_INITIALIZED,
+  UPDATE_POINT_SUCCESS,
+  UPDATE_POINT_FAILURE,
+  DELETE_POINT_INITIALIZED,
+  DELETE_POINT_SUCCESS,
+  DELETE_POINT_FAILURE,
+} from "./points"
 
 export const yearsSince2013 = Array.from(
   { length: new Date().getFullYear() - 2013 + 1 },
   (_, i) => i + 2013,
 )
 
-export const projectStatus = {
+export const status = {
   IDLE: "idle",
   LOADING: "loading",
   SUCCESS: "success",
   ERROR: "error",
 }
 
-export const invoiceStatus = {
-  IDLE: "idle",
-  LOADING: "loading",
-  SUCCESS: "success",
-  ERROR: "error",
-}
-
-const initialState = {
-  projectStatus: projectStatus.IDLE,
-  invoiceStatus: invoiceStatus.IDLE,
+const initialState: InitialState = {
+  projectStatus: status.IDLE,
+  projectError: null,
+  invoiceStatus: status.IDLE,
+  invoiceError: null,
+  pointgroupStatus: status.IDLE,
+  pointgroupError: null,
+  pointStatus: status.IDLE,
+  pointError: null,
   byYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: {} }))),
   byId: {},
   allIds: [],
   idsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
 }
 
-type TInitialState = {
-  projectStatus: typeof projectStatus.IDLE
-  invoiceStatus: typeof invoiceStatus.IDLE
+type InitialState = {
+  projectStatus: typeof status.IDLE
+  projectError: string | null
+  invoiceStatus: typeof status.IDLE
+  invoiceError: string | null
+  pointgroupStatus: typeof status.IDLE
+  pointgroupError: string | null
+  pointStatus: typeof status.IDLE
+  pointError: string | null
   byYear: {
     [key: string]: {}
   }
@@ -85,37 +111,35 @@ const UPDATE_PROJECT_SUCCESS = "[projects] Updating projects was succesful"
 const UPDATE_PROJECT_FAILURE = "[projects] Updating project has failed"
 
 // Reducer
-export default function reducer(state: TInitialState = initialState, action: AnyAction) {
+export default function reducer(state: InitialState = initialState, action: AnyAction) {
   switch (action.type) {
     case FETCH_PROJECTS_BY_YEARS_INITIALIZED:
     case FETCH_SINGLE_PROJECT_INITIALIZED:
       return {
         ...state,
-        projectStatus: projectStatus.LOADING,
+        projectStatus: status.LOADING,
+        projectError: null,
       }
     case FETCH_SINGLE_PROJECT_SUCCESS:
       return {
         ...state,
-        projectStatus: projectStatus.SUCCESS,
+        projectStatus: status.SUCCESS,
         byId: {
           ...state.byId,
           [action.project.id_akce]: { ...action.project },
         },
       }
     case FETCH_SINGLE_PROJECT_FAILURE:
+    case FETCH_PROJECTS_BY_YEARS_FAILURE:
       return {
         ...state,
-        projectStatus: projectStatus.ERROR,
+        projectStatus: status.ERROR,
+        projectError: action.error,
       }
     case FETCH_PROJECTS_BY_YEARS_SUCCESS:
       return {
         ...state,
-        projectStatus: projectStatus.SUCCESS,
-      }
-    case FETCH_PROJECTS_BY_YEARS_FAILURE:
-      return {
-        ...state,
-        projectStatus: projectStatus.ERROR,
+        projectStatus: status.SUCCESS,
       }
     case FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(action.year):
       return {
@@ -146,7 +170,8 @@ export default function reducer(state: TInitialState = initialState, action: Any
     case DELETE_INVOICE_INITIALIZED:
       return {
         ...state,
-        invoiceStatus: invoiceStatus.LOADING,
+        invoiceStatus: status.LOADING,
+        invoiceError: null,
       }
     case CREATE_INVOICE_SUCCESS:
     case UPDATE_INVOICE_SUCCESS:
@@ -155,7 +180,7 @@ export default function reducer(state: TInitialState = initialState, action: Any
       let invoiceType = ["faktury_dohled", "faktury_vyzkum"][action.typ_castky]
       return {
         ...state,
-        invoiceStatus: invoiceStatus.SUCCESS,
+        invoiceStatus: status.SUCCESS,
         byId: {
           ...state.byId,
           [action.projectId]: {
@@ -169,7 +194,8 @@ export default function reducer(state: TInitialState = initialState, action: Any
     case DELETE_INVOICE_FAILURE:
       return {
         ...state,
-        invoiceStatus: invoiceStatus.ERROR,
+        invoiceStatus: status.ERROR,
+        invoiceError: action.error,
       }
     case DELETE_FILE_SUCCESS:
     case BATCH_UPLOAD_FILES_DONE:
@@ -182,6 +208,39 @@ export default function reducer(state: TInitialState = initialState, action: Any
             [action.model]: fileReducer(state.byId[action.projectId][action.model], action),
           },
         },
+      }
+    case CREATE_POINTGROUP_INITIALIZED:
+    case UPDATE_POINTGROUP_INITIALIZED:
+    case DELETE_POINTGROUP_INITIALIZED:
+      return {
+        ...state,
+        pointgroupStatus: status.LOADING,
+        pointgroupError: null,
+      }
+    case CREATE_POINTGROUP_SUCCESS:
+    case UPDATE_POINTGROUP_SUCCESS:
+    case DELETE_POINTGROUP_SUCCESS:
+    case CREATE_POINT_SUCCESS:
+    case UPDATE_POINT_SUCCESS:
+    case DELETE_POINT_SUCCESS:
+      return {
+        ...state,
+        // WRONG! updating unrelated status for points!!!
+        pointgroupStatus: status.SUCCESS,
+        byId: {
+          ...state.byId,
+          [action.projectId]: {
+            ...state.byId[action.projectId],
+            pointgroups: pointgroupsReducer(state.byId[action.projectId].pointgroups, action),
+          },
+        },
+      }
+    case CREATE_POINTGROUP_FAILURE:
+    case UPDATE_POINTGROUP_FAILURE:
+    case DELETE_POINTGROUP_FAILURE:
+      return {
+        ...state,
+        pointgroupStatus: status.ERROR,
       }
     default:
       return state

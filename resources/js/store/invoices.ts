@@ -1,4 +1,3 @@
-// @ts-check
 import client from "../utils/axiosWithDefaults"
 
 // Actions

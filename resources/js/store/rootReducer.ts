@@ -6,8 +6,9 @@ import meta from "./meta"
 import table from "./table"
 import upload from "./upload"
 import updates from "./updates"
+import pointgroups from "./pointgroups"
 
-const reducers = combineReducers({ auth, projects, meta, table, upload, updates })
+const reducers = combineReducers({ auth, projects, meta, table, upload, updates, pointgroups })
 
 export default reducers
 
