@@ -4,7 +4,8 @@ import tw from "twin.macro"
 
 import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
 import SvgCurrencyDollar from "../../vendor/heroicons/outline/CurrencyDollar"
-import SvgAcademicCap from "../../vendor/heroicons/outline/AcademicCap"
+import SvgDocumentText from "../../vendor/heroicons/outline/DocumentText"
+import SvgLocatioMarker from "../../vendor/heroicons/outline/LocationMarker.js"
 import SvgPaperClip from "../../vendor/heroicons/outline/PaperClip"
 import { Detail, InvoiceView, ApprovalSheet, Files, GeoFeatures } from "./lazyImports"
 
@@ -89,7 +90,7 @@ const DetailNav = ({ detail }: DetailNavProps) => {
             activeClassName={activeClassName}
             onMouseOver={() => ApprovalSheet.preload()}
           >
-            <SvgAcademicCap tw="flex w-6 mr-2" />
+            <SvgDocumentText tw="flex w-6 mr-2" />
             <span>Expertní list</span>
           </StyledNavLink>
         </li>
@@ -100,7 +101,7 @@ const DetailNav = ({ detail }: DetailNavProps) => {
             activeClassName={activeClassName}
             onMouseOver={() => GeoFeatures.preload()}
           >
-            <SvgAcademicCap tw="flex w-6 mr-2" />
+            <SvgLocatioMarker tw="flex w-6 mr-2" />
             <span>Lokalizace</span>
           </StyledNavLink>
         </li>

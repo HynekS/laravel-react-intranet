@@ -1,4 +1,3 @@
-import React from "react"
 import { NavLink } from "react-router-dom"
 import { useSelector } from "react-redux"
 import styled from "@emotion/styled"
@@ -14,7 +13,7 @@ const Container = tw.section`flex flex-wrap justify-between py-2 px-4 border-b`
 const StyledNavLink = styled(NavLink)`
   ${tw`p-2 text-blue-500 hover:text-blue-800`}
   &.active {
-    ${tw`bg-gray-200`}
+    ${tw`bg-blue-100`}
   }
 `
 const NavContainer = tw.nav`py-2 px-4 flex flex-wrap`
