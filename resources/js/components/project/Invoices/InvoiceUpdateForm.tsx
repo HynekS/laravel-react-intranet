@@ -1,11 +1,11 @@
-import React, { useEffect } from "react"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
-import { jsx, css } from "@emotion/react"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
 
 import { updateInvoice } from "../../../store/invoices"
-import { invoiceStatus } from "../../../store/projects"
+import { status } from "../../../store/projects"
 
 import Input from "../../common/Input"
 import Select from "../../common/Select"
@@ -62,7 +62,7 @@ const styles = css`
 
 const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => {
   const { register, setValue, handleSubmit, errors } = useForm()
-  const isLoading = useSelector(store => store.projects.invoiceStatus === invoiceStatus.LOADING)
+  const isLoading = useSelector(store => store.projects.invoiceStatus === status.LOADING)
   const dispatch = useDispatch()
   const { id_zaznam: invoiceId, akce_id: projectId } = data
 

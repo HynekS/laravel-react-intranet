@@ -1,11 +1,10 @@
-import React from "react"
 import { useForm } from "react-hook-form"
-import { jsx, css } from "@emotion/react"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
 
 import { createInvoice } from "../../../store/invoices"
-import { invoiceStatus } from "../../../store/projects"
+import { status } from "../../../store/projects"
 
 import Input from "../../common/Input"
 import Select from "../../common/Select"
@@ -60,9 +59,9 @@ const styles = css`
   }
 `
 
-const InvoiceCreateForm = ({ modalState: { data }, onModalClose, ...props }) => {
+const InvoiceCreateForm = ({ modalState: { data }, onModalClose }) => {
   const { register, handleSubmit, errors } = useForm()
-  const isLoading = useSelector(store => store.projects.invoiceStatus === invoiceStatus.LOADING)
+  const isLoading = useSelector(store => store.projects.invoiceStatus === status.LOADING)
   const dispatch = useDispatch()
   const { c_akce, id_akce: projectId } = data
 

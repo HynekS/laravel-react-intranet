@@ -1,19 +1,16 @@
-import React from "react"
-import { jsx, css } from "@emotion/react"
-import tw from "twin.macro"
 import { useSelector, useDispatch } from "react-redux"
 
 import { deleteInvoice } from "../../../store/invoices"
-import { invoiceStatus } from "../../../store/projects"
+import { status } from "../../../store/projects"
 
 import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
 
 import type { AppState } from "../../../store/rootReducer"
 
-const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose, ...props }) => {
+const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }) => {
   const dispatch = useDispatch()
   const isLoading = useSelector(
-    (store: AppState) => store.projects.invoiceStatus === invoiceStatus.LOADING,
+    (store: AppState) => store.projects.invoiceStatus === status.LOADING,
   )
   const { id_zaznam: invoiceId, akce_id: projectId, typ_castky, c_faktury = "", castka = "" } = data
 

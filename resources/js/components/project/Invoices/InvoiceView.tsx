@@ -1,5 +1,4 @@
-import React, { useState } from "react"
-import { jsx } from "@emotion/react"
+import { useState } from "react"
 import tw from "twin.macro"
 
 import DetailWrapper from "../DetailWrapper"
