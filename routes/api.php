@@ -58,5 +58,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/upload', 'UploadController@upload');
     Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
     Route::delete('/file', 'FileController@destroy');
+
+    Route::post('/pointgroup', 'PointgroupController@store');
+    Route::put('/pointgroup/{id}', 'PointgroupController@update');
+    Route::delete('/pointgroup/{id}', 'PointgroupController@delete');
+
+    Route::post('/point', 'PointController@store');
+    Route::put('/point/{id}', 'PointController@update');
+    Route::delete('/point/{id}', 'PointController@delete');
+
     Route::post('/report/{akce}', 'ReportController@generate_pdf');
 });
