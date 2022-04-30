@@ -9,7 +9,7 @@ type Props = {
     [name: string]: Error
   }
   placeholder?: string
-  type: React.HTMLInputTypeAttribute
+  type?: React.HTMLInputTypeAttribute
 }
 
 const Input = ({

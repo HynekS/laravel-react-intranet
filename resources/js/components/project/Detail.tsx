@@ -66,6 +66,7 @@ const styles = css`
   }
 `
 
+/* A lot of that can be probably delegated to 'valueAsNumber' prop, but we still has to deal with isNaN or null value */
 const transformFormValues = data => ({
   ...data,
   objednavka: Number(data.objednavka),
@@ -82,7 +83,7 @@ const transformFormValues = data => ({
   datum_ukonceni: data.datum_ukonceni && data.datum_ukonceni.toISOString().split("T")[0],
 })
 
-function parseDate(str: string, format: string, locale: Locale | undefined) {
+function parseDate(str: string, format: string, locale: Locale) {
   const parsed = dateFnsParse(str, format, new Date(), { locale })
   if (DateUtils.isDate(parsed)) {
     return parsed
@@ -102,8 +103,6 @@ const Detail = ({ detail }: DetailProps) => {
   const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
   const { c_akce, id_akce: id } = detail || {}
-
-  console.log({ detail })
 
   useEffect(() => {
     if (detail) {
@@ -274,7 +273,6 @@ const Detail = ({ detail }: DetailProps) => {
                   <Controller
                     as={DayPickerInput}
                     control={control}
-                    //rules={{ pattern: czechDateRegexp }}
                     name="datum_pocatku"
                     format="d. M. yyyy"
                     formatDate={formatDate}
@@ -310,7 +308,6 @@ const Detail = ({ detail }: DetailProps) => {
                   <Controller
                     as={DayPickerInput}
                     control={control}
-                    //rules={{ pattern: czechDateRegexp }}
                     name="datum_ukonceni"
                     format="d. M. yyyy"
                     formatDate={formatDate}
