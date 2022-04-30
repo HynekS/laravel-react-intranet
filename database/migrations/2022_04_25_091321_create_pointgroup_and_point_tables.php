@@ -22,7 +22,7 @@ class CreatePointgroupAndPointTables extends Migration
 
         Schema::create('points', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pointgroup_id')->references('id')->on('pointgroups');
+            $table->foreignId('pointgroup_id')->references('id')->on('pointgroups')->onDelete('cascade');
             $table->string('coords_as_string')->nullable();
             $table->float('latitude', 9, 7)->nullable();
             $table->float('longitude', 9, 7)->nullable();
