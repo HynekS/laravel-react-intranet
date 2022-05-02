@@ -16,8 +16,8 @@ class CreatePointgroupAndPointTables extends Migration
         Schema::create('pointgroups', function (Blueprint $table) {
             $table->id();
             $table->integer('akce_id');
-            $table->foreign('akce_id')->references('id_akce')->on('akce');
-            $table->enum('type', ['point', 'line', 'polygon'])->default('point');
+            $table->foreign('akce_id')->references('id_akce')->on('akce')->onDelete('cascade');
+            $table->enum('feature_type', ['point', 'line', 'polygon'])->default('point');
         });
 
         Schema::create('points', function (Blueprint $table) {

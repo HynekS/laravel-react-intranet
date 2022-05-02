@@ -53,21 +53,21 @@ class FillPointgroupAndPointTables extends Migration
             switch (true) {
                 case preg_match('/plocha mezi body/', $akce->El_forma):
                     $pointgroup_id = DB::table('pointgroups')->insertGetId(
-                        array('akce_id' => $akce->id_akce, 'type' => 'polygon')
+                        array('akce_id' => $akce->id_akce, 'feature_type' => 'polygon')
                     );
                     self::insertPoints($coords, $pointgroup_id);
 
                     break;
                 case preg_match('/linie mezi body/', $akce->El_forma):
                     $pointgroup_id = DB::table('pointgroups')->insertGetId(
-                        array('akce_id' => $akce->id_akce, 'type' => 'line')
+                        array('akce_id' => $akce->id_akce, 'feature_type' => 'line')
                     );
                     self::insertPoints($coords, $pointgroup_id);
 
                     break;
                 default: // Unclear what the coordinates do represent.
                     $pointgroup_id = DB::table('pointgroups')->insertGetId(
-                        array('akce_id' => $akce->id_akce, 'type' => 'point')
+                        array('akce_id' => $akce->id_akce, 'feature_type' => 'point')
                     );
                     self::insertPoints($coords, $pointgroup_id);
 

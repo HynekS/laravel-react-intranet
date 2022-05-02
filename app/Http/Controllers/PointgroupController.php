@@ -13,7 +13,7 @@ class PointgroupController extends Controller
         $pointgroup = new Pointgroup;
         //default
         $pointgroup->akce_id = $request->projectId;
-        $pointgroup->type = "line"; 
+        $pointgroup->feature_type = "line"; 
         $pointgroup->save();
 
         return response()->json($pointgroup, 201);
@@ -22,7 +22,7 @@ class PointgroupController extends Controller
     public function update(Request $request, $id)
     {
         $pointgroup = Pointgroup::with('points')->find($id);
-        $pointgroup->type = $request->type;
+        $pointgroup->feature_type = $request->feature_type;
         $pointgroup->save();
 
         return $pointgroup; // HTTP 200?
