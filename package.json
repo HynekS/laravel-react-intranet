@@ -55,6 +55,7 @@
     "@emotion/babel-plugin-jsx-pragmatic": "^0.1.5",
     "@emotion/babel-preset-css-prop": "^11.2.0",
     "@emotion/react": "^11.7.1",
+    "@heroicons/react": "^1.0.6",
     "@react-hook/window-size": "^3.0.7",
     "D": "^1.0.0",
     "axios-progress-bar": "git+https://github.com/HynekS/progress-bar-4-axios-updated.git#master",
