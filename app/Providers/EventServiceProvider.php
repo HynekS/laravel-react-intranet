@@ -22,8 +22,10 @@ use App\{
 };
 use App\Observers\UploadObserver;
 
-use App\Faktura;
+use App\Point;
+use App\Observers\PointObserver;
 
+use App\Faktura;
 use App\User;
 
 class EventServiceProvider extends ServiceProvider
@@ -59,5 +61,7 @@ class EventServiceProvider extends ServiceProvider
         GeodetPlan::observe(UploadObserver::class);
         TerenFoto::observe(UploadObserver::class);
         TerenScan::observe(UploadObserver::class);
+
+        Point::observe(PointObserver::class);
     }
 }
