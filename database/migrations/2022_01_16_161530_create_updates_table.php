@@ -17,7 +17,8 @@ class CreateUpdatesTable extends Migration
             $table->id();
             $table->integer("akce_id");
             $table->integer('user_id');
-            $table->enum('type', ['created', 'updated', 'deleted']);
+            $table->enum('update_type', ['created', 'updated', 'deleted']);
+            $table->string('update_scope');
             $table->string("description");
             $table->datetime('created_at');
         });
