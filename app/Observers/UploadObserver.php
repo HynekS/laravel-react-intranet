@@ -29,7 +29,8 @@ class UploadObserver
             $update->user_id = $data->userId;
         }
 
-        $update->type = $type;
+        $update->update_type = $type;
+        $update->update_scope = "file";
         $update->description = json_encode($model->getDirty());
         $update->created_at = now();
         $update->save();

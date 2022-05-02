@@ -20,7 +20,8 @@ class AkceObserver
         $update = new Update();
         $update->akce_id = $this->request->id_akce;
         $update->user_id = $this->request->userId; // current user id
-        $update->type = $type;
+        $update->update_type = $type;
+        $update->update_scope = "info";
         $update->description = json_encode($akce->getDirty());
         $update->created_at = now();
         $update->save();
