@@ -77,10 +77,16 @@ export const deletePointSuccess = ({ response, projectId }) => ({
 export const deletePointFailure = error => ({ type: DELETE_POINT_FAILURE, error })
 
 // Thunks
-export const createPoint = ({ pointgroupId, latitude, longitude, projectId }) => async dispatch => {
+export const createPoint = ({
+  pointgroupId,
+  latitude,
+  longitude,
+  projectId,
+  userId,
+}) => async dispatch => {
   if (pointgroupId == undefined) {
     dispatch(createPointgroup({ projectId })).then(response =>
-      dispatch(createPoint({ pointgroupId: response.id, latitude, longitude, projectId })),
+      dispatch(createPoint({ pointgroupId: response.id, latitude, longitude, projectId, userId })),
     )
   } else {
     try {
@@ -90,6 +96,7 @@ export const createPoint = ({ pointgroupId, latitude, longitude, projectId }) =>
         latitude,
         longitude,
         akce_id: projectId,
+        userId,
       })
       if (response) {
         dispatch(
@@ -106,13 +113,20 @@ export const createPoint = ({ pointgroupId, latitude, longitude, projectId }) =>
   }
 }
 
-export const updatePoint = ({ pointId, longitude, latitude, projectId }) => async dispatch => {
+export const updatePoint = ({
+  pointId,
+  longitude,
+  latitude,
+  projectId,
+  userId,
+}) => async dispatch => {
   try {
     dispatch(updatePointInit())
     let response = await client.put(`/point/${pointId}`, {
       longitude,
       latitude,
-      projectId,
+      akce_id: projectId,
+      userId,
     })
     if (response) {
       dispatch(
@@ -128,10 +142,12 @@ export const updatePoint = ({ pointId, longitude, latitude, projectId }) => asyn
   }
 }
 
-export const deletePoint = ({ pointId, projectId }) => async dispatch => {
+export const deletePoint = ({ pointId, projectId, userId }) => async dispatch => {
   try {
     dispatch(deletePointInit())
-    let response = await client.delete(`/point/${pointId}`)
+    let response = await client.delete(`/point/${pointId}`, {
+      data: { akce_id: projectId, userId },
+    })
     if (response) {
       dispatch(
         deletePointSuccess({

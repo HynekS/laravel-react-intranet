@@ -112,10 +112,10 @@ export const createPointgroup = ({ projectId }) => async dispatch => {
   }
 }
 
-export const updatePointgroup = ({ pointgroupId, type, projectId }) => async dispatch => {
+export const updatePointgroup = ({ pointgroupId, feature_type, projectId }) => async dispatch => {
   try {
     dispatch(updatePointgroupInit())
-    let response = await client.put(`/pointgroup/${pointgroupId}`, { type })
+    let response = await client.put(`/pointgroup/${pointgroupId}`, { feature_type })
     if (response) {
       dispatch(
         updatePointgroupSuccess({
