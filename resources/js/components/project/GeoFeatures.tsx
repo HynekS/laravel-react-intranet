@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { css } from "@emotion/react"
 import { useSelector, useDispatch } from "react-redux"
-import { v4 as uuidv4 } from "uuid"
 
 import useScript from "../../hooks/useScript"
 import findCenter from "../../services/geometry/findCenterOfCoords"
@@ -13,9 +12,11 @@ import DetailWrapper from "./DetailWrapper"
 import { createPointgroup } from "../../store/pointgroups"
 import { createPoint, updatePoint, deletePoint } from "../../store/points"
 
-import SvgPlus from "../../vendor/heroicons/outline/Plus"
+import { PlusIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../store/rootReducer"
+
+import type { akce as Akce, pointgroups as Pointgroup, points as Point } from "@/types/model"
 
 declare global {
   interface Window {
@@ -27,26 +28,30 @@ declare global {
   }
 }
 
-const GeoFeatures = ({ detail }) => {
+type Props = { detail: Akce & { pointgroups: Pointgroup & { points: Point[] }[] } }
+
+const GeoFeatures = ({ detail }: Props) => {
   const dispatch = useDispatch()
   const { id: userId } = useSelector((store: AppState) => store.auth.user)
-  const { pointgroups = [], id_akce: projectId } = detail || {} // this is probably redundant with useEffect added
+  const { id_akce: projectId } = detail
 
   // redraw on new props
   useEffect(() => {
     setGeometryData((detail || {}).pointgroups || [])
   }, [detail])
 
-  const { coordinates: wikiCoordinates, error: wikiError } = useGetCoordsFromWiki(detail.katastr)
+  const { coordinates: wikiCoordinates, error: wikiError } = useGetCoordsFromWiki(
+    String(detail.katastr),
+  )
 
-  const mapRef = useRef()
+  const mapRef = useRef<any>()
   const mapContainerRef = useRef() as React.MutableRefObject<HTMLDivElement>
-  const markerLayerRef = useRef()
-  const geometryLayerRef = useRef()
+  const markerLayerRef = useRef<any>()
+  const geometryLayerRef = useRef<any>()
 
   const [loaded, loadError] = useScript("https://api.mapy.cz/loader.js")
 
-  const [geometryData, setGeometryData] = useState(pointgroups)
+  const [geometryData, setGeometryData] = useState(() => (detail || {}).pointgroups || [])
 
   // Stale state hack!
   const activeGroupIndexRef = useRef<number | undefined>(
@@ -55,27 +60,7 @@ const GeoFeatures = ({ detail }) => {
   const [activeGroupIndex, setActiveGroupIndex] = useState(
     geometryData.length ? geometryData.length - 1 : undefined,
   )
-
-  // TODO: would reduce be cleaner, maybe?
-  const allPoints = pointgroups
-    .map(group => {
-      const all = [] as [number, number][]
-      const { points } = group
-      points.forEach(point => {
-        const { latitude, longitude } = point
-        all.push([latitude, longitude])
-      })
-
-      return all
-    })
-    .flat()
-
-  const getCenter = () => {
-    const { latitude, longitude } = findCenter(allPoints) ||
-      wikiCoordinates || { longitude: 14.5495308, latitude: 50.0013525 }
-
-    return { latitude, longitude }
-  }
+  console.log("activeGroupIndexRef ", activeGroupIndexRef.current, "run component")
 
   // load map
   useEffect(() => {
@@ -93,6 +78,17 @@ const GeoFeatures = ({ detail }) => {
       renderMarkersToMap(geometryData)
     }
   }, [geometryData])
+
+  const allPoints = geometryData
+    .map(pointgroup => pointgroup.points.map(point => [point.latitude, point.longitude]))
+    .flat()
+
+  const getCenter = () => {
+    const { latitude, longitude } = findCenter(allPoints) ||
+      wikiCoordinates || { longitude: 14.5495308, latitude: 50.0013525 }
+
+    return { latitude, longitude }
+  }
 
   // Expose map variables
   const bootstrapMap = () => {
@@ -140,8 +136,8 @@ const GeoFeatures = ({ detail }) => {
     markerLayerRef.current.removeAll()
     geometryLayerRef.current.removeAll()
 
-    pointgroups.forEach(({ points = [], type }) => {
-      points.forEach(({ latitude, longitude, id }) => {
+    pointgroups.forEach(({ points = [], feature_type }) => {
+      points.forEach(({ latitude, longitude, id }: Point) => {
         let coords = SMap.Coords.fromWGS84(longitude, latitude)
         let marker = new SMap.Marker(coords)
         marker.decorate(SMap.Marker.Feature.Draggable)
@@ -150,11 +146,11 @@ const GeoFeatures = ({ detail }) => {
         markerLayerRef.current.addMarker(marker)
       })
 
-      renderGeometry(points, type)
+      renderGeometry(points, feature_type)
     })
   }
 
-  const renderGeometry = (coordinates, type) => {
+  const renderGeometry = (coordinates: Point[], feature_type: Pointgroup["feature_type"]) => {
     let { SMap } = window
 
     const types = {
@@ -169,7 +165,7 @@ const GeoFeatures = ({ detail }) => {
     }
 
     let geometry = new SMap.Geometry(
-      SMap[types[type]],
+      SMap[types[feature_type]],
       null,
       coordinates.map(({ latitude, longitude }) => SMap.Coords.fromWGS84(longitude, latitude)),
       options,
@@ -178,23 +174,52 @@ const GeoFeatures = ({ detail }) => {
   }
 
   const addMarker = e => {
+    /*
+    const doOptimisticAddition = stateUpdater => {
+      stateUpdater(prevState => {
+        if (!prevState.length) return prevState
+        const uiOnlyPoint = {
+          __id: marker.getId(),
+          id: marker.getId(), // needed for key prop
+          pointgroup_id: prevState[activeGroupIndexRef.current || 0]?.id,
+          latitude,
+          longitude,
+        }
+
+        return prevState.map((pointgroup, i) =>
+          i === activeGroupIndexRef.current
+            ? { ...pointgroup, points: pointgroup.points.concat(uiOnlyPoint) }
+            : pointgroup,
+        )
+      })
+    }
+    */
+    let { SMap } = window
+
     let coords = SMap.Coords.fromEvent(e.data.event, mapRef.current)
     let marker = new SMap.Marker(coords)
     marker.decorate(SMap.Marker.Feature.Draggable)
-    markerLayerRef.current.addMarker(marker)
+    // markerLayerRef.current.addMarker(marker)
     const [longitude, latitude] = marker.getCoords().toWGS84()
 
     setGeometryData(prevState => {
+      if (!prevState.length) {
+        activeGroupIndexRef.current = prevState.length
+        setActiveGroupIndex(prevState.length)
+      }
+
       dispatch(
         createPoint({
           pointgroupId: prevState[activeGroupIndexRef.current || 0]?.id,
           latitude,
           longitude,
           projectId,
+          userId,
         }),
       )
       return prevState
     })
+
     /*
     Allow for optimistic updates?
     setGeometryData(prevState => {
@@ -233,7 +258,7 @@ const GeoFeatures = ({ detail }) => {
     const [longitude, latitude] = e.target.getCoords().toWGS84()
 
     setGeometryData(prevState => {
-      dispatch(updatePoint({ pointId: __id, longitude, latitude, projectId }))
+      dispatch(updatePoint({ pointId: __id, longitude, latitude, projectId, userId }))
       return prevState
     })
 
@@ -264,7 +289,7 @@ const GeoFeatures = ({ detail }) => {
     markerLayerRef.current.removeMarker(marker)
 
     setGeometryData(prevState => {
-      dispatch(deletePoint({ pointId: __id, projectId }))
+      dispatch(deletePoint({ pointId: __id, projectId, userId }))
       return prevState
     })
 
@@ -310,17 +335,25 @@ const GeoFeatures = ({ detail }) => {
             <button
               tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 pl-2 pr-3 text-sm rounded focus:(outline-none ring)"
               onClick={() => {
+                /* Update current index */
+                setGeometryData(prevState => {
+                  activeGroupIndexRef.current = prevState.length
+                  setActiveGroupIndex(prevState.length)
+                  return prevState
+                })
+
+                activeGroupIndexRef.current
                 dispatch(createPointgroup({ projectId }))
               }}
             >
-              <SvgPlus tw="w-4 mr-1" />
+              <PlusIcon tw="w-4 mr-1" />
               Přidat
             </button>
           </div>
           {geometryData.length
-            ? geometryData.map(({ type, id, points = [] }, i) => (
+            ? geometryData.map(({ feature_type, id, points = [] }, i) => (
                 <GeoFeaturesPointgroup
-                  type={type}
+                  feature_type={feature_type}
                   id={id}
                   projectId={projectId}
                   points={points}
@@ -328,7 +361,7 @@ const GeoFeatures = ({ detail }) => {
                   setData={setGeometryData}
                   activeIndexRef={activeGroupIndexRef}
                   activeIndex={activeGroupIndex}
-                  rerenderOnActiveIndexChange={setActiveGroupIndex}
+                  setActiveIndex={setActiveGroupIndex}
                   key={id}
                 />
               ))

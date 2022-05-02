@@ -1,16 +1,22 @@
-import React, { Fragment, useState } from "react"
-import { jsx, css } from "@emotion/react"
+import { Fragment, useState } from "react"
 import tw from "twin.macro"
 
 import { modalStatus } from "./InvoiceModalStatus"
 import useOuterClick from "../../../hooks/useOuterClick"
-import SvgTrashSolid from "../../../vendor/heroicons/solid/Trash"
-import SvgPencilSolid from "../../../vendor/heroicons/solid/Pencil"
-import SvgDotsHorizontalSolid from "../../../vendor/heroicons/solid/DotsHorizontal"
+import { TrashIcon } from "@heroicons/react/solid"
+import { PencilIcon } from "@heroicons/react/solid"
+import { DotsHorizontalIcon } from "@heroicons/react/solid"
 
-const Invoice = ({ invoice, modalOpenCallback }) => {
+import type { faktury as InvoiceT } from "@/types/model"
+
+type Props = {
+  invoice: InvoiceT
+  modalOpenCallback: ({ status, data }: { status: string; data: InvoiceT }) => void
+}
+
+const Invoice = ({ invoice, modalOpenCallback }: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const innerRef = useOuterClick(() => {
+  const innerRef = useOuterClick<HTMLDivElement>(() => {
     setIsMenuOpen(false)
   })
 
@@ -19,13 +25,13 @@ const Invoice = ({ invoice, modalOpenCallback }) => {
       <tr key={invoice.id_zaznam}>
         <td tw="px-2 py-2 text-right">{invoice.c_faktury}</td>
         <td tw="px-2 py-2 text-right">
-          {new Date(Date.parse(invoice.datum_vlozeni)).toLocaleDateString("cs-CZ")}
+          {new Date(Date.parse(String(invoice.datum_vlozeni))).toLocaleDateString("cs-CZ")}
         </td>
-        <td tw="px-2 py-2 text-right">{invoice.castka.toLocaleString("cs-CZ")},–</td>
+        <td tw="px-2 py-2 text-right">{Number(invoice.castka).toLocaleString("cs-CZ")},–</td>
         <td tw="px-2 py-2 text-right">
           <div ref={innerRef} tw="relative">
             <button tw="flex items-center" onClick={() => setIsMenuOpen(true)}>
-              <SvgDotsHorizontalSolid tw="flex w-5 opacity-50" />
+              <DotsHorizontalIcon tw="flex w-5 opacity-50" />
             </button>
             <div
               css={[
@@ -37,14 +43,14 @@ const Invoice = ({ invoice, modalOpenCallback }) => {
                 tw="flex items-center w-full p-2 pr-4 rounded rounded-b-none focus:(outline-none) hocus:(bg-gray-200) transition-colors duration-300"
                 onClick={() => modalOpenCallback({ status: modalStatus.DESTROY, data: invoice })}
               >
-                <SvgTrashSolid tw="flex w-5 mr-2 opacity-50" />
+                <TrashIcon tw="flex w-5 mr-2 opacity-50" />
                 Odstranit
               </button>
               <button
                 tw="flex items-center w-full p-2 pr-4 rounded rounded-t-none focus:(outline-none) hocus:(bg-gray-200) transition-colors duration-300"
                 onClick={() => modalOpenCallback({ status: modalStatus.UPDATE, data: invoice })}
               >
-                <SvgPencilSolid tw="flex w-5 mr-2 opacity-50" />
+                <PencilIcon tw="flex w-5 mr-2 opacity-50" />
                 Upravit
               </button>
             </div>

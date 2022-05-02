@@ -1,5 +1,4 @@
-// @ts-check
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useLocation } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
 
@@ -10,9 +9,9 @@ import DetailPage from "./DetailPage"
 
 import type { AppState } from "../../store/rootReducer"
 
-interface Params {
-  year: string
-  num: string
+type Params = {
+  year: string | undefined
+  num: string | undefined
 }
 
 const DetailProvider = () => {
@@ -20,7 +19,7 @@ const DetailProvider = () => {
   const dispatch = useDispatch()
 
   const { state } = useLocation()
-  const params: Params = useParams()
+  const params = useParams<Params>()
 
   // Using state from spreadsheet view link – old way, probably redundant, but maybe faster?
   const projectFromLinkState = useSelector(
@@ -29,7 +28,7 @@ const DetailProvider = () => {
   // When accessing detail directly from url or after refreshing browser
   const projectFromUrl = useSelector((store: AppState) =>
     Object.values(store.projects.byId).find(
-      needle => needle.c_akce === `${params.num}/${params.year.slice(2)}`,
+      needle => needle.c_akce === `${params.num}/${params?.year?.slice(2)}`,
     ),
   )
 
