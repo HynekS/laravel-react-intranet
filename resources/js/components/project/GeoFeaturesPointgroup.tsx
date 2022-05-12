@@ -1,4 +1,4 @@
-import { useState, forwardRef } from "react"
+import { useState, Dispatch } from "react"
 import { useDispatch } from "react-redux"
 import tw from "twin.macro"
 
@@ -11,7 +11,17 @@ import SvgPoint from "../icons/SvgPoint"
 import SvgPolygon from "../icons/SvgPolygon"
 import { DotsHorizontalIcon, TrashIcon } from "@heroicons/react/solid"
 
-type FeatureType = "point" | "line" | "polygon"
+import type { pointgroups as Pointgroup, points as Point } from "@/types/model"
+
+type Props = Pointgroup & {
+  points: Point[]
+  i: number
+  projectId: number
+  setData: Dispatch<(prevState: Pointgroup[]) => Pointgroup[]>
+  activeIndexRef: React.MutableRefObject<number>
+  activeIndex: number
+  setActiveIndex: Dispatch<number>
+}
 
 const GeoFeaturesPointgroup = ({
   feature_type,
@@ -23,14 +33,14 @@ const GeoFeaturesPointgroup = ({
   activeIndexRef,
   activeIndex,
   setActiveIndex,
-}) => {
+}: Props) => {
   const dispatch = useDispatch()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const innerRef = useOuterClick<HTMLDivElement>(() => {
     setIsMenuOpen(false)
   })
 
-  const switchType = (feature_type: FeatureType, id: number, i) => {
+  const switchType = (feature_type: Pointgroup["feature_type"], id: number, i: number) => {
     setData(prevState =>
       prevState.map((pointgroup, idx) =>
         i === idx ? { ...pointgroup, feature_type } : pointgroup,
@@ -111,7 +121,7 @@ const GeoFeaturesPointgroup = ({
         </div>
       </div>
       <ul tw="text-xs">
-        {points.map(({ id, latitude, longitude }, i) => {
+        {points.map(({ id, latitude, longitude }: Point, i) => {
           return (
             <li key={id} tw="pb-2">
               <span tw="inline-block w-1/5">{i + 1}</span>
