@@ -49,6 +49,18 @@ Route::group(['prefix' => 'invoices', 'middleware' => 'auth:api'], function () {
     Route::delete('/{invoice}', 'InvoiceController@destroy');
 });
 
+Route::group(['prefix' => 'pointgroup', 'middleware' => 'auth:api'], function () {
+    Route::post('/pointgroup', 'PointgroupController@store');
+    Route::put('/pointgroup/{id}', 'PointgroupController@update');
+    Route::delete('/pointgroup/{id}', 'PointgroupController@delete');
+});
+
+Route::group(['prefix' => 'point', 'middleware' => 'auth:api'], function () {
+    Route::post('/point', 'PointController@store');
+    Route::put('/point/{id}', 'PointController@update');
+    Route::delete('/point/{id}', 'PointController@delete');
+});
+
 Route::group(['prefix' => 'updates', 'middleware' => 'auth:api'], function () {
     Route::get('/latest_id', 'UpdateController@latest_id');
     Route::get('/last_month', 'UpdateController@get_last_month');
@@ -60,14 +72,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
     Route::get('/download_all/{id}', 'DownloadController@zip_and_download_all');
     Route::delete('/file', 'FileController@destroy');
-
-    Route::post('/pointgroup', 'PointgroupController@store');
-    Route::put('/pointgroup/{id}', 'PointgroupController@update');
-    Route::delete('/pointgroup/{id}', 'PointgroupController@delete');
-
-    Route::post('/point', 'PointController@store');
-    Route::put('/point/{id}', 'PointController@update');
-    Route::delete('/point/{id}', 'PointController@delete');
-
     Route::post('/report/{akce}', 'ReportController@generate_pdf');
 });
