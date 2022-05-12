@@ -1,7 +1,6 @@
-import React from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+import fileDownload from "js-file-download"
 
+import client from "../../../utils/axiosWithDefaults"
 import where from "../../../utils/where"
 import DetailWrapper from "../DetailWrapper"
 import FilesListGroup from "./FilesListGroup"
@@ -46,6 +45,27 @@ const FilesProvider = ({ detail, ...props }) => {
 
   return detail ? (
     <DetailWrapper>
+      <button
+        tw="text-white bg-red-500"
+        onClick={() => {
+          const fileName = `Soubory_k_akci_${
+            detail
+              ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….zip`
+              : `.pdf`
+          }`
+
+          client
+            .get(`/download_all/${detail.id_akce}`, {
+              responseType: "blob",
+            })
+            .then(response => {
+              fileDownload(response.data, fileName)
+            })
+            .catch(error => console.log(error))
+        }}
+      >
+        Stáhnout vše
+      </button>
       <FilesListGroup
         group={where(withData, { group: "teren" })}
         label="Terén"
