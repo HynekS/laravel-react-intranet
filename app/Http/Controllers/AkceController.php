@@ -9,15 +9,6 @@ use Illuminate\Http\Request;
 
 class AkceController extends Controller
 {
-    public function index()
-    {
-        /*
-        I am not using that at the moment. The memory consumption was high,
-        and performance wise – it does make much more sense to request each year separately (in parallel Promise.all). 
-        */
-        return Akce::WithAll()->get();
-    }
-
     public function show(Akce $akce)
     {
         $wrapper = array();
