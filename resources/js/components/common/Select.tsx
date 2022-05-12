@@ -1,12 +1,16 @@
-import React from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+import { ChevronDownIcon, ExclamationCircleIcon } from "@heroicons/react/solid"
 
-import SvgChevronDown from "../../vendor/heroicons/solid/ChevronDown"
-import SvgExclamationCircle from "../../vendor/heroicons/solid/ExclamationCircle"
+type Props = {
+  name: string
+  label: string
+  options: any[]
+  error: Record<string, { message: string }>
+  register: React.LegacyRef<HTMLSelectElement> | undefined
+  ChevronComponent: React.ElementType
+}
 
-const DefaultChevron = ({ ...props }) => (
-  <SvgChevronDown
+const DefaultChevron = (props: any) => (
+  <ChevronDownIcon
     tw="absolute inset-y-0 right-0 flex items-center w-4 h-full mr-2 fill-current"
     {...props}
   />
@@ -20,7 +24,7 @@ const Select = ({
   error = {},
   ChevronComponent = DefaultChevron,
   ...props
-}) => {
+}: Props) => {
   if (!options) {
     console.error("Options are required. Nothing is rendered")
     return null
@@ -46,7 +50,7 @@ const Select = ({
         </div>
         {error[name] && (
           <div className="errorMessage">
-            <SvgExclamationCircle />
+            <ExclamationCircleIcon />
             {error[name].message}
           </div>
         )}

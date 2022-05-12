@@ -5,7 +5,7 @@ import tw from "twin.macro"
 
 import client from "../../utils/axiosWithDefaults"
 import DetailWrapper from "./DetailWrapper"
-import SvgDocumentDownload from "../../vendor/heroicons/outline/DocumentDownload"
+import { DocumentDownloadIcon } from "@heroicons/react/outline"
 import Input from "../common/Input"
 
 import { updateProject } from "../../store/projects"
@@ -116,7 +116,7 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
           })
         }}
       >
-        <SvgDocumentDownload tw="w-5 mr-1" />
+        <DocumentDownloadIcon tw="w-5 mr-1" />
         Stáhnout PDF
       </button>
     </DetailWrapper>

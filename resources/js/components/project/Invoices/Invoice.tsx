@@ -3,9 +3,7 @@ import tw from "twin.macro"
 
 import { modalStatus } from "./InvoiceModalStatus"
 import useOuterClick from "../../../hooks/useOuterClick"
-import { TrashIcon } from "@heroicons/react/solid"
-import { PencilIcon } from "@heroicons/react/solid"
-import { DotsHorizontalIcon } from "@heroicons/react/solid"
+import { TrashIcon, PencilIcon, DotsHorizontalIcon } from "@heroicons/react/solid"
 
 import type { faktury as InvoiceT } from "@/types/model"
 

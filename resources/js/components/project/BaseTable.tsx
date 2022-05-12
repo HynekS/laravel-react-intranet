@@ -9,21 +9,22 @@ import deburr from "lodash.deburr"
 import Highlighter from "react-highlight-words"
 import BaseTable, { Column, AutoResizer, SortOrder, BaseTableProps } from "react-base-table"
 import "react-base-table/styles.css"
-import type { akce as Akce } from "@/types/model"
 
 import { status } from "../../store/projects"
-import { setSortBy, updateFilters, clearFilters } from "../../store/table"
+import { setSortBy, updateFilters, Filters, clearFilters } from "../../store/table"
 import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
-import { Detail } from "../project/lazyImports"
+import { Detail } from "./lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
-import SvgCheck from "../../vendor/heroicons/outline/Check"
-import SvgPencil from "../../vendor/heroicons/outline/Pencil"
-import SvgXCircle from "../../vendor/heroicons/outline/XCircle"
-import SvgX from "../../vendor/heroicons/outline/X"
-import SvgCheckCircle from "../../vendor/heroicons/outline/CheckCircle"
+import {
+  CheckIcon,
+  PencilIcon,
+  XCircleIcon,
+  XIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/outline"
 
 import type { AppState } from "../../store/rootReducer"
-import { Filters } from "../../store/table"
+import type { akce as Akce } from "@/types/model"
 
 type Props = {
   rawData: Akce[]
@@ -167,7 +168,7 @@ const Table = ({ rawData }: Props) => {
             aria-label={`odkaz na detail akce č. ${year}/${c_akce.split("/")[0]}`}
           >
             <div tw="flex items-center justify-center p-1 px-2 text-white transition-colors duration-300 bg-blue-500 rounded hover:bg-blue-700">
-              <SvgPencil tw="w-4" />
+              <PencilIcon tw="w-4" />
             </div>
           </Link>
         </div>
@@ -241,7 +242,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "registrovano_bit",
       width: 40,
       cellRenderer: ({ cellData }) =>
-        Boolean(cellData) ? <SvgCheck width={"1.25rem"} stroke="#48bb78" /> : null,
+        Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
       sortable: true,
     },
     {
@@ -257,7 +258,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "zaa_hlaseno",
       width: 60,
       cellRenderer: ({ cellData }) =>
-        Boolean(cellData) ? <SvgCheck width={"1.25rem"} stroke="#48bb78" /> : null,
+        Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
     },
     {
       title: "Stav",
@@ -394,10 +395,10 @@ const Table = ({ rawData }: Props) => {
       sortable: true,
       cellRenderer: ({ cellData }) => {
         if (cellData === "1") {
-          return <SvgCheckCircle tw="w-5 stroke-green-400 fill-green-100" />
+          return <CheckCircleIcon tw="w-5 stroke-green-400 fill-green-100" />
         }
         if (cellData === "0") {
-          return <SvgXCircle tw="w-5 stroke-red-400 fill-red-100" />
+          return <XCircleIcon tw="w-5 stroke-red-400 fill-red-100" />
         }
         return null
       },
@@ -514,7 +515,7 @@ const Table = ({ rawData }: Props) => {
                       dispatch(clearFilters())
                     }}
                   >
-                    <SvgX tw="w-3 mr-1" />
+                    <XIcon tw="w-3 mr-1" />
                     Zrušit všechny filtry
                   </button>
                 </div>

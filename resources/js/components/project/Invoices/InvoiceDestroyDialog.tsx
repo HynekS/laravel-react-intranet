@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { deleteInvoice } from "../../../store/invoices"
 import { status } from "../../../store/projects"
 
-import SvgExclamation from "../../../vendor/heroicons/outline/Exclamation"
+import { ExclamationIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../../store/rootReducer"
 
@@ -22,7 +22,7 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }) => {
     <div>
       <div tw="flex items-center p-6">
         <div tw="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full text-red-500 bg-red-100 sm:(mx-0 h-10 w-10)">
-          <SvgExclamation tw="w-6 stroke-current" />
+          <ExclamationIcon tw="w-6 stroke-current" />
         </div>
         <div tw="px-4">
           Skutečně chcete odstranit fakturu č. {c_faktury} v hodnotě{" "}

@@ -10,7 +10,7 @@ import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"
 import { modalStatus } from "./InvoiceModalStatus"
 
-import SvgPlus from "../../../vendor/heroicons/outline/Plus"
+import { PlusIcon } from "@heroicons/react/outline"
 
 const InvoicePage = ({ detail, ...props }) => {
   const [modalState, setModalState] = useState({ status: modalStatus.CLOSED, data: null })
@@ -64,7 +64,7 @@ const InvoicePage = ({ detail, ...props }) => {
             )}
           </div>
           <Button onClick={() => setModalState({ status: modalStatus.CREATE, data: detail })}>
-            <SvgPlus tw="w-5 mr-1" />
+            <PlusIcon tw="w-5 mr-1" />
             Nová faktura
           </Button>
           <Modal

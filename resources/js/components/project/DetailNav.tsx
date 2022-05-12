@@ -2,22 +2,23 @@ import { NavLink } from "react-router-dom"
 import styled from "@emotion/styled"
 import tw from "twin.macro"
 
-import SvgClipboardList from "../../vendor/heroicons/outline/ClipboardList"
-import SvgCurrencyDollar from "../../vendor/heroicons/outline/CurrencyDollar"
-import SvgDocumentText from "../../vendor/heroicons/outline/DocumentText"
-import SvgLocatioMarker from "../../vendor/heroicons/outline/LocationMarker.js"
-import SvgPaperClip from "../../vendor/heroicons/outline/PaperClip"
+import {
+  ClipboardListIcon,
+  CurrencyDollarIcon,
+  DocumentTextIcon,
+  LocationMarkerIcon,
+  PaperClipIcon,
+} from "@heroicons/react/outline"
 import { Detail, InvoiceView, ApprovalSheet, Files, GeoFeatures } from "./lazyImports"
 
-import type { akce as Akce } from "../../types/model"
-
-const activeClassName = "active"
+import type { akce as Akce } from "@/types/model"
 
 const StyledNav = styled("nav")`
   ${tw`pt-4`}
   & ul {
     ${tw`flex`}
     position: relative;
+
     &::after {
       content: "";
       ${tw`bg-white`}
@@ -31,7 +32,7 @@ const StyledNav = styled("nav")`
   }
   & li {
     ${tw`mr-1`}
-    display: inline-block;
+    display: flex;
     position: relative;
     transition: all 0.25s ease;
   }
@@ -42,7 +43,7 @@ const StyledNavLink = styled(NavLink)`
   & svg {
     ${tw`opacity-25`}
   }
-  &.${activeClassName} {
+  &.active {
     padding-top: calc(0.5rem + 2px);
     margin-top: -2px;
     transition all 0s;
@@ -64,11 +65,10 @@ const DetailNav = ({ detail }: DetailNavProps) => {
             to=""
             state={detail}
             end
-            activeClassName={activeClassName}
-            // className={({ isActive }) => (isActive ? 'active' : 'not-active')}
+            className={({ isActive }) => (isActive ? "active" : "")}
             onMouseOver={() => Detail.preload()}
           >
-            <SvgClipboardList tw="flex w-6 mr-2" />
+            <ClipboardListIcon tw="flex w-6 mr-2" />
             <span>Údaje o akci</span>
           </StyledNavLink>
         </li>
@@ -76,10 +76,10 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           <StyledNavLink
             to="faktury"
             state={detail}
-            activeClassName={activeClassName}
+            className={({ isActive }) => (isActive ? "active" : "")}
             onMouseOver={() => InvoiceView.preload()}
           >
-            <SvgCurrencyDollar tw="flex w-6 mr-2" />
+            <CurrencyDollarIcon tw="flex w-6 mr-2" />
             <span>Faktury</span>
           </StyledNavLink>
         </li>
@@ -87,10 +87,10 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           <StyledNavLink
             to="expertni-list"
             state={detail}
-            activeClassName={activeClassName}
+            className={({ isActive }) => (isActive ? "active" : "")}
             onMouseOver={() => ApprovalSheet.preload()}
           >
-            <SvgDocumentText tw="flex w-6 mr-2" />
+            <DocumentTextIcon tw="flex w-6 mr-2" />
             <span>Expertní list</span>
           </StyledNavLink>
         </li>
@@ -98,10 +98,10 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           <StyledNavLink
             to="lokalizace"
             state={detail}
-            activeClassName={activeClassName}
+            className={({ isActive }) => (isActive ? "active" : "")}
             onMouseOver={() => GeoFeatures.preload()}
           >
-            <SvgLocatioMarker tw="flex w-6 mr-2" />
+            <LocationMarkerIcon tw="flex w-6 mr-2" />
             <span>Lokalizace</span>
           </StyledNavLink>
         </li>
@@ -109,10 +109,10 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           <StyledNavLink
             to="nahrane-soubory"
             state={detail}
-            activeClassName={activeClassName}
+            className={({ isActive }) => (isActive ? "active" : "")}
             onMouseOver={() => Files.preload()}
           >
-            <SvgPaperClip tw="flex w-6 mr-2" />
+            <PaperClipIcon tw="flex w-6 mr-2" />
             <span>Nahrané soubory</span>
           </StyledNavLink>
         </li>

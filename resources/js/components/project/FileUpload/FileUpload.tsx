@@ -13,8 +13,8 @@ import {
   filesStatus,
 } from "../../../store/upload"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
-import SvgDropIcon from "./DropIcon"
-import SvgCheck from "../../../vendor/heroicons/outline/Check"
+import DropIcon from "./DropIcon"
+import { CheckIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../../store/rootReducer"
 
@@ -88,7 +88,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
             <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${model}`}>
               <div css={[isItemOverDropArea && tw`invisible`]}>
                 <div tw="text-center text-gray-400 pointer-events-none">
-                  <SvgDropIcon tw="inline-block w-24 pb-2 fill-gray-400" />
+                  <DropIcon tw="inline-block w-24 pb-2 fill-gray-400" />
                 </div>
                 <span tw="block text-lg">přetáhněte soubor{!isSingular && "y"}</span>
                 <span tw="block pb-4 leading-4 text-gray-600"> nebo</span>
@@ -131,7 +131,7 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
       {status === filesStatus.UPLOADING_DONE && (
         <div tw="flex flex-col items-center justify-center h-full pb-4">
           <div tw="flex pb-4">
-            <SvgCheck tw="w-8 mr-1 stroke-green-400" />
+            <CheckIcon tw="w-8 mr-1 stroke-green-400" />
             <span tw="text-xl font-medium text-gray-600">
               Soubory byly v pořádku uloženy na server.
             </span>

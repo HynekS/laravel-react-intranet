@@ -1,6 +1,6 @@
 import ServerSyncProvider from "./authenticatedApp/ServerSyncProvider"
 import LoginPage from "./login/LoginPage"
-import useAuth from "../utils/useAuth"
+import useAuth from "../hooks/useAuth"
 
 const HomePage = () => {
   const { user, loading } = useAuth()

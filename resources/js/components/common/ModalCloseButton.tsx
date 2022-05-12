@@ -1,13 +1,13 @@
-import React from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+import { XIcon } from "@heroicons/react/outline"
 
-import SvgX from "../../vendor/heroicons/outline/X"
+type Props = {
+  handleClick: React.MouseEventHandler<HTMLButtonElement>
+}
 
-const ModalCloseButton = ({ handleClick }) => {
+const ModalCloseButton = ({ handleClick }: Props) => {
   return (
     <button onClick={handleClick}>
-      <SvgX tw="w-6" />
+      <XIcon tw="w-6" />
     </button>
   )
 }

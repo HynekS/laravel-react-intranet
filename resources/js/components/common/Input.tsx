@@ -1,4 +1,4 @@
-import SvgExclamationCircle from "../../vendor/heroicons/solid/ExclamationCircle"
+import { ExclamationCircleIcon } from "@heroicons/react/solid"
 
 type Props = {
   name: string
@@ -38,7 +38,7 @@ const Input = ({
         />
         {error[name] && (
           <div className="errorMessage">
-            <SvgExclamationCircle />
+            <ExclamationCircleIcon />
             {error[name].message}
           </div>
         )}

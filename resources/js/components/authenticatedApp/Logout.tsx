@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux"
 import tw from "twin.macro"
 
 import { logout } from "../../store/auth"
-import SvgLogout from "../../vendor/heroicons/outline/Logout"
+import { LogoutIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../store/rootReducer"
 
@@ -20,7 +20,7 @@ const Logout = () => {
       className={`${pending ? "spinner" : ""}`}
       onClick={() => dispatch(logout(navigate))}
     >
-      <SvgLogout tw="w-4 mr-2" />
+      <LogoutIcon tw="w-4 mr-2" />
       <span tw="pr-2">Odhlášení</span>
     </Button>
   )
