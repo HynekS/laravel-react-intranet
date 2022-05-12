@@ -21,7 +21,8 @@
     "lcobucci/jwt": "3.3.3",
     "league/geotools": "@stable",
     "mmerian/doctrine-timestamp": "dev-master",
-    "nunomaduro/collision": "^4.1"
+    "nunomaduro/collision": "^4.1",
+    "teamtnt/laravel-scout-tntsearch-driver": "^11.6"
   },
   "require-dev": {
     "fzaninotto/faker": "^1.9.1",

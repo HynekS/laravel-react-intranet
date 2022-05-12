@@ -33,6 +33,8 @@ Route::group([
 Route::group(['prefix' => 'akce', 'middleware' => 'auth:api'], function () {
 
     Route::get('/', 'AkceController@index');
+    Route::post('/search', 'AkceController@search');
+
     Route::get('/{year}', 'AkceController@showYear');
     Route::get('/{year}/{num}', 'AkceController@getByNumberOfYear');
 

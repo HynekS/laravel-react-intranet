@@ -3,13 +3,36 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Akce extends Model
 {
+    use Searchable;
+
     protected $guarded = [];
     protected $table = 'akce';
     protected $primaryKey = 'id_akce';
     public $timestamps = false;
+
+    /* Laravel Scout search
+    WARNING:
+    the engine needs this two PHP modules to be activated:
+    extension=pdo_mysql
+    extension=sqlite3
+    */
+    public function toSearchableArray()
+    {
+        return [
+            'id_akce' => $this->id_akce,
+            'c_akce' => $this->c_akce,
+            'cislo_per_year' => $this->cislo_per_year,
+            'rok_per_year' => $this->rok_per_year,
+            'nazev_akce' => $this->nazev_akce,
+            'registrace_info' => $this->registrace_info,
+            'investor_jmeno' => $this->investor_jmeno,
+            'katastr'=> $this->katastr,
+        ];
+    }
 
     /*
      * Relations to other tables
