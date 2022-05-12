@@ -49,7 +49,7 @@ const GeoFeatures = ({ detail }: Props) => {
   const markerLayerRef = useRef<any>()
   const geometryLayerRef = useRef<any>()
 
-  const [loaded, loadError] = useScript("https://api.mapy.cz/loader.js")
+  const { loaded, error } = useScript("https://api.mapy.cz/loader.js")
 
   const [geometryData, setGeometryData] = useState(() => (detail || {}).pointgroups || [])
 
