@@ -72,6 +72,7 @@ const InvoicePage = ({ detail, ...props }) => {
             shouldCloseOnOverlayClick={true}
             onRequestClose={onModalClose}
             closeTimeoutMS={500}
+            className=""
             {...props}
           >
             <header tw="flex justify-between p-6">
@@ -100,7 +101,7 @@ const InvoicePage = ({ detail, ...props }) => {
   )
 }
 
-const InvoiceSummary = ({ budget, sum, label, ...props }) => (
+const InvoiceSummary = ({ budget, sum, label }) => (
   <div tw="p-4">
     <div key={label} tw="p-8 font-medium text-gray-600 rounded-lg shadow">
       <dl>
