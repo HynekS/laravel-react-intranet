@@ -9,8 +9,7 @@ import { deletePointgroup, updatePointgroup } from "../../store/pointgroups"
 import SvgLine from "../icons/SvgLine"
 import SvgPoint from "../icons/SvgPoint"
 import SvgPolygon from "../icons/SvgPolygon"
-import { DotsHorizontalIcon } from "@heroicons/react/solid"
-import { TrashIcon } from "@heroicons/react/solid"
+import { DotsHorizontalIcon, TrashIcon } from "@heroicons/react/solid"
 
 type FeatureType = "point" | "line" | "polygon"
 
