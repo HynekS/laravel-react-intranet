@@ -16,6 +16,7 @@ import { fetchActiveUsers } from "../../store/meta"
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
+import Button from "../common/Button"
 import Input from "../common/Input"
 import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
@@ -349,12 +350,7 @@ const Detail = ({ detail }: DetailProps) => {
                 register={register}
               />
             </fieldset>
-            <button
-              type="submit"
-              tw="px-4 py-2 font-bold text-white transition-colors duration-300 bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:transition-shadow focus:duration-300"
-            >
-              Uložit změny
-            </button>
+            <Button type="submit">Uložit změny</Button>
           </div>
         </div>
       </form>

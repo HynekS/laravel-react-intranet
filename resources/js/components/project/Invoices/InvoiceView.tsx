@@ -1,6 +1,7 @@
 import { useState } from "react"
 import tw from "twin.macro"
 
+import Button from "../../common/Button"
 import DetailWrapper from "../DetailWrapper"
 import InvoiceList from "./InvoiceList"
 import InvoiceCreateForm from "./InvoiceCreateForm"
@@ -54,8 +55,6 @@ const InvoicePage = ({ detail, ...props }: Props) => {
     e && e.preventDefault()
     setModalState({ status: modalStatus.CLOSED, data: null })
   }
-
-  const Button = tw.button`flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none ring)`
 
   const {
     faktury_dohled,

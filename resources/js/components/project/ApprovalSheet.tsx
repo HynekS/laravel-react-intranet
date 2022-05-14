@@ -6,6 +6,7 @@ import tw from "twin.macro"
 import client from "../../utils/axiosWithDefaults"
 import DetailWrapper from "./DetailWrapper"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
+import Button from "../common/Button"
 import Input from "../common/Input"
 
 import { updateProject } from "../../store/projects"
@@ -88,8 +89,7 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
           register={register}
         />
       </form>
-      <button
-        tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none ring)"
+      <Button
         type="button"
         onClick={async () => {
           client({
@@ -118,7 +118,7 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
       >
         <DocumentDownloadIcon tw="w-5 mr-1" />
         Stáhnout PDF
-      </button>
+      </Button>
     </DetailWrapper>
   )
 }

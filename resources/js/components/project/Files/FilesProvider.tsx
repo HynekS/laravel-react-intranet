@@ -83,27 +83,29 @@ const FilesProvider = ({ detail, ...props }: Props) => {
 
   return detail ? (
     <DetailWrapper>
-      <button
-        tw="text-white bg-red-500"
-        onClick={() => {
-          const fileName = `Soubory_k_akci_${
-            detail
-              ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….zip`
-              : `.pdf`
-          }`
+      <div tw="flex justify-end">
+        <Button
+          onClick={() => {
+            const fileName = `Soubory_k_akci_${
+              detail
+                ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….zip`
+                : `.pdf`
+            }`
 
-          client
-            .get(`/download_all/${detail.id_akce}`, {
-              responseType: "blob",
-            })
-            .then(response => {
-              fileDownload(response.data, fileName)
-            })
-            .catch(error => console.log(error))
-        }}
-      >
-        Stáhnout vše
-      </button>
+            client
+              .get(`/download_all/${detail.id_akce}`, {
+                responseType: "blob",
+              })
+              .then(response => {
+                fileDownload(response.data, fileName)
+              })
+              .catch(error => console.log(error))
+          }}
+        >
+          <DownloadIcon tw="w-5 h-5 mr-2 -ml-1" />
+          Stáhnout vše
+        </Button>
+      </div>
       <FilesListGroup
         group={where(withData, { group: "teren" })}
         label="Terén"

@@ -12,6 +12,7 @@ import {
   setInitialState,
   filesStatus,
 } from "../../../store/upload"
+import Button from "../../common/Button"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import DropIcon from "./DropIcon"
 import { CheckIcon } from "@heroicons/react/outline"
@@ -137,15 +138,14 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
             </span>
           </div>
           <div>
-            <button
-              tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 rounded focus:(outline-none ring)"
+            <Button
               onClick={() => {
                 modalCloseCallback()
                 dispatch(setInitialState())
               }}
             >
               OK
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -207,22 +207,17 @@ const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalClos
               {filesize(filesToUpload.reduce((acc, file) => acc + file.size, 0))}
             </span>
             <div tw="flex">
-              <button
-                tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none ring transition-shadow duration-300)"
+              <Button
                 onClick={() => {
                   dispatch(setInitialState())
                   modalCloseCallback()
                 }}
               >
                 zrušit
-              </button>
-              <button
-                form={`fileUpload-${model}`}
-                type="submit"
-                tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded focus:(outline-none ring)"
-              >
+              </Button>
+              <Button form={`fileUpload-${model}`} type="submit">
                 uložit soubory
-              </button>
+              </Button>
             </div>
           </div>
         </footer>
