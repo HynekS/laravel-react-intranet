@@ -50,15 +50,15 @@ Route::group(['prefix' => 'invoices', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['prefix' => 'pointgroup', 'middleware' => 'auth:api'], function () {
-    Route::post('/pointgroup', 'PointgroupController@store');
-    Route::put('/pointgroup/{id}', 'PointgroupController@update');
-    Route::delete('/pointgroup/{id}', 'PointgroupController@delete');
+    Route::post('/', 'PointgroupController@store');
+    Route::put('/{id}', 'PointgroupController@update');
+    Route::delete('/{id}', 'PointgroupController@delete');
 });
 
 Route::group(['prefix' => 'point', 'middleware' => 'auth:api'], function () {
-    Route::post('/point', 'PointController@store');
-    Route::put('/point/{id}', 'PointController@update');
-    Route::delete('/point/{id}', 'PointController@delete');
+    Route::post('/', 'PointController@store');
+    Route::put('/{id}', 'PointController@update');
+    Route::delete('/{id}', 'PointController@delete');
 });
 
 Route::group(['prefix' => 'updates', 'middleware' => 'auth:api'], function () {

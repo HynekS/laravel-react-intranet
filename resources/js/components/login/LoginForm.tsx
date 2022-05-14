@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import tw from "twin.macro"
 
 import Logo from "./Logo"
+import Button from "../../components/common/Button"
 import HiddenMessage from "../common/HiddenMessage"
 import { submitLoginData } from "../../store/auth"
 import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
