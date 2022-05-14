@@ -51,87 +51,117 @@ const Dashboard = () => {
   return (
     <DetailPage>
       <div tw="p-4 bg-white rounded-lg lg:(p-8)">
-        <h1 tw="text-xl">Dashboard</h1>
-        <section tw="pb-8">
-          <form action="">
-            <label htmlFor="quicksearch" tw="block mb-2 text-sm font-bold text-gray-700">
-              rychlé hledání
-            </label>
-            <input
-              onChange={e => setSearchTerm(e.target.value)}
-              type="text"
-              name="quicksearch"
-              tw="w-full px-3 py-2 leading-tight text-gray-700 bg-gray-200 border rounded appearance-none focus:outline-none focus:ring focus:transition-shadow focus:duration-300"
-            />
-          </form>
-        </section>
-        <section tw="pb-8">
-          <h2 tw="text-lg">Statistiky</h2>
-          <button
-            type="button"
-            onClick={() =>
-              client("/updates/latest_id").then(res => {
-                console.log(res)
-              })
-            }
-          >
-            Test update state
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              client("/updates/last_month").then(res => {
-                console.log(res)
-              })
-            }
-          >
-            Get Last Month
-          </button>
-        </section>
-        <section>
-          {searchResults.length ? (
-            <ul tw="text-xs">
-              {searchResults.map(
-                (
-                  {
-                    id_akce,
-                    cislo_per_year,
-                    rok_per_year,
-                    nazev_akce,
-                    kraj,
-                    okres,
-                    katastr,
-                    id_stav,
-                  } = {} as Akce,
-                ) => (
-                  <li key={id_akce}>
-                    <Link tw="flex gap-2 border-b" to={`/akce/${rok_per_year}/${cislo_per_year}`}>
-                      <div tw="w-24 p-2 tabular-nums">
-                        {String(cislo_per_year).padStart(3, " ")}/{rok_per_year}
-                      </div>
-                      <div tw="p-2 w-96 overflow-ellipsis">{nazev_akce}</div>
-                      <div tw="w-32 p-2">{kraj}</div>
-                      <div tw="w-32 p-2">{okres}</div>
-                      <div tw="w-32 p-2">{katastr}</div>
-                      <div tw="w-32 p-2">{id_stav}</div>
-                    </Link>
+        <h1 tw="text-xl">Přehled</h1>
+        <div tw="flex flex-col md:(flex-row gap-x-12)">
+          <div tw="pb-8 flex-1 md:(w-3/5)">
+            <section>
+              <form action="" tw="w-full">
+                <h2 tw="mb-2 text-sm font-bold text-gray-700">
+                  <label htmlFor="quicksearch">rychlé hledání</label>
+                </h2>
+                <input
+                  onChange={e => setSearchTerm(e.target.value)}
+                  type="text"
+                  name="quicksearch"
+                  id="quicksearch"
+                  tw="w-full px-3 py-2 leading-tight text-gray-700 bg-gray-200 border rounded appearance-none focus:outline-none focus:ring focus:transition-shadow focus:duration-300"
+                />
+              </form>
+            </section>
+            {/*<section tw="pb-8">
+            <h2 tw="text-lg">Statistiky</h2>
+            <button
+              type="button"
+              onClick={() =>
+                client("/updates/latest_id").then(res => {
+                  console.log(res)
+                })
+              }
+            >
+              Test update state
+            </button>
+            </section>*/}
+            <section>
+              {searchResults.length ? (
+                <ul tw="text-xs">
+                  {searchResults.map(
+                    (
+                      {
+                        id_akce,
+                        cislo_per_year,
+                        rok_per_year,
+                        nazev_akce,
+                        kraj,
+                        okres,
+                        katastr,
+                        id_stav,
+                      } = {} as Akce,
+                    ) => (
+                      <li key={id_akce}>
+                        <Link
+                          tw="flex gap-2 border-b"
+                          to={`/akce/${rok_per_year}/${cislo_per_year}`}
+                        >
+                          <div tw="w-24 p-2 tabular-nums">
+                            {String(cislo_per_year).padStart(3, " ")}/{rok_per_year}
+                          </div>
+                          <div tw="p-2 w-96 overflow-ellipsis">{nazev_akce}</div>
+                          <div tw="w-32 p-2">{kraj}</div>
+                          <div tw="w-32 p-2">{okres}</div>
+                          <div tw="w-32 p-2">{katastr}</div>
+                          <div tw="w-32 p-2">{id_stav}</div>
+                        </Link>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              ) : null}
+            </section>
+          </div>
+          <section tw="md:(w-2/5)">
+            <h2 tw="mb-2 text-sm font-bold text-gray-700">poslední aktualizace</h2>
+            {updateList.length ? (
+              <ul tw="text-xs">
+                {updateList.map(result => (
+                  <li tw="py-2">
+                    <h3 tw="pb-1 text-xs font-semibold">
+                      <Link
+                        to={`/akce/${result.akce.rok_per_year}/${result.akce.cislo_per_year}`}
+                        tw="flex gap-2"
+                      >
+                        <span tw="block">
+                          {`${result.akce.cislo_per_year}/${String(result.akce.rok_per_year).slice(
+                            2,
+                          )}`}
+                        </span>
+                        <span tw="flex-1 block">{result.akce.nazev_akce}</span>
+                      </Link>
+                    </h3>
+                    <ul tw="pb-2 pl-2 text-gray-500">
+                      {result.updates.map(update => (
+                        <li tw="flex justify-between gap-2 px-2 pt-2 border-l">
+                          <div tw="min-width[9ch] text-right tabular-nums font-semibold text-gray-400">
+                            {new Date(update.created_at)
+                              .toLocaleDateString(undefined, {
+                                month: "2-digit",
+                                day: "2-digit",
+                                year: "numeric",
+                              })
+                              .toString()
+                              .replace(/0(?=\d\.)/g, " ")}
+                          </div>
+                          <div tw="flex-1">
+                            {update.user.full_name} aktualizoval(a) {update.update_scope}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
-                ),
-              )}
-            </ul>
-          ) : null}
-        </section>
-        <section>
-          {updateList.length ? (
-            <ul tw="text-xs">
-              {updateList.map(result => (
-                <li>
-                  <pre>{JSON.stringify(result, null, 2)}</pre>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        </div>
       </div>
     </DetailPage>
   )
