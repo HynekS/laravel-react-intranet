@@ -1,6 +1,4 @@
-import React, { useState } from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+import { useState } from "react"
 
 import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"

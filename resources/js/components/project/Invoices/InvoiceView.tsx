@@ -1,5 +1,3 @@
-import { useState } from "react"
-import tw from "twin.macro"
 
 import Button from "../../common/Button"
 import DetailWrapper from "../DetailWrapper"

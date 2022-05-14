@@ -1,7 +1,6 @@
 import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
-import tw from "twin.macro"
 
 import client from "../../utils/axiosWithDefaults"
 import DetailWrapper from "./DetailWrapper"
@@ -39,7 +38,7 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
   return (
     <DetailWrapper>
       <h1>Expertní list</h1>
-      <form onSubmit={handleSubmit(onSubmit)} /*ref={formRef}*/>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Input name="EL_lokalita" label="lokalita" placeholder="lokalita" register={register} />
         <Input
           name="EL_Termin"
