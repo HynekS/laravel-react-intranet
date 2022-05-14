@@ -1,7 +1,5 @@
-import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
-import tw from "twin.macro"
 
 import Logo from "./Logo"
 import Button from "../../components/common/Button"
@@ -9,56 +7,66 @@ import HiddenMessage from "../common/HiddenMessage"
 import { submitLoginData } from "../../store/auth"
 import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
 
-const FormContainer = tw.div`w-full max-w-xs relative z-10`
-const Form = tw.form`bg-white shadow-xl rounded px-10 pt-8 pb-10 mb-4`
-const Label = tw.label`block text-gray-700 text-sm font-bold mb-2`
-const Input = tw.input`bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:transition-shadow focus:duration-300`
-const Submit = tw.button`bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:transition-shadow focus:duration-300`
-const ErrorMessage = tw.div`text-red-600 text-sm pb-2`
+import type { AppState } from "../../store/rootReducer"
 
 const LoginForm = () => {
-  const isAuthPending = useSelector(store => store.auth.isAuthPending)
-  const error = useSelector(store => store.auth.authError)
+  const isAuthPending = useSelector((store: AppState) => store.auth.isAuthPending)
+  const error = useSelector((store: AppState) => store.auth.authError)
   const dispatch = useDispatch()
   const { register, handleSubmit, errors } = useForm()
   const formRef = useFocusNextOnEnter()
   const onSubmit = data => dispatch(submitLoginData(data))
 
   return (
-    <FormContainer>
-      <Form onSubmit={handleSubmit(onSubmit)} ref={formRef}>
+    <div tw="relative z-10 w-full max-w-xs">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        ref={formRef}
+        tw="px-10 pt-8 pb-10 mb-4 bg-white rounded shadow-xl"
+      >
         <Logo />
-        {error && <ErrorMessage>{error.message}</ErrorMessage>}
-        <Label htmlFor={"user_name"}>Uživatelské jméno</Label>
-        <Input
+        {error && <div tw="pb-2 text-sm text-red-600">{error.message}</div>}
+        <label htmlFor="user_name" tw="block mb-2 text-sm font-bold text-gray-700">
+          Uživatelské jméno
+        </label>
+        <input
           type="text"
           name="user_name"
-          id={"user_name"}
+          id="user_name"
           autoComplete="on"
           placeholder="Jan Novák"
           ref={register({ required: true })}
           autoFocus={true}
+          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
         />
         <HiddenMessage show={errors.user_name}>
-          <ErrorMessage>Zadejte, prosím, uživatelské jméno.</ErrorMessage>
+          <div tw="pb-2 text-sm text-red-600">Zadejte, prosím, uživatelské jméno.</div>
         </HiddenMessage>
-        <Label htmlFor={"password"}>Heslo</Label>
-        <Input
+        <label htmlFor="password" tw="block mb-2 text-sm font-bold text-gray-700">
+          Heslo
+        </label>
+        <input
           type="password"
           name="password"
-          id={"password"}
+          id="password"
           autoComplete="on"
           placeholder="*******"
           ref={register({ required: true })}
+          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
         />
         <HiddenMessage show={errors.password}>
-          <ErrorMessage>Zadejte, prosím, heslo.</ErrorMessage>
+          <div tw="pb-2 text-sm text-red-600">Zadejte, prosím, heslo.</div>
         </HiddenMessage>
-        <Submit type="submit" className={`${isAuthPending ? "spinner" : ""}`}>
+        <Button
+          type="submit"
+          className={`${isAuthPending ? "spinner" : ""}`}
+          disabled={isAuthPending}
+          tw="justify-center w-full"
+        >
           Přihlásit
-        </Submit>
-      </Form>
-    </FormContainer>
+        </Button>
+      </form>
+    </div>
   )
 }
 
