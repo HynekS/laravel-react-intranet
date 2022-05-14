@@ -16,6 +16,7 @@ import invoiceReducer, {
   CREATE_INVOICE_FAILURE,
   UPDATE_INVOICE_FAILURE,
   DELETE_INVOICE_FAILURE,
+  SET_INVOICE_STATUS,
 } from "./invoices"
 import fileReducer, { DELETE_FILE_SUCCESS } from "./files"
 import { BATCH_UPLOAD_FILES_DONE } from "./upload"
@@ -196,6 +197,11 @@ export default function reducer(state: InitialState = initialState, action: AnyA
         ...state,
         invoiceStatus: status.ERROR,
         invoiceError: action.error,
+      }
+    case SET_INVOICE_STATUS:
+      return {
+        ...state,
+        invoiceStatus: action.status,
       }
     case DELETE_FILE_SUCCESS:
     case BATCH_UPLOAD_FILES_DONE:
