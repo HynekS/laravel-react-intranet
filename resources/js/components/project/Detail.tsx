@@ -84,7 +84,7 @@ const transformFormValues = data => ({
   datum_ukonceni: data.datum_ukonceni && data.datum_ukonceni.toISOString().split("T")[0],
 })
 
-function parseDate(str: string, format: string, locale: Locale) {
+function parseDate(str: string, format: string, locale: Locale | undefined) {
   const parsed = dateFnsParse(str, format, new Date(), { locale })
   if (DateUtils.isDate(parsed)) {
     return parsed
