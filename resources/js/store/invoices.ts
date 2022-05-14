@@ -13,6 +13,9 @@ export const DELETE_INVOICE_INITIALIZED = "[invoices] deleting an invoice has st
 export const DELETE_INVOICE_SUCCESS = "[invoices] deleting an invoice was succesful"
 export const DELETE_INVOICE_FAILURE = "[invoices] deleting an invoice has failed"
 
+// Maybe explicitely "reset to idle?"
+export const SET_INVOICE_STATUS = "[invoices] updating invoice status"
+
 // Reducer
 export default function reducer(state = [], action = {}) {
   const { response = {} } = action
@@ -72,6 +75,8 @@ export const deleteInvoiceSuccess = ({ response, projectId, typ_castky }) => ({
 })
 
 export const deleteInvoiceFailure = error => ({ type: DELETE_INVOICE_FAILURE, error })
+
+export const setInvoiceStatus = status => ({ type: SET_INVOICE_STATUS, status })
 
 // Thunks
 export const createInvoice = ({ projectId, ...data }) => async dispatch => {
