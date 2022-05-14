@@ -5,7 +5,7 @@ import tw from "twin.macro"
 Modal.setAppElement("#app")
 
 type ModalProps = {
-  className: string
+  className?: string
   isOpen: boolean
   [key: string]: unknown
 }

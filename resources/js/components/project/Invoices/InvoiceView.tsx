@@ -12,10 +12,45 @@ import { modalStatus } from "./InvoiceModalStatus"
 
 import { PlusIcon } from "@heroicons/react/outline"
 
-const InvoicePage = ({ detail, ...props }) => {
-  const [modalState, setModalState] = useState({ status: modalStatus.CLOSED, data: null })
+import type { AppState } from "../../../store/rootReducer"
+import type { akce as Akce, faktury as Faktura } from "@/types/model"
 
-  const onModalClose = e => {
+type Props = {
+  detail: Akce & {
+    faktury_dohled: Faktura[]
+    faktury_vyzkum: Faktura[]
+  }
+}
+
+type SummaryProps = {
+  budget: number
+  sum: number
+  label: string
+}
+
+type ModalState = {
+  status: typeof modalStatus[keyof typeof modalStatus]
+  data: Props["detail"] | null
+}
+
+const InvoicePage = ({ detail, ...props }: Props) => {
+  const [modalState, setModalState] = useState<ModalState>({
+    status: modalStatus.CLOSED,
+    data: null,
+  })
+
+  const modalStateFromStore = useSelector((store: AppState) => store.projects.invoiceStatus)
+  const dispatch = useDispatch()
+
+  // NOTE: This works, but it would be probably much cleaner to move that logic to redux store altogether.
+  useEffect(() => {
+    if (["success", "error"].includes(modalStateFromStore)) {
+      onModalClose()
+      dispatch(setInvoiceStatus("idle"))
+    }
+  }, [modalStateFromStore])
+
+  const onModalClose = (e?: React.MouseEvent<HTMLButtonElement>) => {
     e && e.preventDefault()
     setModalState({ status: modalStatus.CLOSED, data: null })
   }
@@ -29,8 +64,8 @@ const InvoicePage = ({ detail, ...props }) => {
     rozpocet_A: rozpocet_vyzkum,
   } = detail || {}
 
-  const fakturyDohledSum = faktury_dohled.reduce((acc, item) => acc + item.castka, 0)
-  const fakturyVyzkumSum = faktury_vyzkum.reduce((acc, item) => acc + item.castka, 0)
+  const fakturyDohledSum = faktury_dohled.reduce((acc, item) => acc + Number(item.castka), 0)
+  const fakturyVyzkumSum = faktury_vyzkum.reduce((acc, item) => acc + Number(item.castka), 0)
 
   return (
     <DetailWrapper>
@@ -72,7 +107,6 @@ const InvoicePage = ({ detail, ...props }) => {
             shouldCloseOnOverlayClick={true}
             onRequestClose={onModalClose}
             closeTimeoutMS={500}
-            className=""
             {...props}
           >
             <header tw="flex justify-between p-6">
@@ -101,7 +135,7 @@ const InvoicePage = ({ detail, ...props }) => {
   )
 }
 
-const InvoiceSummary = ({ budget, sum, label }) => (
+const InvoiceSummary = ({ budget, sum, label }: SummaryProps) => (
   <div tw="p-4">
     <div key={label} tw="p-8 font-medium text-gray-600 rounded-lg shadow">
       <dl>

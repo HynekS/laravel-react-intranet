@@ -3,4 +3,4 @@ export const modalStatus = {
   CREATE: "create",
   UPDATE: "update",
   DESTROY: "destroy",
-}
+} as const

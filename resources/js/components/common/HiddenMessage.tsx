@@ -3,7 +3,7 @@ import { Transition } from "react-transition-group"
 type Props = {
   children: React.ReactNode
   show: unknown
-  duration: number
+  duration?: number
 }
 
 const HiddenMessage = ({ show, children, duration = 400, ...props }: Props) => {

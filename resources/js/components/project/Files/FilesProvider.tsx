@@ -1,9 +1,34 @@
 import fileDownload from "js-file-download"
 
+import Button from "../../common/Button"
 import client from "../../../utils/axiosWithDefaults"
 import where from "../../../utils/where"
 import DetailWrapper from "../DetailWrapper"
 import FilesListGroup from "./FilesListGroup"
+
+import { DownloadIcon } from "@heroicons/react/outline"
+
+import type {
+  akce as Akce,
+  teren_foto as TerenFoto,
+  teren_scan as TerenScan,
+  digitalizace_nalez as DigitalizaceNalez,
+  digitalizace_plany as DigitalizacePlan,
+  geodet_plany as GeodetPlan,
+  geodet_body as GeodetBod,
+  analyzy as Analyza,
+} from "@/types/model"
+
+type Model =
+  | "teren_foto"
+  | "teren_databaze"
+  | "teren_scan"
+  | "LAB_databaze"
+  | "digitalizace_nalez"
+  | "digitalizace_plan"
+  | "geodet_plan"
+  | "geodet_bod"
+  | "analyza"
 
 const relations = [
   { model: "teren_foto", publicName: "terénní foto", group: "teren" },
@@ -37,10 +62,23 @@ const relations = [
   { model: "analyza", publicName: "odborné analýzy", group: "analyzy" },
 ]
 
-const FilesProvider = ({ detail, ...props }) => {
+type Props = {
+  detail: Akce & {
+    teren_foto: TerenFoto
+    teren_scan: TerenScan
+    digitalizace_nalez: DigitalizaceNalez
+    digitalizace_plan: DigitalizacePlan
+    geodet_plan: GeodetPlan
+    geodet_bod: GeodetBod
+    analyza: Analyza
+  }
+}
+
+const FilesProvider = ({ detail, ...props }: Props) => {
   const withData = relations.map(item => ({
     ...item,
-    data: detail[item.model] === null ? [] : [].concat(detail[item.model]),
+    data:
+      detail[item.model as Model] === null ? [] : ([] as any).concat(detail[item.model as Model]),
   }))
 
   return detail ? (

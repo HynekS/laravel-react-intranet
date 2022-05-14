@@ -4,10 +4,10 @@ type Props = {
   name: string
   label: string
   options: any[]
-  error: Record<string, { message: string }>
+  error?: Record<string, { message: string }>
   register: React.LegacyRef<HTMLSelectElement> | undefined
-  ChevronComponent: React.ElementType
-}
+  ChevronComponent?: React.ElementType
+} & JSX.IntrinsicElements["select"]
 
 const DefaultChevron = (props: any) => (
   <ChevronDownIcon

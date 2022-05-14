@@ -10,7 +10,7 @@ type Props = {
   }
   placeholder?: string
   type?: React.HTMLInputTypeAttribute
-}
+} & JSX.IntrinsicElements["input"]
 
 const Input = ({
   name,

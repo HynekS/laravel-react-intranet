@@ -5,11 +5,11 @@ import { modalStatus } from "./InvoiceModalStatus"
 import useOuterClick from "../../../hooks/useOuterClick"
 import { TrashIcon, PencilIcon, DotsHorizontalIcon } from "@heroicons/react/solid"
 
-import type { faktury as InvoiceT } from "@/types/model"
+import type { faktury as Faktura } from "@/types/model"
 
 type Props = {
-  invoice: InvoiceT
-  modalOpenCallback: ({ status, data }: { status: string; data: InvoiceT }) => void
+  invoice: Faktura
+  modalOpenCallback: ({ status, data }: { status: string; data: Faktura }) => void
 }
 
 const Invoice = ({ invoice, modalOpenCallback }: Props) => {
