@@ -31,7 +31,7 @@ import pointgroupsReducer, {
   DELETE_POINTGROUP_FAILURE,
   DELETE_POINTGROUP_SUCCESS,
 } from "./pointgroups"
-import pointReducer, {
+import {
   CREATE_POINT_INITIALIZED,
   CREATE_POINT_SUCCESS,
   CREATE_POINT_FAILURE,
@@ -177,7 +177,6 @@ export default function reducer(state: InitialState = initialState, action: AnyA
     case CREATE_INVOICE_SUCCESS:
     case UPDATE_INVOICE_SUCCESS:
     case DELETE_INVOICE_SUCCESS:
-      // TODO normalize the shape (id_akce => projectId etc...)
       let invoiceType = ["faktury_dohled", "faktury_vyzkum"][action.typ_castky]
       return {
         ...state,
