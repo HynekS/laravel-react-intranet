@@ -225,13 +225,23 @@ export default function reducer(state: InitialState = initialState, action: AnyA
     case CREATE_POINTGROUP_SUCCESS:
     case UPDATE_POINTGROUP_SUCCESS:
     case DELETE_POINTGROUP_SUCCESS:
+      return {
+        ...state,
+        pointgroupStatus: status.SUCCESS,
+        byId: {
+          ...state.byId,
+          [action.projectId]: {
+            ...state.byId[action.projectId],
+            pointgroups: pointgroupsReducer(state.byId[action.projectId].pointgroups, action),
+          },
+        },
+      }
     case CREATE_POINT_SUCCESS:
     case UPDATE_POINT_SUCCESS:
     case DELETE_POINT_SUCCESS:
+      // Should points have statuses too?
       return {
         ...state,
-        // WRONG! updating unrelated status for points!!!
-        pointgroupStatus: status.SUCCESS,
         byId: {
           ...state.byId,
           [action.projectId]: {
