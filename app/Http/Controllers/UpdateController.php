@@ -13,8 +13,23 @@ class UpdateController extends Controller
         return $latest_id;
     }
 
-    public function get_last_month() {
-        $from_last_month =  Update::where('created_at', '>=', Carbon::now()->subDays(30)->toDateTimeString())->get();
-        return $from_last_month;
+    public function get_last_month()
+    {
+        $projects_updated_last_month_with_updates = Update::where('created_at', '>=', Carbon::now()->subDays(30)->toDateTimeString())
+            ->orderBy('created_at', 'DESC')
+            ->select('id','akce_id')
+            ->with('akce:id_akce,cislo_per_year,rok_per_year,nazev_akce')     
+            ->get()
+            ->unique('akce_id')
+            ->map(fn ($result) => collect($result)
+                ->put('updates', Update::where('created_at', '>=', Carbon::now()->subDays(30)->toDateTimeString())
+                    ->where('akce_id', '=', $result->akce_id)
+                    ->orderBy('created_at', 'DESC')
+                    ->with('user:id,full_name')
+                    ->get()->unique('update_scope')
+                    ->toArray()))
+            ->values();
+        
+        return  $projects_updated_last_month_with_updates;
     }
 }
