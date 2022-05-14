@@ -53,7 +53,7 @@ export const createInvoiceSuccess = ({ response, projectId, ...data }) => ({
   ...data,
 })
 
-export const createInvoiceFailure = error => ({ type: CREATE_INVOICE_FAILURE, error })
+export const createInvoiceFailure = (error: Error) => ({ type: CREATE_INVOICE_FAILURE, error })
 
 export const updateInvoiceInit = () => ({ type: UPDATE_INVOICE_INITIALIZED })
 
@@ -63,7 +63,7 @@ export const updateInvoiceSuccess = ({ response, ...data }) => ({
   ...data,
 })
 
-export const updateInvoiceFailure = error => ({ type: UPDATE_INVOICE_FAILURE, error })
+export const updateInvoiceFailure = (error: Error) => ({ type: UPDATE_INVOICE_FAILURE, error })
 
 export const deleteInvoiceInit = () => ({ type: DELETE_INVOICE_INITIALIZED })
 
@@ -74,7 +74,7 @@ export const deleteInvoiceSuccess = ({ response, projectId, typ_castky }) => ({
   typ_castky,
 })
 
-export const deleteInvoiceFailure = error => ({ type: DELETE_INVOICE_FAILURE, error })
+export const deleteInvoiceFailure = (error: Error) => ({ type: DELETE_INVOICE_FAILURE, error })
 
 export const setInvoiceStatus = status => ({ type: SET_INVOICE_STATUS, status })
 
@@ -94,7 +94,7 @@ export const createInvoice = ({ projectId, ...data }) => async dispatch => {
     }
   } catch (error) {
     console.log(error)
-    dispatch(createInvoiceFailure(error))
+    dispatch(createInvoiceFailure(error as Error))
   }
 }
 
@@ -112,7 +112,7 @@ export const updateInvoice = ({ invoiceId, ...data }) => async dispatch => {
     }
   } catch (error) {
     console.log(error)
-    dispatch(updateInvoiceFailure(error))
+    dispatch(updateInvoiceFailure(error as Error))
   }
 }
 
@@ -131,6 +131,6 @@ export const deleteInvoice = ({ invoiceId, projectId, typ_castky }) => async dis
     }
   } catch (error) {
     console.log(error)
-    dispatch(deleteInvoiceFailure(error))
+    dispatch(deleteInvoiceFailure(error as Error))
   }
 }
