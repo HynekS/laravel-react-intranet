@@ -83,7 +83,7 @@ const FileUpload = ({
             }}
             onDragLeave={() => setIsItemOverDropArea(false)}
             css={[
-              tw`relative z-0 flex flex-col justify-center flex-grow p-16 -m-2 text-center transition-all transition duration-300 rounded-lg`,
+              tw`relative z-0 flex flex-col justify-center flex-grow p-16 -m-2 text-center transition-all duration-300 rounded-lg`,
               isItemOverDropArea && tw`bg-blue-500`,
             ]}
           >
