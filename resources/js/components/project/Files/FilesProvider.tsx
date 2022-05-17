@@ -19,7 +19,7 @@ import type {
   analyzy as Analyza,
 } from "@/types/model"
 
-type Model =
+export type Model =
   | "teren_foto"
   | "teren_databaze"
   | "teren_scan"

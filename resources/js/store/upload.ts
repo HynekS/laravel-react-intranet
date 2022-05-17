@@ -24,7 +24,7 @@ const SET_INITIAL_STATE = "[upload] A state is being cleared"
 
 export { BATCH_UPLOAD_FILES_DONE }
 
-type FileObject = {
+export type FileObject = {
   content: FileReader["result"]
   name: string
   size: number

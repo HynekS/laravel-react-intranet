@@ -6,8 +6,16 @@ import { status } from "../../../store/projects"
 import { ExclamationIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../../store/rootReducer"
+import type { faktury as Faktura } from "@/types/model"
 
-const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }) => {
+type Props = {
+  modalState: {
+    data: Faktura
+  }
+  onModalClose: React.MouseEventHandler<HTMLButtonElement>
+}
+
+const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }: Props) => {
   const dispatch = useDispatch()
   const isLoading = useSelector(
     (store: AppState) => store.projects.invoiceStatus === status.LOADING,
@@ -26,7 +34,7 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }) => {
         </div>
         <div tw="px-4">
           Skutečně chcete odstranit fakturu č. {c_faktury} v hodnotě{" "}
-          {castka.toLocaleString("cs-CZ")} Kč?
+          {castka?.toLocaleString("cs-CZ")} Kč?
         </div>
       </div>
       <footer tw="flex justify-end p-6 bg-gray-100 rounded-lg rounded-t-none">

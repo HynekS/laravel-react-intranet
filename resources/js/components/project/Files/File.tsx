@@ -14,28 +14,24 @@ import { TrashIcon } from "@heroicons/react/solid"
 
 import type { AppState } from "../../../store/rootReducer"
 import type {
-  analyzy,
-  digitalizace_nalez,
-  digitalizace_plany,
-  geodet_body,
-  geodet_plany,
-  kresleni_foto,
-  teren_foto,
-  teren_negativni_foto,
-  teren_scan,
-} from "../../../types/model"
-import type { TFile } from "../../../store/files"
+  teren_foto as TerenFoto,
+  teren_scan as TerenScan,
+  digitalizace_nalez as DigitalizaceNalez,
+  digitalizace_plany as DigitalizacePlan,
+  geodet_plany as GeodetPlan,
+  geodet_body as GeodetBod,
+  analyzy as Analyza,
+} from "@/types/model"
+import type { FileType } from "../../../store/files"
 
-type TFileTable =
-  | analyzy
-  | digitalizace_nalez
-  | digitalizace_plany
-  | geodet_body
-  | geodet_plany
-  | kresleni_foto
-  | teren_foto
-  | teren_negativni_foto
-  | teren_scan
+type FileTable =
+  | TerenFoto
+  | DigitalizaceNalez
+  | DigitalizacePlan
+  | GeodetBod
+  | GeodetPlan
+  | TerenScan
+  | Analyza
 
 const onDownload = (path: string) => {
   client
@@ -48,12 +44,11 @@ const onDownload = (path: string) => {
     .catch(error => console.log(error))
 }
 
-type TFileProps = TFile & {
-  file: TFileTable
-  // Maybe shoud be narrowed to a set of upload tables? But how?
+type FileProps = FileType & {
+  file: FileTable
 }
 
-const File = ({ file, model, projectId, fileId }: TFileProps) => {
+const File = ({ file, model, projectId, fileId }: FileProps) => {
   const { id: userId } = useSelector((store: AppState) => store.auth.user)
   const dispatch = useDispatch()
 

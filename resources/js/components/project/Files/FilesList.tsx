@@ -5,7 +5,38 @@ import ModalCloseButton from "../../common/ModalCloseButton"
 import File from "./File"
 import FileUpload from "../FileUpload/FileUpload"
 
-const FilesList = ({ subgroup, detail, ...props }) => {
+import type {
+  akce as Akce,
+  teren_foto as TerenFoto,
+  teren_scan as TerenScan,
+  digitalizace_nalez as DigitalizaceNalez,
+  digitalizace_plany as DigitalizacePlan,
+  geodet_plany as GeodetPlan,
+  geodet_body as GeodetBod,
+  analyzy as Analyza,
+} from "@/types/model"
+
+type FileTable =
+  | TerenFoto
+  | DigitalizaceNalez
+  | DigitalizacePlan
+  | GeodetBod
+  | GeodetPlan
+  | TerenScan
+  | Analyza
+
+import type { FileType } from "../../../store/files"
+
+type Props = {
+  detail: Akce
+  subgroup: {
+    publicName: string
+    data: FileTable[]
+    model: FileType["model"]
+  }
+}
+
+const FilesList = ({ subgroup, detail, ...props }: Props) => {
   const { publicName, data, model } = subgroup || {}
   const [isModalOpen, setIsModalOpen] = useState(false)
 

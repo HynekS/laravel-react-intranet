@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 import filesize from "filesize.js"
 import { css } from "@emotion/react"
@@ -11,6 +11,7 @@ import {
   removeFileFromUploads,
   setInitialState,
   filesStatus,
+  FileObject,
 } from "../../../store/upload"
 import Button from "../../common/Button"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
@@ -18,30 +19,45 @@ import DropIcon from "./DropIcon"
 import { CheckIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../../store/rootReducer"
+import type { Model } from "../../../store/files"
 
-const FileUpload = ({ model, projectId, fileTypes = "*/*", isSingular, modalCloseCallback }) => {
+type Props = {
+  model: Model
+  fileTypes?: string
+  projectId: number
+  isSingular: boolean
+  modalCloseCallback: Function
+}
+
+const FileUpload = ({
+  model,
+  projectId,
+  fileTypes = "*/*",
+  isSingular,
+  modalCloseCallback,
+}: Props) => {
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
 
   const dispatch = useDispatch()
   // const response = useSelector(store => store.files.response)
   const { id: userId } = useSelector((store: AppState) => store.auth.user)
 
-  const filesToUpload = useSelector((store: AppState) => store.upload.filesToUpload)
+  const filesToUpload = useSelector((store: AppState) => store.upload.filesToUpload as FileObject[])
   const status = useSelector((store: AppState) => store.upload.status)
   const uploadProgress = useSelector((store: AppState) =>
-    store.upload.uploadProgress.reduce(
+    (store.upload.uploadProgress as number[]).reduce(
       (acc: number, val: number, _: number, self: number[]) => (acc + val) / self.length,
       0,
     ),
   )
 
-  const onFormSubmit = e => {
+  const onFormSubmit: React.FormEventHandler<HTMLFormElement> = (e: FormEvent) => {
     e.preventDefault()
     if (!filesToUpload.length) return false
     dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }))
   }
 
-  const onChange = e => {
+  const onChange = (e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
     setIsItemOverDropArea(false)
     let files = isSingular

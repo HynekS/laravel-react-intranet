@@ -4,18 +4,20 @@ import { BATCH_UPLOAD_FILES_DONE } from "./upload"
 import type { AnyAction } from "redux"
 import type { AppDispatch } from "../store/configuredStore"
 
-export type TFile = {
-  type: typeof DELETE_FILE_INITIALIZED | typeof DELETE_FILE_SUCCESS | typeof DELETE_FILE_FAILURE
-  model:
-    | "teren_databaze"
-    | "LAB_databaze"
-    | "teren_foto"
-    | "teren_scan"
-    | "digitalizace_nalez"
-    | "digitalizace_plany"
-    | "geodet_body"
-    | "geodet_plany"
-  projectId: string
+export type Model =
+  | "teren_databaze"
+  | "LAB_databaze"
+  | "teren_foto"
+  | "teren_scan"
+  | "digitalizace_nalez"
+  | "digitalizace_plany"
+  | "geodet_body"
+  | "geodet_plany"
+
+export type FileType = {
+  type?: typeof DELETE_FILE_INITIALIZED | typeof DELETE_FILE_SUCCESS | typeof DELETE_FILE_FAILURE
+  model: Model
+  projectId: number
   fileId: number
   userId?: number
 }
@@ -49,7 +51,7 @@ export const deleteFileInitialized = () => ({
   type: DELETE_FILE_INITIALIZED,
 })
 
-export const deleteFileSuccess = ({ model, projectId, fileId }: Omit<TFile, "type">) => ({
+export const deleteFileSuccess = ({ model, projectId, fileId }: Omit<FileType, "type">) => ({
   type: DELETE_FILE_SUCCESS,
   model,
   projectId,
@@ -62,8 +64,7 @@ export const deleteFileFailure = (error: Error) => ({
 })
 
 // Thunks
-// ! Important: Must have user field!
-export const deleteFile = ({ model, projectId, fileId, userId }: Omit<TFile, "type">) => async (
+export const deleteFile = ({ model, projectId, fileId, userId }: Omit<FileType, "type">) => async (
   dispatch: AppDispatch,
 ) => {
   try {

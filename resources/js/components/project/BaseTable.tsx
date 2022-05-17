@@ -130,10 +130,10 @@ const Table = ({ rawData }: Props) => {
   /*
     sorting
   */
-  const sortData = (data, { key, order }) => {
-    const defaultSort = (a, b) => {
-      let sortCache = a[key] - b[key]
-      return isNaN(sortCache) ? String(a[key]).localeCompare(b[key]) : sortCache
+  const sortData = (data: Akce[], { key, order }: { key: keyof Akce; order: SortOrder }) => {
+    const defaultSort = (a: Akce, b: Akce) => {
+      let sortCache = Number(a[key]) - Number(b[key])
+      return isNaN(sortCache) ? String(a[key]).localeCompare(String(b[key])) : sortCache
     }
 
     const sortedList =

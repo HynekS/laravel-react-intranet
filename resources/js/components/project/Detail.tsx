@@ -22,7 +22,7 @@ import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
 
 import type { AppState } from "../../store/rootReducer"
-import type { akce as Akce } from "../../types/model"
+import type { akce as Akce, users as User } from "../../types/model"
 
 const styles = css`
   fieldset {
@@ -96,12 +96,12 @@ function formatDate(date: Date, format: string, locale: Locale | undefined) {
   return dateFnsFormat(date, format, { locale })
 }
 
-type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
+type DetailProps = { detail: Akce & { user: User } }
 
 const Detail = ({ detail }: DetailProps) => {
   const dispatch = useDispatch()
   const userId = useSelector((store: AppState) => store.auth.user.id)
-  const activeUsers = useSelector((store: AppState) => store.meta.activeUsers)
+  const activeUsers: User[] = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
   const { c_akce, id_akce: id } = detail || {}
 

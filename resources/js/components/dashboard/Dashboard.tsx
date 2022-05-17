@@ -7,12 +7,24 @@ import client from "../../utils/axiosWithDefaults"
 // Todo move DetailPage out of project (it is a layout stuff)
 import DetailPage from "../project/DetailPage"
 
-import type { akce as Akce, updates as Update } from "@/types/model"
+import type { akce as Akce, updates as Update, users as User } from "@/types/model"
+
+type UpdateListItem = {
+  akce: {
+    id_akce: number
+    cislo_per_year: number
+    rok_per_year: number
+    nazev_akce: string
+  }
+  akce_id: number
+  id: number
+  updates: Array<Update & { user: Pick<User, "id" | "full_name"> }>
+}
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [searchResults, setSearchResults] = useState<Akce[]>([])
-  const [updateList, setUpdateList] = useState<Update[]>([])
+  const [updateList, setUpdateList] = useState<UpdateListItem[]>([])
 
   const debouncedValue = useDebouncedValue(searchTerm, 500)
 
