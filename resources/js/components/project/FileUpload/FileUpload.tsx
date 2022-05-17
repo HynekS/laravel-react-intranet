@@ -228,6 +228,7 @@ const FileUpload = ({
                   dispatch(setInitialState())
                   modalCloseCallback()
                 }}
+                tw="text-gray-500 duration-300 bg-transparent mr-4 hocus:(text-gray-600 bg-transparent) focus:(outline-none ring transition-shadow duration-300)"
               >
                 zrušit
               </Button>
