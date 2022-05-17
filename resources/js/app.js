@@ -15,13 +15,15 @@ import HomePage from "./components/HomePage"
 
 const App = () => {
   return (
-    <Provider store={configuredStore}>
-      <BrowserRouter>
-        <GlobalStyles />
-        <Global styles={globalStyles} />
-        <HomePage />
-      </BrowserRouter>
-    </Provider>
+    <React.StrictMode>
+      <Provider store={configuredStore}>
+        <BrowserRouter>
+          <GlobalStyles />
+          <Global styles={globalStyles} />
+          <HomePage />
+        </BrowserRouter>
+      </Provider>
+    </React.StrictMode>
   )
 }
 
