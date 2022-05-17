@@ -1,15 +1,14 @@
-import { useState, Dispatch } from "react"
+import { Dispatch } from "react"
 import { useDispatch } from "react-redux"
 import tw from "twin.macro"
 
-import useOuterClick from "../../hooks/useOuterClick"
-
 import { deletePointgroup, updatePointgroup } from "../../store/pointgroups"
 
+import { Dropdown, DropdownItem } from "../common/Dropdown"
 import SvgLine from "../icons/SvgLine"
 import SvgPoint from "../icons/SvgPoint"
 import SvgPolygon from "../icons/SvgPolygon"
-import { DotsHorizontalIcon, TrashIcon } from "@heroicons/react/solid"
+import { TrashIcon } from "@heroicons/react/solid"
 
 import type { pointgroups as Pointgroup, points as Point } from "@/types/model"
 
@@ -35,10 +34,6 @@ const GeoFeaturesPointgroup = ({
   setActiveIndex,
 }: Props) => {
   const dispatch = useDispatch()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const innerRef = useOuterClick<HTMLDivElement>(() => {
-    setIsMenuOpen(false)
-  })
 
   const switchType = (feature_type: Pointgroup["feature_type"], id: number, i: number) => {
     setData(prevState =>
@@ -97,27 +92,13 @@ const GeoFeaturesPointgroup = ({
           >
             <SvgPolygon tw="w-6 h-6 p-1 fill-current" />
           </button>
-          <div ref={innerRef} tw="relative inline-block">
-            <button tw="flex items-center pl-2" onClick={() => setIsMenuOpen(true)}>
-              <DotsHorizontalIcon tw="flex w-5 h-6 opacity-50" />
-            </button>
-            <div
-              css={[
-                tw`absolute right-0 z-10 invisible text-sm bg-white rounded shadow top-full`,
-                isMenuOpen && tw`visible`,
-              ]}
-            >
-              <button
-                tw="flex items-center w-full p-2 pr-4 rounded rounded-b-none focus:(outline-none) hocus:(bg-gray-200) transition-colors duration-300"
-                onClick={() => {
-                  dispatch(deletePointgroup({ pointgroupId: id, projectId }))
-                }}
-              >
-                <TrashIcon tw="flex w-5 mr-2 opacity-50" />
-                Odstranit
-              </button>
-            </div>
-          </div>
+          <Dropdown tw="relative inline-block">
+            <DropdownItem
+              onClick={() => dispatch(deletePointgroup({ pointgroupId: id, projectId }))}
+              Icon={TrashIcon}
+              label="Odstranit"
+            />
+          </Dropdown>
         </div>
       </div>
       <ul tw="text-xs">

@@ -1,16 +1,14 @@
-import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import fileDownload from "js-file-download"
-import tw from "twin.macro"
-
-import useOuterClick from "../../../hooks/useOuterClick"
 
 import { deleteFile } from "../../../store/files"
 import client from "../../../utils/axiosWithDefaults"
 import getFileExtension from "../../../utils/getFileExtension"
 
-import { DotsHorizontalIcon, DownloadIcon } from "@heroicons/react/outline"
+import { DownloadIcon } from "@heroicons/react/outline"
 import { TrashIcon } from "@heroicons/react/solid"
+
+import { Dropdown, DropdownItem } from "../../common/Dropdown"
 
 import type { AppState } from "../../../store/rootReducer"
 import type {
@@ -52,12 +50,6 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
   const { id: userId } = useSelector((store: AppState) => store.auth.user)
   const dispatch = useDispatch()
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const innerRef = useOuterClick<HTMLDivElement>(() => {
-    setIsMenuOpen(false)
-  })
-
   const path = file?.file_path
   const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
 
@@ -95,33 +87,14 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
             </span>
           </span>
         </button>
-        <div ref={innerRef} tw="relative px-2 height[max-content]  self-start">
-          <button tw="flex items-center pl-2" onClick={() => setIsMenuOpen(true)}>
-            <DotsHorizontalIcon tw="flex w-5 h-6 opacity-50" />
-          </button>
-          <div
-            css={[
-              tw`text-gray-500 absolute right-0 z-10 invisible text-sm bg-white rounded shadow-lg top-full /*before:(absolute bottom-full right-2.5 w-3 h-3 border-transparent border-8 border-b-white)*/`,
-              isMenuOpen && tw`visible`,
-            ]}
-          >
-            <div tw=" h-5 w-5 absolute bottom-full right-2 overflow-hidden after:(absolute h-2.5 w-2.5 rotate-45 bg-white shadow-md left-1/2 top-1/2 translate-y-1/2 translate-x--1/2)" />
-            <button
-              tw="font-medium flex items-center w-full p-2 pr-4 rounded first-of-type:(rounded-b-none) last-of-type:(rounded-t-none) focus:(outline-none) hocus:(bg-gray-200 text-gray-900) transition-colors duration-300"
-              onClick={() => dispatch(deleteFile({ model, projectId, fileId, userId }))}
-            >
-              <TrashIcon tw="flex w-5 mr-2 opacity-50" />
-              Odstranit
-            </button>
-            <button
-              tw="font-medium flex items-center w-full p-2 pr-4 rounded first-of-type:(rounded-b-none) last-of-type:(rounded-t-none) focus:(outline-none) hocus:(bg-gray-200 text-gray-900) transition-colors duration-300"
-              onClick={() => onDownload(path)}
-            >
-              <DownloadIcon tw="flex w-5 mr-2 opacity-50" />
-              Uložit
-            </button>
-          </div>
-        </div>
+        <Dropdown>
+          <DropdownItem
+            onClick={() => dispatch(deleteFile({ model, projectId, fileId, userId }))}
+            Icon={TrashIcon}
+            label="Odstranit"
+          />
+          <DropdownItem onClick={() => onDownload(path)} Icon={DownloadIcon} label="uložit" />
+        </Dropdown>
       </div>
     </div>
   ) : null
