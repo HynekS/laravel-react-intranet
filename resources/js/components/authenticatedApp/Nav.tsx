@@ -11,7 +11,7 @@ import type { RootState } from "../../store/configuredStore"
 
 const Container = tw.section`flex flex-wrap justify-between py-2 px-4 border-b`
 const StyledNavLink = styled(NavLink)`
-  ${tw`p-2 text-blue-500 hover:text-blue-800`}
+  ${tw`p-2 font-semibold text-blue-500 hover:text-blue-700`}
   &.active {
     ${tw`bg-blue-100`}
   }
