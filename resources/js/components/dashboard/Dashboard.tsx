@@ -134,24 +134,24 @@ const Dashboard = () => {
             <h2 tw="mb-2 text-sm font-bold text-gray-700">poslední aktualizace</h2>
             {updateList.length ? (
               <ul tw="text-xs">
-                {updateList.map(result => (
-                  <li tw="py-2">
+                {updateList.map(project => (
+                  <li tw="py-2" key={project.id}>
                     <h3 tw="pb-1 text-xs font-semibold">
                       <Link
-                        to={`/akce/${result.akce.rok_per_year}/${result.akce.cislo_per_year}`}
+                        to={`/akce/${project.akce.rok_per_year}/${project.akce.cislo_per_year}`}
                         tw="flex gap-2"
                       >
                         <span tw="block">
-                          {`${result.akce.cislo_per_year}/${String(result.akce.rok_per_year).slice(
-                            2,
-                          )}`}
+                          {`${project.akce.cislo_per_year}/${String(
+                            project.akce.rok_per_year,
+                          ).slice(2)}`}
                         </span>
-                        <span tw="flex-1 block">{result.akce.nazev_akce}</span>
+                        <span tw="flex-1 block">{project.akce.nazev_akce}</span>
                       </Link>
                     </h3>
                     <ul tw="pb-2 pl-2 text-gray-500">
-                      {result.updates.map(update => (
-                        <li tw="flex justify-between gap-2 px-2 pt-2 border-l">
+                      {project.updates.map(update => (
+                        <li tw="flex justify-between gap-2 px-2 pt-2 border-l" key={update.id}>
                           <div tw="min-width[9ch] text-right tabular-nums font-semibold text-gray-400">
                             {new Date(update.created_at)
                               .toLocaleDateString(undefined, {
