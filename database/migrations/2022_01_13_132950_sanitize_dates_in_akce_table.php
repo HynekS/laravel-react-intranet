@@ -42,9 +42,6 @@ class SanitizeDatesInAkceTable extends Migration
                 } elseif (is_string($result->{"datum_{$modifier}"})) {
                     $attempt = self::tryToParse($result->{"datum_{$modifier}"});
 
-                    $output = new Symfony\Component\Console\Output\ConsoleOutput();
-                    $output->writeln("Modifier: " . "{$modifier}" . "Datum: " . $result->{"datum_{$modifier}"} . "Carbon: " . $attempt);
-
                     if ($attempt) {
                         DB::table('akce')
                             ->where('id_akce', $result->id_akce)
