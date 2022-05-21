@@ -1,71 +1,58 @@
 import { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { useSelector, useDispatch } from "react-redux"
+import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
 import DayPickerInput from "react-day-picker/DayPickerInput"
 import "react-day-picker/lib/style.css"
-
 import dateFnsFormat from "date-fns/format"
 import dateFnsParse from "date-fns/parse"
 import { DateUtils } from "react-day-picker"
+import { TrashIcon } from "@heroicons/react/solid"
 
-import { updateProject } from "../../store/projects"
+import { createProject, updateProject, deleteProject } from "../../store/projects"
 import { fetchActiveUsers } from "../../store/meta"
 
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
-import Input from "../common/Input"
+import Input, { InputProps, StyleScopeObject } from "../common/Input"
 import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
+import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
 
 import type { AppState } from "../../store/rootReducer"
 import type { akce as Akce, users as User } from "../../types/model"
 
-const styles = css`
-  fieldset {
-    border-bottom: 1px solid gray;
-    padding: 0.5rem;
-  }
-  .fieldWrapper {
-    ${tw`pb-2 md:(flex items-center)`}
-  }
-  .labelWrapper {
-    ${tw`md:(w-1/4)`}
-    & label {
-      ${tw`block text-gray-600 font-semibold pb-1 md:(text-right mb-0 pr-4)`}
-    }
-  }
-  .inputWrapper {
-    ${tw`relative md:(w-3/4)`}
-    & .DayPickerInput {
-      position: relative;
-      &::after {
-        ${tw`absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current`}
-        content: "";
-        background: url(/images/calendar-solid.svg) no-repeat center;
-      }
-    }
-    & input[type="text"],
-    .DayPickerInput input {
-      ${tw`bg-gray-200 appearance-none border-2 border-gray-200 rounded py-1 px-2 text-gray-700 leading-tight focus:(outline-none bg-white border-blue-500)`}
-    }
-    & input[type="checkbox"] {
-      ${tw`w-auto focus:(outline-none ring)`}
-    }
-    & select {
-      ${tw`block appearance-none border-2 w-full bg-white border-gray-300 p-2 pr-8 rounded leading-tight hover:(border-gray-400) focus:(outline-none bg-white border-blue-500)`}
-    }
-    & .hasError {
-      ${tw`border-red-400`}
-    }
-  }
-  .errorMessage {
-    ${tw`absolute left-0 z-10 inline-block p-1 pr-2 text-xs bg-white rounded shadow-sm top-full`}
-  }
-`
+const styles = {
+  fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
+  labelWrapper: tw`pr-4 md:(w-60 flex items-center justify-end) lg:(w-72) xl:(w-80)`,
+  label: tw`font-semibold`,
+  inputWrapper: tw`relative w-full flex-1`,
+  input: tw`border border-gray-200 text-gray-600 rounded-sm py-0.5 px-1.5 width[20ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300) placeholder:(text-gray-300)`,
+  inputError: tw`border-red-400 focus:(ring-red-400)`,
+  errorMessage: tw`absolute left-0 z-10 top-full inline-block p-1 pr-2 text-xs bg-white rounded shadow-sm text-red-400 flex border-red-300`,
+}
+
+const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScopeObject = {}) => {
+  let result = { ...styles }
+  ;(Object.keys(result) as Array<keyof StyleScopeObject>).forEach(key => {
+    result[key] = overrides[key] ? [result[key]].concat(overrides[key]).flat() : result[key]
+  })
+  return result
+}
+
+const DefaultInput = ({ overrides, ...props }: InputProps) => (
+  <Input {...props} styles={mergeStyles(styles, overrides)} />
+)
+
+const DefaultFieldset = ({ children, ...props }) => (
+  <fieldset tw="pb-5" {...props}>
+    {children}
+  </fieldset>
+)
 
 /* A lot of that can be probably delegated to 'valueAsNumber' prop, but we still has to deal with isNaN or null value */
 const transformFormValues = data => ({
@@ -77,7 +64,7 @@ const transformFormValues = data => ({
   registrovano_bit: Number(data.registrovano_bit),
   id_stav: Number(data.id_stav),
   nalez: data.nalez === "null" ? null : Number(data.nalez),
-  owner_id: Number(data.owner_id),
+  user_id: Number(data.user_id),
   zaa_hlaseno: Number(data.zaa_hlaseno),
 
   datum_pocatku: data.datum_pocatku && data.datum_pocatku.toISOString().split("T")[0],
@@ -96,14 +83,20 @@ function formatDate(date: Date, format: string, locale: Locale | undefined) {
   return dateFnsFormat(date, format, { locale })
 }
 
-type DetailProps = { detail: Akce & { user: User } }
+type Detail = Akce & { user: User }
 
-const Detail = ({ detail }: DetailProps) => {
+type DetailProps = {
+  detail?: Akce & { user: User }
+  type: "update" | "create"
+}
+
+const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const userId = useSelector((store: AppState) => store.auth.user.id)
   const activeUsers: User[] = useSelector((store: AppState) => store.meta.activeUsers)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
-  const { c_akce, id_akce: id } = detail || {}
+  const { c_akce, id_akce: id, rok_per_year } = detail
 
   useEffect(() => {
     if (detail) {
@@ -123,73 +116,127 @@ const Detail = ({ detail }: DetailProps) => {
     }
   }, [])
 
-  const onSubmit = data => dispatch(updateProject({ id, userId, ...transformFormValues(data) }))
+  const onSubmit = data => {
+    if (type === "update")
+      return dispatch(updateProject({ id, userId, ...transformFormValues(data) }))
+    if (type === "create")
+      return dispatch(createProject({ userId, ...transformFormValues(data) }, navigate))
+    return
+  }
 
   const boundTitle = watch("nazev_akce")
   const dateValues = watch(["datum_pocatku", "datum_ukonceni"])
 
   return (
     <DetailWrapper>
-      <h1 tw="pb-4 text-xl font-semibold text-gray-700">
-        {c_akce}&ensp;{boundTitle}
-      </h1>
-      <form onSubmit={handleSubmit(onSubmit)} /*ref={formRef}*/ css={styles}>
-        <div>
-          <div>
-            <fieldset>
-              <Input
-                name="nazev_akce"
-                label="název akce"
-                placeholder="název akce"
-                register={register({ required: true })}
-              />
-            </fieldset>
+      <form onSubmit={handleSubmit(onSubmit)} tw="pb-4">
+        <div tw="flex justify-between items-start">
+          <h1 tw="pb-4 text-xl font-semibold text-gray-700">
+            {c_akce}&ensp;{boundTitle}
+          </h1>
+          <div tw="flex items-center">
+            {type === "update" && (
+              <Dropdown tw="mr-4 my-auto">
+                <DropdownItem
+                  onClick={() => {
+                    return dispatch(
+                      deleteProject(
+                        { id, userId, year: Number(rok_per_year), project: detail },
+                        navigate,
+                      ),
+                    )
+                  }}
+                  Icon={TrashIcon}
+                  label="Odstranit&nbsp;akci"
+                />
+              </Dropdown>
+            )}
+            <Button type="submit">
+              {type === "update" ? "Uložit\u00a0změny" : "Vytvořit\u00a0akci"}
+            </Button>
           </div>
-          <div>
-            <fieldset>
-              <Input type="checkbox" name="objednavka" label="objednávka" register={register} />
-              <Input
+        </div>
+        <div>
+          <DefaultFieldset>
+            <DefaultInput
+              name="nazev_akce"
+              label="název akce"
+              placeholder="název akce"
+              register={register({
+                required: { value: true, message: "toto pole je třeba vyplnit" },
+              })}
+              error={errors}
+              overrides={{ input: tw`w-7/12` }}
+            />
+          </DefaultFieldset>
+        </div>
+        <div tw="flex justify-start">
+          <div tw="w-4/12">
+            <DefaultFieldset>
+              <DefaultInput
+                type="checkbox"
+                name="objednavka"
+                label="objednávka"
+                register={register}
+                overrides={{
+                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                }}
+              />
+              <DefaultInput
                 name="objednavka_cislo"
                 label="číslo objednávky"
                 placeholder="číslo objednávky"
                 register={register}
               />
-              <Input
+              <DefaultInput
                 name="objednavka_info"
                 label="objednávka info"
                 placeholder="objednávka info"
                 register={register}
               />
-              <Input type="checkbox" name="smlouva" label="smlouva podepsána" register={register} />
-              <Input
+              <DefaultInput
+                type="checkbox"
+                name="smlouva"
+                label="smlouva podepsána"
+                register={register}
+                overrides={{
+                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                }}
+              />
+              <DefaultInput
                 name="rozpocet_B"
                 label="rozpočet dohledy"
                 placeholder="Rozpočet dohledy"
                 register={register}
               />
-              <Input
+              <DefaultInput
                 name="rozpocet_A"
                 label="rozpočet výzkum"
                 placeholder="Rozpočet výzkum"
                 register={register}
               />
-            </fieldset>
+            </DefaultFieldset>
           </div>
-
           <div>
-            <fieldset>
-              <Input
+            <DefaultFieldset>
+              <DefaultInput
                 type="checkbox"
                 name="registrovano_bit"
                 label="registrováno v databázi"
                 register={register}
+                overrides={{
+                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                }}
               />
-              <Input
+              <DefaultInput
                 name="registrace_info"
                 label="id registrace"
                 placeholder="id registrace"
                 register={register}
+                overrides={{ input: tw`width[26ch]` }}
               />
+            </DefaultFieldset>
+            <DefaultFieldset>
               <Select
                 name="id_stav"
                 label="stav"
@@ -202,55 +249,8 @@ const Detail = ({ detail }: DetailProps) => {
                   { label: "✔️ 4 (hotovo)", value: 4 },
                 ]}
                 register={register}
+                styles={mergeStyles(styles, { input: tw`width[26ch]` })}
               />
-            </fieldset>
-          </div>
-
-          <div>
-            <fieldset>
-              <Input
-                name="investor_jmeno"
-                label="název investora"
-                placeholder="jméno investora"
-                register={register}
-              />
-              <Input
-                name="investor_kontakt"
-                label="zástupce investora"
-                placeholder="zástupce investora"
-                register={register}
-              />
-              <Input
-                name="investor_adresa"
-                label="sídlo investora"
-                placeholder="sídlo investora"
-                register={register}
-              />
-              <Input
-                name="investor_ico"
-                label="IČO investora"
-                placeholder="IČO investora"
-                register={register}
-              />
-            </fieldset>
-          </div>
-
-          <div>
-            <fieldset>
-              <Input name="katastr" label="katastr" placeholder="katastr" register={register} />
-              <Input
-                type="text"
-                name="okres"
-                label="okres"
-                placeholder="okres"
-                register={register}
-              />
-              <Input type="text" name="kraj" label="kraj" placeholder="kraj" register={register} />
-            </fieldset>
-          </div>
-
-          <div>
-            <fieldset>
               <ButtonStyledRadio
                 name="nalez"
                 label="nález"
@@ -260,18 +260,66 @@ const Detail = ({ detail }: DetailProps) => {
                   negativní: 0,
                 }}
                 register={register}
+                styles={mergeStyles(styles, {})}
               />
-              <Input
+            </DefaultFieldset>
+          </div>
+        </div>
+        <DefaultFieldset>
+          <DefaultInput
+            name="investor_jmeno"
+            label="název investora"
+            placeholder="jméno investora"
+            register={register}
+            overrides={{ input: tw`w-7/12` }}
+          />
+          <DefaultInput
+            name="investor_kontakt"
+            label="zástupce investora"
+            placeholder="zástupce investora"
+            register={register}
+            overrides={{ input: tw`w-7/12` }}
+          />
+          <DefaultInput
+            name="investor_adresa"
+            label="sídlo investora"
+            placeholder="sídlo investora"
+            register={register}
+            overrides={{ input: tw`w-7/12` }}
+          />
+          <DefaultInput
+            name="investor_ico"
+            label="IČO investora"
+            placeholder="IČO investora"
+            register={register}
+          />
+        </DefaultFieldset>
+        <div tw="flex">
+          <div tw="w-4/12">
+            <DefaultFieldset>
+              <DefaultInput
                 name="datum_pocatku_text"
-                label="předběžné datum pořátku"
+                label="předběžné datum počátku"
                 register={register}
               />
-              <div className="fieldWrapper">
-                <div className="labelWrapper">
-                  <label>datum počátku</label>
+              <div className="fieldWrapper" css={[styles.fieldWrapper]}>
+                <div className="labelWrapper" css={[styles.labelWrapper]}>
+                  <label css={[styles.label]}>datum počátku</label>
                 </div>
-                <div className="inputWrapper">
+                <div
+                  className="inputWrapper"
+                  css={css`
+                    ${styles.inputWrapper}
+                    & .DayPickerInput {
+                      ${tw`relative after:(absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current background[url(/images/calendar-solid.svg) no-repeat center])`}
+                      & input {
+                        ${styles.input}
+                      }
+                    }
+                  `}
+                >
                   <Controller
+                    tw="border border-gray-200 text-gray-500 rounded-sm py-0.5 px-1.5 width[24ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300)"
                     as={DayPickerInput}
                     control={control}
                     name="datum_pocatku"
@@ -295,17 +343,28 @@ const Detail = ({ detail }: DetailProps) => {
                   />
                 </div>
               </div>
-              <Input
+              <DefaultInput
                 type="text"
                 name="datum_ukonceni_text"
                 label="předběžné datum ukončení"
                 register={register}
               />
-              <div className="fieldWrapper">
-                <div className="labelWrapper">
-                  <label>datum ukončení</label>
+              <div className="fieldWrapper" css={[styles.fieldWrapper]}>
+                <div className="labelWrapper" css={[styles.labelWrapper]}>
+                  <label css={[styles.label]}>datum ukončení</label>
                 </div>
-                <div className="inputWrapper">
+                <div
+                  className="inputWrapper"
+                  css={css`
+                    ${styles.inputWrapper}
+                    & .DayPickerInput {
+                      ${tw`relative after:(absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current background[url(/images/calendar-solid.svg) no-repeat center])`}
+                      & input {
+                        ${styles.input}
+                      }
+                    }
+                  `}
+                >
                   <Controller
                     as={DayPickerInput}
                     control={control}
@@ -331,7 +390,7 @@ const Detail = ({ detail }: DetailProps) => {
                 </div>
               </div>
               <Select
-                name="owner_id"
+                name="user_id"
                 label="zajišťuje"
                 options={activeUsers
                   .map(user => ({
@@ -348,9 +407,33 @@ const Detail = ({ detail }: DetailProps) => {
                         },
                   )}
                 register={register}
+                styles={mergeStyles(styles, {})}
               />
-            </fieldset>
-            <Button type="submit">Uložit změny</Button>
+            </DefaultFieldset>
+          </div>
+          <div>
+            <DefaultFieldset>
+              <DefaultInput
+                name="katastr"
+                label="katastr"
+                placeholder="katastr"
+                register={register}
+              />
+              <DefaultInput
+                type="text"
+                name="okres"
+                label="okres"
+                placeholder="okres"
+                register={register}
+              />
+              <DefaultInput
+                type="text"
+                name="kraj"
+                label="kraj"
+                placeholder="kraj"
+                register={register}
+              />
+            </DefaultFieldset>
           </div>
         </div>
       </form>

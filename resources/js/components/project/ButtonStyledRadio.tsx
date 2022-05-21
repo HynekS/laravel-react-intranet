@@ -1,22 +1,39 @@
-import { jsx, css } from "@emotion/react"
-import tw from "twin.macro"
+import { css } from "@emotion/react"
+import tw, { TwStyle } from "twin.macro"
 
-const DefaultRootWrapper = ({ children }) => <div>{children}</div>
-const DefaultLabelWrapper = ({ children }) => <div>{children}</div>
-const DefaultInputWrapper = ({ children }) => <div>{children}</div>
+export type TwStyles = TwStyle | TwStyle[]
+
+export type StyleScope =
+  | "fieldWrapper"
+  | "labelWrapper"
+  | "label"
+  | "inputWrapper"
+  | "input"
+  | "errorMessage"
+
+export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
+
+type Props = {
+  name: string
+  label: string
+  options: Record<string, any>
+  error?: Record<string, { message: string }>
+  register: React.LegacyRef<HTMLInputElement> | undefined
+  ChevronComponent?: React.ElementType
+  styles?: StyleScopeObject
+  overrides?: StyleScopeObject
+} & JSX.IntrinsicElements["input"]
 
 const ButtonStyledRadio = ({
   name,
   options,
   label,
   register,
-  RootWrapperComponent = DefaultRootWrapper,
-  LabelWrapperComponent = DefaultLabelWrapper,
-  InputWrapperComponent = DefaultInputWrapper,
-  LabelComponent = "label",
+  styles = {},
+  overrides = {},
   ...props
-}) => {
-  const renderRadioButtons = (key, index, { length } = list) => {
+}: Props) => {
+  const renderRadioButtons = (key, index, self) => {
     return (
       <span key={key} tw="relative">
         <input
@@ -32,7 +49,7 @@ const ButtonStyledRadio = ({
           css={css`
             ${tw`inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid`}
             ${index === 0 && tw`border-l rounded-l-lg`}
-            ${index === length - 1 && tw`rounded-r-lg`}
+            ${index === self.length - 1 && tw`rounded-r-lg`}
           `}
         >
           {key}
@@ -43,14 +60,16 @@ const ButtonStyledRadio = ({
 
   if (name && options) {
     return (
-      <div className="fieldWrapper">
-        <div className="labelWrapper">
-          <label htmlFor={name}>{label}</label>
+      <div className="fieldWrapper" css={[styles.fieldWrapper]}>
+        <div className="labelWrapper" css={[styles.labelWrapper]}>
+          <label htmlFor={name} css={[styles.label]}>
+            {label}
+          </label>
         </div>
         <div
           className="inputWrapper"
           css={css`
-            ${tw`text-gray-500`}
+            ${styles.inputWrapper}
             & label {
               transition: all 0.2s ease-in-out;
             }
@@ -89,7 +108,7 @@ const ButtonStyledRadio = ({
       </div>
     )
   }
-  return console.warn('"name" and "options" props are required') || null
+  return null
 }
 
 export default ButtonStyledRadio

@@ -450,12 +450,12 @@ const Table = ({ rawData }: Props) => {
                 ${tw`bg-white`}
               }
               input {
-                ${tw`w-full h-5 p-1 mt-1 text-xs bg-gray-100 border border-gray-300 rounded-sm border-b-gray-200 border-r-gray-200`}
+                ${tw`w-full h-5 p-1 mt-1 text-xs bg-blue-100 border border-blue-200 rounded-sm border-b-gray-200 border-r-gray-200`}
                 &:focus:not(.focus-visible) {
                   ${tw`outline-none focus:(ring ring-2 border-blue-500 bg-blue-100)`}
                 }
                 &[value=""] {
-                  ${tw`bg-blue-100 border-blue-200`}
+                  ${tw`bg-gray-100 border-gray-300`}
                 }
               }
             `}

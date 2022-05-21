@@ -13,7 +13,7 @@ const Button = ({ type = "button", onClick, className, children, ...props }: Pro
     <button
       type={type}
       onClick={onClick}
-      css={tw`flex items-center bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4 rounded hover:(bg-blue-700) focus:(outline-none ring)`}
+      tw="flex items-center bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4 rounded hover:(bg-blue-700) focus:(outline-none ring)"
       {...{ className }}
       {...props}
     >

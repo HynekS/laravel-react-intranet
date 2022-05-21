@@ -10,35 +10,33 @@ export type StyleScope =
   | "label"
   | "inputWrapper"
   | "input"
-  | "inputError"
   | "errorMessage"
 
 export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
 
-export type InputProps = {
+export type TextAreaProps = {
   name: string
   label: string
-  register: React.RefObject<HTMLInputElement> | React.LegacyRef<HTMLInputElement>
+  // Hotfix! Possibly faullty. Try to pluck the type from useForm
+  register: React.RefObject<HTMLTextAreaElement> | React.LegacyRef<HTMLTextAreaElement>
   error?: {
     [name: string]: Error
   }
   placeholder?: string
-  type?: React.HTMLInputTypeAttribute
   styles?: StyleScopeObject
   overrides?: StyleScopeObject
-} & JSX.IntrinsicElements["input"]
+} & JSX.IntrinsicElements["textarea"]
 
-const Input = ({
+const TextArea = ({
   name,
   label,
   register,
   error = {},
   placeholder = "",
-  type = "text",
   styles = {},
   overrides = {},
   ...props
-}: InputProps) => {
+}: TextAreaProps) => {
   return (
     <div className="fieldWrapper" css={[styles.fieldWrapper]}>
       <div className="labelWrapper" css={[styles.labelWrapper]}>
@@ -47,28 +45,24 @@ const Input = ({
         </label>
       </div>
       <div className="inputWrapper" css={[styles.inputWrapper]}>
-        <input
+        <textarea
           id={name}
-          type={type}
           name={name}
           placeholder={placeholder}
           ref={register}
-          css={[styles.input, error[name] && styles.inputError]}
+          css={[styles.input]}
           className={error[name] ? "hasError" : ""}
-          onFocus={() => {
-            delete error[name]
-          }}
           {...props}
         />
-        {error[name] ? (
+        {error[name] && (
           <div className="errorMessage" css={[styles.errorMessage]}>
-            <ExclamationCircleIcon tw="w-4 h-4 fill-current mr-2 inline-block" />
-            {error[name].message || "Something is wrong with this field"}
+            <ExclamationCircleIcon />
+            {error[name].message}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   )
 }
 
-export default Input
+export default TextArea

@@ -1,6 +1,7 @@
 import type { AnyAction } from "redux"
 import { loadProgressBar } from "axios-progress-bar"
 import type { akce as Akce } from "../types/model"
+import type { NavigateFunction } from "react-router"
 
 import client from "../utils/axiosWithDefaults"
 
@@ -107,9 +108,17 @@ const FETCH_SINGLE_PROJECT_INITIALIZED = "[projects] Fetching single project has
 const FETCH_SINGLE_PROJECT_SUCCESS = "[projects] Fetching single project was succesful"
 const FETCH_SINGLE_PROJECT_FAILURE = "[projects] Fetching single project has failed"
 
+const CREATE_PROJECT_INITIALIZED = "[projects] Creating project has started"
+const CREATE_PROJECT_SUCCESS = "[projects] Creating projects was succesful"
+const CREATE_PROJECT_FAILURE = "[projects] Creating project has failed"
+
 const UPDATE_PROJECT_INITIALIZED = "[projects] Updating project has started"
 const UPDATE_PROJECT_SUCCESS = "[projects] Updating projects was succesful"
 const UPDATE_PROJECT_FAILURE = "[projects] Updating project has failed"
+
+const DELETE_PROJECT_INITIALIZED = "[projects] Deleting project has started"
+const DELETE_PROJECT_SUCCESS = "[projects] Deleting projects was succesful"
+const DELETE_PROJECT_FAILURE = "[projects] Deleting project has failed"
 
 // Reducer
 export default function reducer(state: InitialState = initialState, action: AnyAction) {
@@ -150,9 +159,22 @@ export default function reducer(state: InitialState = initialState, action: AnyA
         idsByYear: {
           ...state.idsByYear,
           [action.year]: [
-            // BEWARE: this throws error (luckily catchable) if year has no projects
-            ...new Set([...state.idsByYear[action.year], ...Object.keys(action.projectsOfOneYear)]),
+            ...new Set([
+              ...(state.idsByYear[action.year] || []),
+              ...Object.keys(action.projectsOfOneYear),
+            ]),
           ],
+        },
+      }
+    case CREATE_PROJECT_SUCCESS:
+      return {
+        ...state,
+        byId: {
+          ...state.byId,
+          [action.id]: {
+            ...state.byId[action.id],
+            ...action.createdProject,
+          },
         },
       }
     case UPDATE_PROJECT_SUCCESS:
@@ -165,6 +187,12 @@ export default function reducer(state: InitialState = initialState, action: AnyA
             ...action.updatedProject,
           },
         },
+      }
+    case DELETE_PROJECT_SUCCESS:
+      const { [action.id]: deleted, ...withoutDeletedProject } = state.byId
+      return {
+        ...state,
+        byId: withoutDeletedProject,
       }
     case CREATE_INVOICE_INITIALIZED:
     case UPDATE_INVOICE_INITIALIZED:
@@ -281,7 +309,10 @@ export const fetchProjectsOfOneYearInit = (year: number) => ({
   year,
 })
 
-export const fetchProjectsOfOneYearSuccess = (projectsOfOneYear: Akce[], year: number) => ({
+export const fetchProjectsOfOneYearSuccess = (
+  projectsOfOneYear: { [key: string]: Akce },
+  year: number,
+) => ({
   type: FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(year),
   projectsOfOneYear,
   year,
@@ -293,6 +324,16 @@ export const fetchProjectsOfOneYearFailure = (year: number, error: Error) => ({
   year,
 })
 
+export const createProjectInit = () => ({ type: CREATE_PROJECT_INITIALIZED })
+
+export const createProjectSuccess = (id: number, createdProject: Akce) => ({
+  type: CREATE_PROJECT_SUCCESS,
+  id,
+  createdProject,
+})
+
+export const createProjectFailure = (error: Error) => ({ type: CREATE_PROJECT_FAILURE, error })
+
 export const updateProjectInit = () => ({ type: UPDATE_PROJECT_INITIALIZED })
 
 export const updateProjectSuccess = (id: number, updatedProject: Akce) => ({
@@ -302,6 +343,15 @@ export const updateProjectSuccess = (id: number, updatedProject: Akce) => ({
 })
 
 export const updateProjectFailure = (error: Error) => ({ type: UPDATE_PROJECT_FAILURE, error })
+
+export const deleteProjectInit = () => ({ type: DELETE_PROJECT_INITIALIZED })
+
+export const deleteProjectSuccess = (id: number) => ({
+  type: DELETE_PROJECT_SUCCESS,
+  id,
+})
+
+export const deleteProjectFailure = (error: Error) => ({ type: DELETE_PROJECT_FAILURE, error })
 
 export const fetchSingleProjectInit = () => ({ type: FETCH_SINGLE_PROJECT_INITIALIZED })
 
@@ -368,6 +418,48 @@ export const updateProject = ({ id, userId, ...project }) => async (dispatch: Ap
   } catch (error) {
     console.log(error)
     dispatch(updateProjectFailure(error as Error))
+  }
+  loadProgressBar({ progress: false })
+}
+
+export const createProject = (
+  { userId, ...project }: { userId: number; project: Akce },
+  navigate: NavigateFunction,
+) => async (dispatch: AppDispatch) => {
+  try {
+    dispatch(createProjectInit())
+    loadProgressBar({}, client)
+    const response = await client.post(`akce`, { userId, ...project })
+    if (response) {
+      const data = response.data || {}
+      dispatch(createProjectSuccess(data.id_akce, data))
+      navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
+    }
+  } catch (error) {
+    console.log(error)
+    dispatch(createProjectFailure(error as Error))
+  }
+  loadProgressBar({ progress: false })
+}
+
+export const deleteProject = (
+  { id, userId, year, ...project }: { id: number; userId: number; year: number; project: Akce },
+  navigate: NavigateFunction,
+) => async (dispatch: AppDispatch) => {
+  try {
+    dispatch(deleteProjectInit())
+    loadProgressBar({}, client)
+    const response = await client.delete(`akce/${id}`, {
+      data: { userId, id_akce: id, ...project },
+    })
+    if (response) {
+      const data = response.data || {}
+      dispatch(deleteProjectSuccess(id))
+      navigate(`/akce/${year}`)
+    }
+  } catch (error) {
+    console.log(error)
+    dispatch(deleteProjectFailure(error as Error))
   }
   loadProgressBar({ progress: false })
 }

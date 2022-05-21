@@ -20,6 +20,7 @@ export const DropdownItem = ({ onClick, Icon, label, ...props }: DropdownItemPro
     <button
       tw="font-medium flex items-center w-full p-2 pr-4 rounded first-of-type:(rounded-b-none) last-of-type:(rounded-t-none) focus:(outline-none) hocus:(bg-gray-200 text-gray-900) transition-colors duration-300"
       onClick={onClick}
+      type="button"
       {...props}
     >
       <Icon tw="flex w-5 mr-2 opacity-50" />
@@ -37,12 +38,12 @@ export const Dropdown = ({ children, ...props }: DropdownProps) => {
 
   return (
     <div ref={innerRef} tw="relative px-2 height[max-content]  self-start" {...props}>
-      <button tw="flex items-center pl-2" onClick={() => setIsMenuOpen(true)}>
+      <button tw="flex items-center pl-2" onClick={() => setIsMenuOpen(true)} type="button">
         <DotsHorizontalIcon tw="flex w-5 h-6 opacity-50" />
       </button>
       <div
         css={[
-          tw`text-gray-500 absolute right-0 z-10 invisible text-sm bg-white rounded shadow border border-gray-200 top-full /*before:(absolute bottom-full right-2.5 w-3 h-3 border-transparent border-8 border-b-white)*/`,
+          tw`text-gray-500 absolute right-0 z-10 invisible text-sm bg-white rounded shadow border border-gray-200 top-full`,
           isMenuOpen && tw`visible`,
         ]}
       >

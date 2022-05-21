@@ -1,12 +1,14 @@
 import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
+import tw from "twin.macro"
 
 import client from "../../utils/axiosWithDefaults"
 import DetailWrapper from "./DetailWrapper"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
 import Button from "../common/Button"
-import Input from "../common/Input"
+import Input, { InputProps, StyleScopeObject } from "../common/Input"
+import TextArea from "../common/TextArea"
 
 import { updateProject } from "../../store/projects"
 
@@ -14,6 +16,26 @@ import type { AppState } from "../../store/rootReducer"
 import type { akce as Akce } from "../../types/model"
 
 type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
+
+const styles = {
+  fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
+  labelWrapper: tw`pr-4 md:(w-2/6 flex items-center justify-end) lg:(w-3/12) xl:(w-2/12)`,
+  label: tw`font-semibold`,
+  inputWrapper: tw`w-full`,
+  input: tw`border border-gray-200 text-gray-500 rounded-sm py-0.5 px-1.5 width[24ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300)`,
+}
+
+const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScopeObject = {}) => {
+  let result = { ...styles }
+  ;(Object.keys(result) as Array<keyof StyleScopeObject>).forEach(key => {
+    result[key] = overrides[key] ? [result[key]].concat(overrides[key]).flat() : result[key]
+  })
+  return result
+}
+
+const DefaultInput = ({ overrides, ...props }: InputProps) => (
+  <Input {...props} styles={mergeStyles(styles, overrides)} />
+)
 
 const ApprovalSheet = ({ detail }: DetailProps) => {
   const userId = useSelector((store: AppState) => store.auth.user.id)
@@ -39,53 +61,77 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
     <DetailWrapper>
       <h1>Expertní list</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Input name="EL_lokalita" label="lokalita" placeholder="lokalita" register={register} />
-        <Input
+        <DefaultInput
+          name="EL_lokalita"
+          label="lokalita"
+          placeholder="lokalita"
+          register={register}
+          overrides={{ input: tw`md:(w-96)` }}
+        />
+        <DefaultInput
           name="EL_Termin"
           label="termín kontrol"
           placeholder="termín kontrol"
           register={register}
         />
-        <Input name="EL_Forma" label="forma" placeholder="forma" register={register} />
+        <DefaultInput
+          name="EL_Forma"
+          label="forma"
+          placeholder="forma"
+          register={register}
+          overrides={{ input: tw`md:(w-96)` }}
+        />
 
-        <Input name="EL_Denik" label="deník" placeholder="deník" register={register} />
-        <Input
+        <DefaultInput name="EL_Denik" label="deník" placeholder="deník" register={register} />
+        <DefaultInput
           name="EL_fotodokumentace"
           label="fotodokumentace"
           placeholder="fotodokumentace"
           register={register}
         />
-        <Input
+        <DefaultInput
           name="EL_kresebna_a_textova"
           label="kresebná či textová dokumentace"
           placeholder="kresebná či textová dokumentace"
           register={register}
         />
-        <Input
+        <DefaultInput
           name="EL_Dokumentovane"
           label="dokumentované situace"
           placeholder="dokumentované situace"
           register={register}
         />
-        <Input
+        <DefaultInput
           name="EL_Movite"
           label="movité nálezy"
           placeholder="dokumentace"
           register={register}
         />
-        <Input
+        <DefaultInput
           name="EL_ulozeni"
           label="uložení movitých nálezů"
           placeholder="uložení movitých nálezů"
           register={register}
         />
-        <Input name="EL_Popis" label="popis" placeholder="popis" register={register} />
-        <Input name="EL_datum" label="datum tisku" placeholder="datum tisku" register={register} />
-        <Input
+        <TextArea
+          name="EL_Popis"
+          label="popis"
+          placeholder="popis"
+          register={register}
+          styles={mergeStyles(styles, { input: tw`w-96 resize max-w-full` })}
+        />
+        <DefaultInput
+          name="EL_datum"
+          label="datum tisku"
+          placeholder="datum tisku"
+          register={register}
+        />
+        <DefaultInput
           type="checkbox"
           name="EL_hotovo"
           label="údaje pro expertní list jsou vloženy"
           register={register}
+          overrides={{ input: tw`w-auto` }}
         />
       </form>
       <Button

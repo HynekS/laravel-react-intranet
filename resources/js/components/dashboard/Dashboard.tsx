@@ -15,7 +15,7 @@ type UpdateListItem = {
     cislo_per_year: number
     rok_per_year: number
     nazev_akce: string
-  }
+  } | null
   akce_id: number
   id: number
   updates: Array<Update & { user: Pick<User, "id" | "full_name"> }>
@@ -137,17 +137,21 @@ const Dashboard = () => {
                 {updateList.map(project => (
                   <li tw="py-2" key={project.id}>
                     <h3 tw="pb-1 text-xs font-semibold">
-                      <Link
-                        to={`/akce/${project.akce.rok_per_year}/${project.akce.cislo_per_year}`}
-                        tw="flex gap-2"
-                      >
-                        <span tw="block">
-                          {`${project.akce.cislo_per_year}/${String(
-                            project.akce.rok_per_year,
-                          ).slice(2)}`}
-                        </span>
-                        <span tw="flex-1 block">{project.akce.nazev_akce}</span>
-                      </Link>
+                      {project.akce ? (
+                        <Link
+                          to={`/akce/${project.akce.rok_per_year}/${project.akce.cislo_per_year}`}
+                          tw="flex gap-2"
+                        >
+                          <span tw="block">
+                            {`${project.akce.cislo_per_year}/${String(
+                              project.akce.rok_per_year,
+                            ).slice(2)}`}
+                          </span>
+                          <span tw="flex-1 block">{project.akce.nazev_akce}</span>
+                        </Link>
+                      ) : (
+                        "(Odstranněná akce)"
+                      )}
                     </h3>
                     <ul tw="pb-2 pl-2 text-gray-500">
                       {project.updates.map(update => (

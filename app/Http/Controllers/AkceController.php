@@ -18,8 +18,20 @@ class AkceController extends Controller
 
     public function store(Request $request)
     {
-        // TODO need transform at least the 'nalez' field types
-        $akce = new Akce($request->validated());
+        $validated = $request->validate([
+            'nazev_akce' => 'required|unique:akce',
+        ]);
+
+        $akce = new Akce($validated);
+
+        $currentYear = (new \DateTime)->format("Y");
+        $latestCurrentYearProject = Akce::where("rok_per_year", "=", $currentYear)->orderBy("cislo_per_year", "desc")->first();
+        $yearly_id = $latestCurrentYearProject ? (int) $latestCurrentYearProject->cislo_per_year + 1 : 1;
+
+        $akce->rok_per_year = $currentYear;
+        $akce->cislo_per_year = $yearly_id;
+        $akce->c_akce = $yearly_id . "/" . substr($currentYear, -2);
+
         $akce->save();
         return response()->json($akce, 201);
     }
@@ -30,10 +42,11 @@ class AkceController extends Controller
         return response()->json($akce, 200);
     }
 
-    public function destroy(Akce $akce)
+    public function delete(Request $request, $id)
     {
+        $akce = Akce::find($id);
         $akce->delete();
-        return response()->json(null, 204);
+        return response()->noContent();;
     }
 
     public function showYear($year)

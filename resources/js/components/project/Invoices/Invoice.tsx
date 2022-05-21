@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import { Dropdown, DropdownItem } from "../../common/Dropdown"
 import { modalStatus } from "./InvoiceModalStatus"
 import { TrashIcon, PencilIcon } from "@heroicons/react/solid"
@@ -10,8 +11,10 @@ type Props = {
 }
 
 const Invoice = ({ invoice, modalOpenCallback }: Props) => {
+  // WARNING: TS compiler chokes on fragment shorthand if React is not explicitely imported.
+  // https://next--emotion.netlify.app/docs/typescript
   return (
-    <>
+    <Fragment>
       <tr key={invoice.id_zaznam}>
         <td tw="px-2 py-2 text-right">{invoice.c_faktury}</td>
         <td tw="px-2 py-2 text-right">
@@ -33,7 +36,7 @@ const Invoice = ({ invoice, modalOpenCallback }: Props) => {
           </Dropdown>
         </td>
       </tr>
-    </>
+    </Fragment>
   )
 }
 
