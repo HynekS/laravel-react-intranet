@@ -2,16 +2,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserRequest;
+use Illuminate\Http\Request;
 use App\User;
 
 class UserController extends Controller
 {
-    public function update(UserRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        $user->update($request->validated());
+        $user->update($request);
 
         return response()->json([
             'user' => $user
