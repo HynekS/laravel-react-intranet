@@ -37,7 +37,7 @@ class InvoiceController extends Controller
         return $invoice;
     }
 
-    public function destroy($id)
+    public function delete($id)
     {
         $invoice = Faktura::find($id);
         $invoice->delete();
