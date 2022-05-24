@@ -60,8 +60,11 @@ class AkceController extends Controller
 
     public function getByNumberOfYear($year, $num)
     {
-        $akceNumOfYear = Akce::NumberOfYear($year, $num)->WithAll()->first();
-        return is_null($akceNumOfYear) ? response()->json(null, 204) : AkceTransformer::transformResponse($akceNumOfYear);
+        $akceNumOfYear = Akce::NumberOfYear($year, $num)
+            ->WithAll()
+            ->first();
+
+        return is_null($akceNumOfYear) ? response()->json(null, 404) : AkceTransformer::transformResponse($akceNumOfYear);
     }
 
     public function search(Request $request)
