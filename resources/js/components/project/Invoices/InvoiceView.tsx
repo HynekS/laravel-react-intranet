@@ -30,7 +30,7 @@ type SummaryProps = {
   label: string
 }
 
-type ModalState = {
+export type ModalState = {
   status: typeof modalStatus[keyof typeof modalStatus]
   data: Props["detail"] | null
 }
@@ -44,7 +44,7 @@ const InvoicePage = ({ detail, ...props }: Props) => {
   const modalStateFromStore = useSelector((store: AppState) => store.projects.invoiceStatus)
   const dispatch = useDispatch()
 
-  // NOTE: This works, but it would be probably much cleaner to move that logic to redux store altogether.
+  // NOTE: This works, but it would be probably much cleaner to move that logic to redux altogether.
   useEffect(() => {
     if (["success", "error"].includes(modalStateFromStore)) {
       onModalClose()
