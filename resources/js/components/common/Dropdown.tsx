@@ -23,7 +23,7 @@ export const DropdownItem = ({ onClick, Icon, label, ...props }: DropdownItemPro
       type="button"
       {...props}
     >
-      <Icon tw="flex w-5 mr-2 opacity-50" />
+      {Icon ? <Icon tw="flex w-5 mr-2 opacity-50" /> : null}
       {label}
     </button>
   )
@@ -43,7 +43,7 @@ export const Dropdown = ({ children, ...props }: DropdownProps) => {
       </button>
       <div
         css={[
-          tw`text-gray-500 absolute right-0 z-10 invisible text-sm bg-white rounded shadow border border-gray-200 top-full`,
+          tw`absolute right-0 z-10 invisible text-sm text-gray-500 bg-white border border-gray-200 rounded shadow top-full`,
           isMenuOpen && tw`visible`,
         ]}
       >
