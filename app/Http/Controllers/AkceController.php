@@ -26,7 +26,10 @@ class AkceController extends Controller
         $akce->c_akce = $yearly_id . "/" . substr($currentYear, -2);
 
         $akce->save();
-        return response()->json($akce, 201);
+
+        $withRelated = $akce->refresh()->withAll()->find($akce->id_akce);
+
+        return response()->json(AkceTransformer::transformResponse($withRelated), 201);
     }
 
     public function update(Request $request, Akce $akce)
