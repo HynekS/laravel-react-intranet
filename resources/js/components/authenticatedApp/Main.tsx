@@ -3,7 +3,7 @@ type Props = {
 }
 
 const Main = ({ children }: Props) => {
-  return <main tw="flex flex-auto bg-gray-400 shadow-inner">{children}</main>
+  return <main tw="flex flex-auto shadow-inner">{children}</main>
 }
 
 export default Main
