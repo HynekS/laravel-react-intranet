@@ -9,13 +9,6 @@ use Illuminate\Http\Request;
 
 class AkceController extends Controller
 {
-    public function show(Akce $akce)
-    {
-        $wrapper = array();
-        array_push($wrapper, $akce);
-        return $wrapper;
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,20 +35,23 @@ class AkceController extends Controller
         return response()->json($akce, 200);
     }
 
-    public function delete(Request $request, $id)
+    public function delete($id)
     {
         $akce = Akce::find($id);
         $akce->delete();
-        return response()->noContent();;
+
+        return response()->noContent();
     }
 
     public function showYear($year)
     {
         $akceFromYear = Akce::year($year)->WithAll()->get();
 
-        $keyed = collect($akceFromYear->map(function ($item) {
-            return AkceTransformer::transformResponse($item);
-        }))->keyBy('id_akce');
+        $keyed = collect($akceFromYear->map(
+            fn ($item) =>
+            AkceTransformer::transformResponse($item)
+        ))->keyBy('id_akce');
+
         return $keyed;
     }
 
@@ -68,7 +64,6 @@ class AkceController extends Controller
     public function search(Request $request)
     {
         $search_term = $request->search_term;
-
         $results = Akce::search($search_term)->get()->take(10);
 
         return $results;

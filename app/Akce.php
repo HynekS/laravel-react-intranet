@@ -114,9 +114,7 @@ class Akce extends Model
             [
                 'fakturyDohled',
                 'fakturyVyzkum',
-                'user' => function ($q) {
-                    return $q->select('id', 'full_name');
-                },
+                'user:id,full_name',
                 'pointgroups',
                 'pointgroups.points',
                 'analyza',
