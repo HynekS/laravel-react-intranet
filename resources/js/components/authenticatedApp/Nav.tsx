@@ -1,59 +1,32 @@
 import { NavLink } from "react-router-dom"
-import { useSelector } from "react-redux"
-import styled from "@emotion/styled"
+
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 
-import UserWidget from "./UserWidget"
-import LogoThumb from "../common/LogoThumb"
-import Logout from "./Logout"
-
-import type { RootState } from "../../store/configuredStore"
-
-const Container = tw.section`flex flex-wrap justify-between py-2 px-4 border-b`
-const StyledNavLink = styled(NavLink)`
+const style = css`
   ${tw`p-2 font-semibold text-blue-500 hover:text-blue-700`}
   &.active {
     ${tw`bg-blue-100`}
   }
 `
-const NavContainer = tw.nav`py-2 px-4 flex flex-wrap`
-
 const Nav = () => {
-  const user = useSelector((store: RootState) => store.auth.user)
-
   const currentYear = new Date().getFullYear()
   return (
-    <Container role="navigation" aria-label="main navigation">
-      <div>
-        <NavLink to="/" aria-label="návrat na domovskou stránku">
-          <LogoThumb />
+    <nav tw="flex flex-wrap px-4 py-2">
+      <NavLink css={style} to={`/akce`} end>
+        vše
+      </NavLink>
+      {Array.from({ length: currentYear - 2013 }, (_, i) => currentYear - i).map((year, i) => (
+        <NavLink
+          css={style}
+          to={`/akce/${year}`}
+          key={year}
+          aria-label={`akce proběhlé v roce ${year}`}
+        >
+          {year}
         </NavLink>
-      </div>
-      <NavContainer>
-        <StyledNavLink to={`/akce`} end>
-          vše
-        </StyledNavLink>
-        {Array.from({ length: currentYear - 2013 }, (_, i) => currentYear - i).map((year, i) => (
-          <StyledNavLink
-            to={`/akce/${year}`}
-            key={year}
-            aria-label={`akce proběhlé v roce ${year}`}
-          >
-            {year}
-          </StyledNavLink>
-        ))}
-      </NavContainer>
-      <div>
-        <NavLink to="vytvorit-akci" aria-label="vytvořit novou akci">
-          + vytvořit novou akci
-        </NavLink>
-        {user && (
-          <UserWidget user={user}>
-            <Logout />
-          </UserWidget>
-        )}
-      </div>
-    </Container>
+      ))}
+    </nav>
   )
 }
 
