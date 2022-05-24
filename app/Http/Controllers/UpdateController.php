@@ -25,7 +25,7 @@ class UpdateController extends Controller
                 ->put('updates', Update::where('created_at', '>=', Carbon::now()->subDays(30)->toDateTimeString())
                     ->where('akce_id', '=', $result->akce_id)
                     ->orderBy('created_at', 'DESC')
-                    ->with('user:id,full_name')
+                    ->with('user:id,full_name,avatar_path')
                     ->get()->unique('update_scope')
                     ->toArray()))
             ->values();
