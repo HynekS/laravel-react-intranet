@@ -57,7 +57,10 @@ class Akce extends Model
     // Zajišťuje
     public function user()
     {
-        return $this->belongsTo('App\User', 'owner_id', 'id');
+        // BUG | TODO: Owner_id makes much more sense (owner vs current user), but it wasn't migrated in 'akce' table,
+        // which was causing bugs in FE. Would be a good idea to add implement it in one of the migrations.
+        // return $this->belongsTo('App\User', 'owner_id', 'id');
+        return $this->belongsTo('App\User', 'user_id', 'id');
     }
 
     // Dokumentace apod.
