@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router"
@@ -22,6 +22,9 @@ import Input, { InputProps, StyleScopeObject } from "../common/Input"
 import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
 import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
+import Modal from "../common/StyledModal"
+import ProjectDeleteDialog from "./ProjectDeleteDialog"
+import ModalCloseButton from "../common/ModalCloseButton"
 
 import type { AppState } from "../../store/rootReducer"
 import type { akce as Akce, users as User } from "../../types/model"
@@ -30,10 +33,10 @@ const styles = {
   fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
   labelWrapper: tw`pr-4 md:(w-60 flex items-center justify-end) lg:(w-72) xl:(w-80)`,
   label: tw`font-semibold`,
-  inputWrapper: tw`relative w-full flex-1`,
+  inputWrapper: tw`relative flex-1 w-full`,
   input: tw`border border-gray-200 text-gray-600 rounded-sm py-0.5 px-1.5 width[20ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300) placeholder:(text-gray-300)`,
   inputError: tw`border-red-400 focus:(ring-red-400)`,
-  errorMessage: tw`absolute left-0 z-10 top-full inline-block p-1 pr-2 text-xs bg-white rounded shadow-sm text-red-400 flex border-red-300`,
+  errorMessage: tw`absolute left-0 z-10 flex inline-block p-1 pr-2 text-xs text-red-400 bg-white border-red-300 rounded shadow-sm top-full`,
 }
 
 const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScopeObject = {}) => {
@@ -95,7 +98,9 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
   const navigate = useNavigate()
   const userId = useSelector((store: AppState) => store.auth.user.id)
   const activeUsers: User[] = useSelector((store: AppState) => store.meta.activeUsers)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
+
   const { c_akce, id_akce: id, rok_per_year } = detail
 
   useEffect(() => {
@@ -130,21 +135,23 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
   return (
     <DetailWrapper>
       <form onSubmit={handleSubmit(onSubmit)} tw="pb-4">
-        <div tw="flex justify-between items-start">
+        <div tw="flex items-start justify-between">
           <h1 tw="pb-4 text-xl font-semibold text-gray-700">
             {c_akce}&ensp;{boundTitle}
           </h1>
           <div tw="flex items-center">
             {type === "update" && (
-              <Dropdown tw="mr-4 my-auto">
+              <Dropdown tw="my-auto mr-4">
                 <DropdownItem
                   onClick={() => {
+                    setIsModalOpen(true)
+                    /*
                     return dispatch(
                       deleteProject(
                         { id, userId, year: Number(rok_per_year), project: detail },
                         navigate,
                       ),
-                    )
+                    )*/
                   }}
                   Icon={TrashIcon}
                   label="Odstranit&nbsp;akci"
@@ -316,6 +323,13 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                         ${styles.input}
                       }
                     }
+                    & .DayPicker {
+                      font-size: small;
+                    }
+                    & .DayPickerInput-Overlay {
+                      bottom: 100%;
+                      left: 100%;
+                    }
                   `}
                 >
                   <Controller
@@ -362,6 +376,13 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                       & input {
                         ${styles.input}
                       }
+                    }
+                    & .DayPicker {
+                      font-size: small;
+                    }
+                    & .DayPickerInput-Overlay {
+                      bottom: 100%;
+                      left: 100%;
                     }
                   `}
                 >
@@ -437,6 +458,22 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
           </div>
         </div>
       </form>
+      <Modal
+        isOpen={isModalOpen}
+        shouldCloseOnOverlayClick={true}
+        onRequestClose={() => setIsModalOpen(false)}
+        closeTimeoutMS={500}
+      >
+        <header tw="flex justify-between p-6">
+          <h2 tw="text-lg font-medium">Odstranit akci</h2>
+          <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
+        </header>
+        <ProjectDeleteDialog
+          onModalClose={() => setIsModalOpen(false)}
+          detail={detail}
+          userId={userId}
+        />
+      </Modal>
     </DetailWrapper>
   )
 }
