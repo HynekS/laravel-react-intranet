@@ -1,7 +1,5 @@
-import { useEffect } from "react"
+import { useEffect, Fragment } from "react"
 import { useDispatch } from "react-redux"
-
-import Layout from "./Layout"
 
 import { fetchLatestUpdateId } from "../../store/updates"
 
@@ -23,12 +21,16 @@ function usePoll(func: (...args: any) => any, deps: any[], interval = 5000) {
   }, deps)
 }
 
-const ServerSyncProvider = () => {
+type Props = {
+  children: React.ReactNode
+}
+
+const ServerSyncProvider = ({ children }: Props) => {
   const dispatch = useDispatch()
 
   usePoll(() => dispatch(fetchLatestUpdateId()), [], 60000)
 
-  return <Layout />
+  return <Fragment>{children}</Fragment>
 }
 
 export default ServerSyncProvider
