@@ -1,9 +1,9 @@
-import React from "react"
-import { jsx } from "@emotion/react"
-import tw from "twin.macro"
+type Props = {
+  children: React.ReactNode
+}
 
-const DetailPage = ({ children }) => (
-  <div tw="w-full py-2 px-2 bg-gray-400 shadow-inner lg:(px-10)">{children}</div>
+const DetailPage = ({ children }: Props) => (
+  <div tw="w-full py-2 px-2 shadow-inner lg:(px-10)">{children}</div>
 )
 
 export default DetailPage
