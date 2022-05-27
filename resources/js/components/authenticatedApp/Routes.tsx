@@ -2,18 +2,20 @@ import React from "react"
 import { Routes, Route } from "react-router-dom"
 
 import Dashboard from "../dashboard/Dashboard"
-import Detail from "../project/Detail"
 
 const TableDataProvider = React.lazy(
   () => import(/* webpackChunkName: 'TableProvider' */ "../project/TableDataProvider"),
 )
+
+const Detail = React.lazy(() => import(/* webpackChunkName: 'Detail' */ "../project/Detail"))
+
 const DetailProvider = React.lazy(
   () => import(/* webpackChunkName: 'DetailProvider' */ "../project/DetailProvider"),
 )
 
 const AuthenticatedRoutes = () => (
   <React.Suspense
-    fallback={<div tw="h-full w-full flex items-center justify-center">Loading…</div>}
+    fallback={<div tw="flex items-center justify-center w-full h-full">Loading…</div>}
   >
     <Routes>
       <Route path="/" element={<Dashboard />} />
