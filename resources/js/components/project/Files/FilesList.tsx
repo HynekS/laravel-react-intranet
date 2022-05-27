@@ -49,7 +49,7 @@ const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
           <h4 tw="pb-4 font-semibold text-gray-600">{publicName}</h4>
           <div tw="flex flex-wrap flex-1">
             {data.length > 0 &&
-              data.map((file, i) => (
+              data.map(file => (
                 <File
                   file={file}
                   key={file.file_path}
