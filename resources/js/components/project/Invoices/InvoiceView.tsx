@@ -88,7 +88,7 @@ const InvoicePage = ({ detail, ...props }: Props) => {
                 />
               )}
               {faktury_dohled.length + faktury_vyzkum.length === 0 && (
-                <div tw="pb-4">K této akci nebyly nalezeny žádné faktury.</div>
+                <div tw="pb-4">K této akci nebyly zatím vystaveny žádné faktury.</div>
               )}
             </div>
             {!!rozpocet_dohled && (
