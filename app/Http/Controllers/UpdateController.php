@@ -27,6 +27,7 @@ class UpdateController extends Controller
                     ->orderBy('created_at', 'DESC')
                     ->with('user:id,full_name,avatar_path')
                     ->get()->unique('update_scope')
+                    ->values()
                     ->toArray()))
             ->values();
         
