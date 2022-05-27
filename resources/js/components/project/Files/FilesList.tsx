@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, memo } from "react"
 
 import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"
@@ -36,7 +36,7 @@ type Props = {
   }
 }
 
-const FilesList = ({ subgroup, detail, ...props }: Props) => {
+const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
   const { publicName, data, model } = subgroup || {}
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -95,6 +95,6 @@ const FilesList = ({ subgroup, detail, ...props }: Props) => {
       </Modal>
     </div>
   )
-}
+})
 
 export default FilesList
