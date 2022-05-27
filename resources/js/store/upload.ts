@@ -1,3 +1,5 @@
+import { toast } from "react-toastify"
+
 import type { AnyAction } from "redux"
 import type { AppDispatch } from "../store/configuredStore"
 
@@ -37,7 +39,6 @@ export const filesStatus = {
   READING: "reading",
   READING_DONE: "reading_done",
   UPLOADING: "uploading",
-  UPLOADING_DONE: "uploading_done",
 } as const
 
 type InitialState = {
@@ -84,7 +85,7 @@ export default function reducer(state = initialState, action: AnyAction) {
       return {
         ...state,
         response: action.responses,
-        status: filesStatus.UPLOADING_DONE,
+        status: filesStatus.IDLE,
         filesToUpload: [],
         uploadProgress: [],
       }
@@ -205,9 +206,10 @@ export const readSingleFile = (file: File) => {
   }
 }
 
-export const uploadMultipleFiles = ({ filesToUpload, model, projectId, userId }) => async (
-  dispatch: (...args: any) => void,
-) => {
+export const uploadMultipleFiles = (
+  { filesToUpload, model, projectId, userId },
+  callback,
+) => async (dispatch: (...args: any) => void) => {
   try {
     dispatch(batchUploadFilesInit(filesToUpload.length))
     const responses = await Promise.all(
@@ -217,6 +219,10 @@ export const uploadMultipleFiles = ({ filesToUpload, model, projectId, userId })
     )
     if (responses) {
       dispatch(batchUploadFilesDone({ model, projectId, responses }))
+      callback()
+      toast.success("Soubory byly úspěšně uloženy na server", {
+        position: toast.POSITION.BOTTOM_RIGHT,
+      })
     }
   } catch (error) {
     console.log(error)

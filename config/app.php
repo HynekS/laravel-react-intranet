@@ -168,6 +168,8 @@ return [
         // Barryvdh\DomPDF\ServiceProvider::class, // I don't use it, do I?
         TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
         Laravel\Scout\ScoutServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
+
         /*
          * Application Service Providers...
          */

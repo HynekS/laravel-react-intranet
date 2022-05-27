@@ -16,7 +16,6 @@ import {
 import Button from "../../common/Button"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import DropIcon from "./DropIcon"
-import { CheckIcon } from "@heroicons/react/outline"
 
 import type { AppState } from "../../../store/rootReducer"
 import type { Model } from "../../../store/files"
@@ -39,7 +38,6 @@ const FileUpload = ({
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
 
   const dispatch = useDispatch()
-  // const response = useSelector(store => store.files.response)
   const { id: userId } = useSelector((store: AppState) => store.auth.user)
 
   const filesToUpload = useSelector((store: AppState) => store.upload.filesToUpload as FileObject[])
@@ -54,7 +52,7 @@ const FileUpload = ({
   const onFormSubmit: React.FormEventHandler<HTMLFormElement> = (e: FormEvent) => {
     e.preventDefault()
     if (!filesToUpload.length) return false
-    dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }))
+    dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }, modalCloseCallback))
   }
 
   const onChange = (e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +68,7 @@ const FileUpload = ({
 
   return (
     <div tw="flex flex-col flex-1 h-full">
-      {status !== filesStatus.UPLOADING && status !== filesStatus.UPLOADING_DONE && (
+      {status !== filesStatus.UPLOADING && (
         <div tw="px-5 pb-5">
           <div
             onDrop={onChange}
@@ -143,26 +141,6 @@ const FileUpload = ({
             <span>nahrávání: {Math.round(uploadProgress)} %</span>
           </div>
           <ProgressBar progress={uploadProgress} />
-        </div>
-      )}
-      {status === filesStatus.UPLOADING_DONE && (
-        <div tw="flex flex-col items-center justify-center h-full pb-4">
-          <div tw="flex pb-4">
-            <CheckIcon tw="w-8 mr-1 stroke-green-400" />
-            <span tw="text-xl font-medium text-gray-600">
-              Soubory byly v pořádku uloženy na server.
-            </span>
-          </div>
-          <div>
-            <Button
-              onClick={() => {
-                modalCloseCallback()
-                dispatch(setInitialState())
-              }}
-            >
-              OK
-            </Button>
-          </div>
         </div>
       )}
       {[filesStatus.READING, filesStatus.READING_DONE].includes(status) && (

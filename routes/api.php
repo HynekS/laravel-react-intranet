@@ -73,4 +73,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/download_all/{id}', 'DownloadController@zip_and_download_all');
     Route::delete('/file', 'FileController@destroy');
     Route::post('/report/{akce}', 'ReportController@generate_pdf');
+    Route::get('/securedimage/{path}', 'SecuredImageController@show')->where('path', '(.*)');
+
 });

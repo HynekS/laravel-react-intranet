@@ -13,14 +13,17 @@ use App\{
     TerenScan
 };
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\{Storage, File};
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Image;
 use function GuzzleHttp\json_decode;
 
 class UploadController extends Controller
 {
+    public $allowed_mimetypes_for_thumbnails = ['image/jpeg', 'image/gif', 'image/png', 'image/webp'];
+
     public function store($data)
     {
         if (in_array($data->model, ["LAB_databaze", "teren_databaze"])) {
@@ -57,12 +60,14 @@ class UploadController extends Controller
         $data = json_decode($request->data);
         $file = $data->file;
         $directory = $data->projectId . "/";
-
-        if (!Storage::exists($directory)) {
-            Storage::makeDirectory($directory);
-        }
         $data->path = $directory;
+
         $base64str = explode(',', $file->content)[1];
+        $mimetype = mime_content_type($file->content);
+
+        File::ensureDirectoryExists($directory);
+
+        $storage = Storage::disk('local');
 
         if (in_array($data->model, ["LAB_databaze", "teren_databaze"])) {
 
@@ -70,35 +75,54 @@ class UploadController extends Controller
             // The DBs are part or an Akce row and therefore can store only one record.
             // It is thus neccessary to remove an old file to prevent orphaned files in storage.
             if ($akce[$data->model] && Storage::disk('local')->exists($akce[$data->model])) {
-                Storage::disk('local')->delete($akce[$data->model]);
+                $storage->delete($akce[$data->model]);
             }
 
-            Storage::disk('local')->put($directory . $file->name, base64_decode($base64str));
+            $storage->put($directory . $file->name, base64_decode($base64str));
         } else {
 
             $uniqueFileName = $this->createUniqueFileName($directory, $file->name);
             $data->file->name = $uniqueFileName;
 
-            Storage::disk('local')->put($directory . $uniqueFileName, base64_decode($base64str));
+            $storage->put($directory . $uniqueFileName, base64_decode($base64str));
+
+            if (in_array($mimetype, $this->allowed_mimetypes_for_thumbnails)) {
+                try {
+                    File::ensureDirectoryExists($storage->path($directory . "/thumbnails"));
+                    $thumbnail = $this->createThumbnail($storage->path($directory . $uniqueFileName), 200, 200);
+                    $thumbnail->save($storage->path($directory . "/thumbnails\/" . "thumbnail_" . $uniqueFileName));
+                } catch (\Throwable $th) {
+                    // Just swallow the error for now;
+                }
+            }
         }
         return $this->store($data);
     }
 
     public function createUniqueFileName($directory, $filename)
     {
+        $storage = Storage::disk('local');
 
-        if (Storage::disk('local')->exists($directory . $filename)) {
+        if ($storage->exists($directory . $filename)) {
             $name = pathinfo($filename, PATHINFO_FILENAME);
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
             $duplicateCounter = 1;
 
-            while (Storage::disk('local')->exists($directory . $name . "(" . $duplicateCounter . ")." . $extension)) {
+            while ($storage->exists($directory . $name . "(" . $duplicateCounter . ")." . $extension)) {
                 $duplicateCounter++;
             }
 
             return $name . "(" . $duplicateCounter . ")." . $extension;
         }
         return $filename;
+    }
+
+    public function createThumbnail($path, $width, $height)
+    {
+        $img = Image::make($path)->resize($width, $height, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        return $img;
     }
 }

@@ -9,6 +9,7 @@ import { DownloadIcon } from "@heroicons/react/outline"
 import { TrashIcon } from "@heroicons/react/solid"
 
 import { Dropdown, DropdownItem } from "../../common/Dropdown"
+import SecuredImage from "../../common/SecuredImage"
 
 import type { AppState } from "../../../store/rootReducer"
 import type {
@@ -51,7 +52,11 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
   const dispatch = useDispatch()
 
   const path = file?.file_path
-  const icon = path ? String(getFileExtension(path)).toLowerCase() || "fallback" : null
+
+  const filename = String(path).substring(String(path).lastIndexOf("/") + 1)
+  const folders = String(path).replace(filename, "")
+
+  const icon = path ? String(getFileExtension(path)).toLowerCase() : "fallback"
 
   return path ? (
     <div tw="pb-4 pr-4 w-1/2 md:(w-1/3) lg:(w-1/4)">
@@ -62,12 +67,22 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
         }}
       >
         <button onClick={() => onDownload(path)} title="uložit" tw="flex flex-1">
-          <span
-            tw="block w-[4em] h-[4em] bg-gray-300 rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0	"
-            style={{
-              backgroundImage: `url(/images/fileIcons/${icon}.svg), url(/images/fileIcons/fallback.svg)`,
-            }}
-          />
+          {["jpg", "jpeg", "png", "svg"].includes(getFileExtension(path)) ? (
+            <span tw="block w-[4em] h-[4em] bg-gray-300 rounded self-start flex-shrink-0 overflow-hidden">
+              <SecuredImage
+                path={`${folders}/thumbnails/thumbnail_${decodeURI(filename)}`}
+                alt="thumbnail"
+                tw="rounded object-cover w-[4em] h-[4em]"
+              />
+            </span>
+          ) : (
+            <span
+              tw="block w-[4em] h-[4em] bg-gray-300 rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0"
+              style={{
+                backgroundImage: `url(/images/fileIcons/${icon}.svg), url(/images/fileIcons/fallback.svg)`,
+              }}
+            />
+          )}
           <span tw="px-3 pt-1 pb-2 pr-4 text-left">
             <span
               tw="block overflow-hidden text-sm font-medium text-gray-600 break-all"
