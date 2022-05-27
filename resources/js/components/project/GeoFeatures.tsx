@@ -327,7 +327,7 @@ const GeoFeatures = ({ detail }: Props) => {
             }
           `}
         >
-          <div ref={mapContainerRef} style={{ height: 600 }} />
+          <div ref={mapContainerRef} style={{ height: 600, backgroundColor: "#f1f0e5" }} />
         </div>
         <div tw="w-1/6">
           <div tw="relative z-10 flex items-center justify-between mb-2">
