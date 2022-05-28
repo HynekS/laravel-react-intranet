@@ -6,10 +6,7 @@ import { GlobalStyles } from "twin.macro"
 import { Global } from "@emotion/react"
 
 import configuredStore from "./store/configuredStore"
-import { checkForValidToken } from "./store/auth"
 import globalStyles from "./globalStyles"
-
-configuredStore.dispatch(checkForValidToken())
 
 import HomePage from "./components/HomePage"
 

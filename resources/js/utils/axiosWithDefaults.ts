@@ -1,7 +1,8 @@
 import axios from "axios"
+import createAuthRefreshInterceptor from "axios-auth-refresh"
 
 import store from "../store/configuredStore"
-import { clearLoggedInUser } from "../store/auth"
+import { fetchUserFailure } from "../store/auth"
 
 const API_URL =
   process.env.NODE_ENV === "test"
@@ -14,17 +15,40 @@ axios.defaults.headers.common["X-CSRF-TOKEN"] = document.querySelector<HTMLMetaE
   'meta[name="csrf-token"]',
 )?.content
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
+axios.defaults.withCredentials = true
+
+const refreshAuthLogic = () =>
+  axios
+    .get("auth/refresh-token")
+    .then(tokenRefreshResponse => {
+      axios.defaults.headers["Authorization"] = "Bearer " + tokenRefreshResponse.data.access_token
+      return Promise.resolve()
+    })
+    .catch(e => {
+      // Maybe clear the prevoious refresh token?
+      store.dispatch(fetchUserFailure(e))
+      history.pushState({}, "Pueblo intranet", "/")
+      return Promise.reject(e)
+    })
+
+createAuthRefreshInterceptor(axios, refreshAuthLogic, {
+  // pauseInstanceWhileRefreshing: true,
+})
 
 axios.interceptors.response.use(
   response => response,
-  error => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("oauth_token")
-      localStorage.removeItem("expires_at")
-      store.dispatch(clearLoggedInUser())
-      history.pushState({}, "Pueblo intranet", "/")
+  async error => {
+    const request = error.config
+
+    if (error && error.response && error.response.status === 401) {
+      // let's retry
+      return axios(request)
     }
-    return Promise.reject(error)
+    /*
+    if (error && error.response && error.response.status !== 404) {
+      store.dispatch(fetchUserFailure(error))
+    }*/
+    throw error
   },
 )
 

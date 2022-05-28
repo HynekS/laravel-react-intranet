@@ -26,9 +26,11 @@ class RevokeExistingTokens
      */
     public function handle($event)
     {
+        /*
         Token::where('id', '!=', $event->tokenId)
             ->where('user_id', $event->userId)
             ->where('client_id', $event->clientId)
             ->delete();
+            */
     }
 }

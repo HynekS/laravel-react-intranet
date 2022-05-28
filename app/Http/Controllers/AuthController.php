@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 use App\User;
- 
+use Illuminate\Support\Facades\Http;
+
 class AuthController extends Controller
 {
   /**
@@ -42,12 +41,11 @@ class AuthController extends Controller
   /**
    * Login user and create token
    *
-   * @param  [string] email
+   * @param  [string] user_name
    * @param  [string] password
-   * @param  [boolean] remember_me
    * @return [string] access_token
    * @return [string] token_type
-   * @return [string] expires_at
+   * @return [string] expires_in
    */
   public function login(Request $request)
   {
@@ -55,76 +53,90 @@ class AuthController extends Controller
       'user_name' => 'required|string',
       'password' => 'required|string',
     ]);
-    $credentials = $request->only(['user_name', 'password']);
-    if (!Auth::attempt($credentials)) {
 
-      if ($this->tryLegacyHash($request)) {
-        $user = User::where('user_name', $request->input('user_name'))->first();
-        $user->password = Hash::make($request->input('password'));
-        $user->save();
-        return $this->createResponse($user, $request);
-      } else {
-        return response()->json([
-          'message' => trans('auth.failed'),
-        ], 401);
-      }
-    }
-    return $this->createResponse($request->user(), $request);
-  }
+    $client = \DB::table('oauth_clients')
+      ->where('password_client', true)
+      ->first();
+    
+    $response = Http::post(
+      \Config::get('app.url') . '/oauth/token',
+      [
+        'grant_type' => 'password',
+        'client_id' => $client->id,
+        'client_secret' => $client->secret,
+        'username' => $request->user_name,
+        'password' => $request->password,
+        'scope' => '',
+      ]
+    );
+    
+    $data = json_decode($response->body());
+    if (!$response->ok()) return response()->json($data, 400);
 
-  private function tryLegacyHash($request, $salt = 'FWiZqz1q7rvji7bo4Vmg')
-  {
-    $user_name = $request->input('user_name');
-    $password = $request->input('password');
-    $user = User::where('user_name', $user_name)->first();
-    $hash = sha1(md5($password) . md5($salt));
-    return ($user && $hash == $user->password);
-  }
-
-  private function createResponse($user)
-  {
-    $tokenResult = $user->createToken('Personal Access Token');
-    $token = $tokenResult->token;
-    $token->save();
+    $this->setHttpOnlyCookie($data->refresh_token);
 
     return response()->json([
-      'access_token' => $tokenResult->accessToken,
-      'token_type' => 'Bearer',
-      'expires_at' => Carbon::parse(
-        $tokenResult->token->expires_at
-      )->toDateTimeString(),
-      'user' => $user
-    ]); 
+      'user' => User::where('user_name', '=', $request->user_name)->first(),
+      'token_type' => $data->token_type,
+      'expires_in' => $data->expires_in,
+      'access_token' => $data->access_token,
+      'refresh_token' => $data->refresh_token
+    ], 200);
   }
 
-  public function userRefreshToken(Request $request)
-{
-    $client = DB::table('oauth_clients')
-        ->where('password_client', true)
-        ->first();
+  protected function setHttpOnlyCookie(string $refreshToken)
+  {
+    cookie()->queue(
+      'refresh_token',
+      $refreshToken,
+      14400, // 10 days
+      null,
+      null,
+      false,
+      true, // httponly
+      false,
+      'Strict' //same-site
+    );
+  }
 
-    $data = [
+  public function refreshToken(Request $request)
+  {
+    $refresh_token = request()->cookie('refresh_token');
+
+    abort_if(!$refresh_token, 400, 'Your request is missing a refresh token.');
+
+    $client = \DB::table('oauth_clients')
+      ->where('password_client', true)
+      ->first();
+
+    $response = Http::post(
+      \Config::get('app.url') . '/oauth/token',
+      [
         'grant_type' => 'refresh_token',
-        'refresh_token' => $request->refresh_token,
+        'refresh_token' => $refresh_token,
         'client_id' => $client->id,
         'client_secret' => $client->secret,
         'scope' => ''
-    ];
-    $request = Request::create('/oauth/token', 'POST', $data);
-    $content = json_decode(app()->handle($request)->getContent());
+      ]
+    );
+
+    $data = json_decode($response->body());
+
+    if (!$response->ok()) {
+      cookie()->queue(cookie()->forget('refresh_token'));
+      return response()->json($data, 400);
+    } 
+
+    $this->setHttpOnlyCookie($data->refresh_token);
 
     return response()->json([
-        'error' => false,
-        'data' => [
-            'meta' => [
-                'token' => $content->access_token,
-                'refresh_token' => $content->refresh_token,
-                'type' => 'Bearer'
-            ]
-        ]
-    ], Response::HTTP_OK);
-}
-
+      'user' => User::where('user_name', '=', $request->user_name)->first(),
+      'token_type' => $data->token_type,
+      'expires_in' => $data->expires_in,
+      'access_token' => $data->access_token,
+      'refresh_token' => $data->refresh_token
+    ], 200);
+  }
   /**
    * Logout user (Revoke the token)
    *
@@ -133,6 +145,8 @@ class AuthController extends Controller
   public function logout(Request $request)
   {
     $request->user()->token()->revoke();
+    cookie()->queue(cookie()->forget('refresh_token'));
+
     return response()->json([
       'message' => 'Successfully logged out'
     ]);
