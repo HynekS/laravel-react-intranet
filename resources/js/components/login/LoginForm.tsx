@@ -1,16 +1,20 @@
+import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
+import { EyeIcon } from "@heroicons/react/solid"
+import { EyeOffIcon } from "@heroicons/react/solid"
 
 import Logo from "./Logo"
 import Button from "../../components/common/Button"
 import HiddenMessage from "../common/HiddenMessage"
-import { submitLoginData } from "../../store/auth"
+import { submitLoginData, authStatus } from "../../store/auth"
 import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
 
 import type { AppState } from "../../store/rootReducer"
 
 const LoginForm = () => {
-  const isAuthPending = useSelector((store: AppState) => store.auth.isAuthPending)
+  const [passwordShown, setPasswordShown] = useState(false)
+  const status = useSelector((store: AppState) => store.auth.status)
   const error = useSelector((store: AppState) => store.auth.authError)
   const dispatch = useDispatch()
   const { register, handleSubmit, errors } = useForm()
@@ -45,22 +49,32 @@ const LoginForm = () => {
         <label htmlFor="password" tw="block mb-2 text-sm font-bold text-gray-700">
           Heslo
         </label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          autoComplete="on"
-          placeholder="*******"
-          ref={register({ required: true })}
-          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
-        />
+        <div tw="relative">
+          <input
+            type={passwordShown ? "text" : "password"}
+            name="password"
+            id="password"
+            autoComplete="on"
+            placeholder="*******"
+            ref={register({ required: true })}
+            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
+          />
+          <button
+            type="button"
+            tw="absolute right-2 top-0 bottom-0 text-gray-400"
+            aria-label="show password"
+            onClick={() => setPasswordShown(!passwordShown)}
+          >
+            {passwordShown ? <EyeOffIcon tw="h-4 w-4" /> : <EyeIcon tw="h-4 w-4" />}
+          </button>
+        </div>
         <HiddenMessage show={errors.password}>
           <div tw="pb-2 text-sm text-red-600">Zadejte, prosím, heslo.</div>
         </HiddenMessage>
         <Button
           type="submit"
-          className={`${isAuthPending ? "spinner" : ""}`}
-          disabled={isAuthPending}
+          className={`${status === authStatus.PENDING ? "spinner" : ""}`}
+          disabled={status === authStatus.PENDING}
           tw="justify-center w-full"
         >
           Přihlásit

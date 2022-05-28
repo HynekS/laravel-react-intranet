@@ -8,16 +8,13 @@ export const authStatus = {
 } as const
 
 type TypeAuthStatus = typeof authStatus
-type AuthStatus = TypeAuthStatus[keyof TypeAuthStatus]
+//type AuthStatus = TypeAuthStatus[keyof TypeAuthStatus]
 
 const initialState = {
   status: authStatus.INITIAL,
-  isAuthPending: false,
   authError: null,
-  isUserBeingFetched: false,
   userError: null,
   user: null,
-  isLogoutPending: false,
   logoutError: null,
 }
 
@@ -40,6 +37,7 @@ export default function reducer(state = initialState, action = {}) {
     case LOGIN_INITIALIZED:
       return {
         ...state,
+        status: authStatus.PENDING,
         authError: null,
       }
     case LOGIN_SUCCESS:
@@ -73,19 +71,16 @@ export default function reducer(state = initialState, action = {}) {
     case LOGOUT_INITIALIZED:
       return {
         ...state,
-        isLogoutPending: true,
       }
     case LOGOUT_SUCCESS:
       return {
         ...state,
         status: authStatus.REJECTED,
-        isLogoutPending: false,
         user: null,
       }
     case LOGOUT_FAILURE:
       return {
         ...state,
-        isLogoutPending: false,
         logoutError: action.error,
       }
     default:
