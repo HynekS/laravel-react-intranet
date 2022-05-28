@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,7 +37,17 @@ class Handler extends ExceptionHandler
      */
     public function report(Throwable $exception)
     {
-        parent::report($exception);
+
+        Log::error(sprintf(
+            "Uncaught exception '%s' with message '%s' in %s:%d%s%s",
+            get_class($exception),
+            $exception->getMessage(),
+            $exception->getTrace()[0]['file'],
+            $exception->getTrace()[0]['line'],
+            PHP_EOL,
+            PHP_EOL
+        ));
+        // parent::report($exception);
     }
 
     /**
