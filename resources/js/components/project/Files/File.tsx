@@ -66,9 +66,13 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
           boxShadow: "0 0 8px -2px rgba(5, 10, 29, 0.2)",
         }}
       >
-        <button onClick={() => onDownload(path)} title="uložit" tw="flex flex-1">
+        <button
+          onClick={() => onDownload(path)}
+          title={`uložit soubor ${path.split("/").pop()}`}
+          tw="flex max-w-[80%]"
+        >
           {["jpg", "jpeg", "png", "svg"].includes(getFileExtension(path)) ? (
-            <span tw="block w-[4em] h-[4em] bg-gray-300 rounded self-start flex-shrink-0 overflow-hidden">
+            <span tw="block w-[4em] h-[4em] min-w-[4em] bg-gray-300 rounded self-start flex-shrink-0 overflow-hidden">
               <SecuredImage
                 path={`${folders}/thumbnails/thumbnail_${decodeURI(filename)}`}
                 alt="thumbnail"
@@ -77,26 +81,21 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
             </span>
           ) : (
             <span
-              tw="block w-[4em] h-[4em] bg-gray-300 rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0"
+              tw="block w-[4em] h-[4em] min-w-[4em] bg-gray-300 rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0"
               style={{
                 backgroundImage: `url(/images/fileIcons/${icon}.svg), url(/images/fileIcons/fallback.svg)`,
               }}
             />
           )}
-          <span tw="px-3 pt-1 pb-2 pr-4 text-left">
-            <span
-              tw="block overflow-hidden text-sm font-medium text-gray-600 break-all"
-              style={{
-                msWordBreak: "break-all",
-                wordBreak: "break-word",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
-              {path.split("/").pop()}
-            </span>
+          <span tw="px-3 pt-1 pb-2 pr-4 text-left flex justify-between flex-col">
+            <div tw="flex">
+              <span tw="block text-sm font-medium text-gray-600 break-all leading-none pb-1 truncate max-w-[90%]">
+                {String(path.split("/").pop()).split(".").shift()}
+              </span>
+              <span tw="text-sm font-medium text-gray-600 leading-none pb-1">
+                .{String(path.split("/").pop()).split(".").pop()}
+              </span>
+            </div>
             <span tw="block text-xs font-medium text-gray-400">
               {new Date(file.vlozeno).toLocaleDateString("cs-CZ")}
             </span>
