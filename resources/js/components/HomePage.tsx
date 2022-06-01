@@ -1,7 +1,6 @@
 import { useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { ToastContainer, Slide } from "react-toastify"
-import "react-toastify/dist/ReactToastify.min.css"
+import { Toaster } from "react-hot-toast"
 
 import ServerSyncProvider from "./authenticatedApp/ServerSyncProvider"
 import LoginPage from "./login/LoginPage"
@@ -20,13 +19,12 @@ const HomePage = () => {
   if (status === authStatus.FULFILLED) {
     return (
       <ServerSyncProvider>
-        <ToastContainer transition={Slide} />
+        <Toaster position="bottom-right" />
         <Layout />
       </ServerSyncProvider>
     )
   }
   if (status === authStatus.INITIAL || status === authStatus.PENDING) {
-    // Some spinner maybe? 😋
     return null
   }
   return <LoginPage />
