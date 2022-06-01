@@ -12,7 +12,7 @@ import { DateUtils } from "react-day-picker"
 import { TrashIcon } from "@heroicons/react/solid"
 
 import { createProject, updateProject } from "../../store/projects"
-import { fetchActiveUsers } from "../../store/meta"
+import { fetchActiveUsers } from "../../store/users"
 
 import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
 
@@ -97,7 +97,7 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const userId = useSelector((store: AppState) => store.auth.user.id)
-  const activeUsers: User[] = useSelector((store: AppState) => store.meta.activeUsers)
+  const activeUsers: User[] = useSelector((store: AppState) => store.users.activeUsers)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
 

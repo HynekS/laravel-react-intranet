@@ -8,9 +8,9 @@ const initialState = {
 }
 
 // Actions
-const FETCH_ACTIVE_USERS_LIST_INITIALIZED = "[meta] fetching the list of users was initialized"
-const FETCH_ACTIVE_USERS_LIST_SUCCESS = "[meta] fetching the list of users was successful"
-const FETCH_ACTIVE_USERS_LIST_FAILURE = "[meta] fetching the list of users has failed"
+const FETCH_ACTIVE_USERS_LIST_INITIALIZED = "[users] fetching the list of users was initialized"
+const FETCH_ACTIVE_USERS_LIST_SUCCESS = "[users] fetching the list of users was successful"
+const FETCH_ACTIVE_USERS_LIST_FAILURE = "[users] fetching the list of users has failed"
 
 // Reducer
 export default function reducer(state = initialState, action = {}) {
@@ -48,7 +48,7 @@ export const fetchActiveUsersFailure = error => ({ type: FETCH_ACTIVE_USERS_LIST
 export const fetchActiveUsers = () => async dispatch => {
   try {
     dispatch(fetchActiveUsersInit())
-    const response = await client.get("meta/users")
+    const response = await client.get("users/get_active")
     if (response) {
       dispatch(fetchActiveUsersSuccess(response.data))
     }

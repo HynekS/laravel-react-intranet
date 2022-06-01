@@ -137,4 +137,9 @@ class Akce extends Model
     {
         return $query->where('rok_per_year', '=', $year)->where('cislo_per_year', '=', $num);
     }
+
+    public function scopeNotCancelled($query)
+    {
+        return $query->where('id_stav', '>', -1);
+    }
 }

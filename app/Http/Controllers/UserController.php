@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -7,14 +8,9 @@ use App\User;
 
 class UserController extends Controller
 {
-    public function update(Request $request, $id)
+    public function active_users()
     {
-        $user = User::findOrFail($id);
-
-        $user->update($request);
-
-        return response()->json([
-            'user' => $user
-        ], 201);
+        $active_users = User::where('active', '=', 1)->get(['id', 'full_name']);
+        return $active_users;
     }
 }

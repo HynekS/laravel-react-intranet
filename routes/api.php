@@ -68,7 +68,7 @@ Route::group(['prefix' => 'updates', 'middleware' => 'auth:api'], function () {
 });
 
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('/meta/users', 'MetaController@active_users');
+    Route::get('/users/get_active', 'UserController@active_users');
     Route::post('/upload', 'UploadController@upload');
     Route::get('/download/{folder}/{filename?}', 'DownloadController@download');
     Route::get('/download_all/{id}', 'DownloadController@zip_and_download_all');
