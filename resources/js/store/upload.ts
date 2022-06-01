@@ -1,10 +1,9 @@
-import { toast } from "react-toastify"
-
 import type { AnyAction } from "redux"
 import type { AppDispatch } from "../store/configuredStore"
 
 import client from "../utils/axiosWithDefaults"
 import getFileExtension from "../utils/getFileExtension"
+import triggerToast from "../components/common/Toast"
 
 // constants
 const BATCH_READ_FILES_INITIALIZED = "[upload] Reading multiple files has started"
@@ -220,8 +219,10 @@ export const uploadMultipleFiles = (
     if (responses) {
       dispatch(batchUploadFilesDone({ model, projectId, responses }))
       callback()
-      toast.success("Soubory byly úspěšně uloženy na server", {
-        position: toast.POSITION.BOTTOM_RIGHT,
+      triggerToast({
+        type: "success",
+        message: "Soubory byly úspěšně uloženy na server",
+        options: { duration: 4000 },
       })
     }
   } catch (error) {
