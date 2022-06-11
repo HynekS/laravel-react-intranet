@@ -86,12 +86,12 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
               }}
             />
           )}
-          <span tw="px-3 pt-1 pb-2 pr-4 text-left flex justify-between flex-col">
+          <span tw="flex flex-col justify-between px-3 pt-1 pb-2 pr-4 text-left">
             <div tw="flex">
               <span tw="block text-sm font-medium text-gray-600 break-all leading-none pb-1 truncate max-w-[90%]">
                 {String(path.split("/").pop()).split(".").shift()}
               </span>
-              <span tw="text-sm font-medium text-gray-600 leading-none pb-1">
+              <span tw="pb-1 text-sm font-medium leading-none text-gray-600">
                 .{String(path.split("/").pop()).split(".").pop()}
               </span>
             </div>
