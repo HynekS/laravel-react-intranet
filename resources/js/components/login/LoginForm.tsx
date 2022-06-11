@@ -60,11 +60,11 @@ const LoginForm = () => {
           />
           <button
             type="button"
-            tw="absolute right-2 top-0 bottom-0 text-gray-400"
+            tw="absolute top-0 bottom-0 text-gray-400 right-2"
             aria-label="show password"
             onClick={() => setPasswordShown(!passwordShown)}
           >
-            {passwordShown ? <EyeOffIcon tw="h-4 w-4" /> : <EyeIcon tw="h-4 w-4" />}
+            {passwordShown ? <EyeOffIcon tw="w-4 h-4" /> : <EyeIcon tw="w-4 h-4" />}
           </button>
         </div>
         <HiddenMessage show={errors.password}>
