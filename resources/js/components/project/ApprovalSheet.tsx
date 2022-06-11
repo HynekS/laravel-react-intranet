@@ -117,7 +117,7 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
           label="popis"
           placeholder="popis"
           register={register}
-          styles={mergeStyles(styles, { input: tw`w-96 resize max-w-full` })}
+          styles={mergeStyles(styles, { input: tw`max-w-full resize w-96` })}
         />
         <DefaultInput
           name="EL_datum"
