@@ -39,7 +39,7 @@ const DetailProvider = () => {
     if (projectFromLinkState || projectFromUrl) {
       setData(projectFromLinkState || projectFromUrl)
     } else {
-      dispatch(fetchProject({ year: params.year, id: params.num }))
+      dispatch(fetchProject({ year: Number(params.year), id: Number(params.num) }))
     }
   }, [params, projectFromLinkState, projectFromUrl])
 
