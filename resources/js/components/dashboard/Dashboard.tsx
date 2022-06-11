@@ -77,31 +77,18 @@ const SearchResults = ({ results }: { results: null | Akce[] }) => {
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState<string>("")
-  const [searchResults, setSearchResults] = useState<Akce[] | null>(null)
   const [updateList, setUpdateList] = useState<UpdateListItem[]>([])
+  const dispatch = useAppDispatch()
+  const statsByYears = useAppSelector(store => store.stats.stats)
+  const searchResults = useAppSelector(store => store.search.results)
 
   const debouncedValue = useDebouncedValue(searchTerm, 500)
 
   useEffect(() => {
     if (searchTerm.length > 2) {
-      sendSearchTerm(debouncedValue)
-    }
-
-    async function sendSearchTerm(term: string = "") {
-      try {
-        const response = await client.post<Akce[]>(`/akce/search`, { search_term: term })
-        if (response) {
-          setSearchResults(response.data)
-        }
-      } catch (e) {
-        // TODO: send a toast
-      }
+      dispatch(fetchSearchResults(debouncedValue))
     }
   }, [debouncedValue])
-
-  useEffect(() => {
-    if (!searchTerm.length) setSearchResults(null)
-  }, [searchTerm])
 
   useEffect(() => {
     getUpdates()
@@ -116,6 +103,10 @@ const Dashboard = () => {
         // TODO: send a toast
       }
     }
+  }, [])
+
+  useEffect(() => {
+    dispatch(fetchStatsByYears())
   }, [])
 
   return (
@@ -144,7 +135,7 @@ const Dashboard = () => {
                       tw="absolute top-0 bottom-0 w-5 h-5 my-auto cursor-pointer right-3"
                       onClick={() => {
                         setSearchTerm("")
-                        setSearchResults([])
+                        dispatch(resetSearchResult())
                       }}
                     />
                   ) : null}
@@ -154,6 +145,9 @@ const Dashboard = () => {
             <SearchResults results={searchResults} />
             <Suspense fallback={<div>Loading…</div>}>
               <section tw="flex items-center justify-center p-8">
+                {statsByYears ? (
+                  <pre tw="text-xs">{JSON.stringify(statsByYears, null, 2)}</pre>
+                ) : null}
                 <DistrictsMap fill="#e5e7eb" />
               </section>
             </Suspense>
