@@ -1,146 +1,97 @@
-import client from "../utils/axiosWithDefaults"
+import { createSlice, createAsyncThunk, SerializedError } from "@reduxjs/toolkit"
 
-export const authStatus = {
-  INITIAL: "initial",
-  PENDING: "pending",
-  REJECTED: "rejected",
-  FULFILLED: "fulfilled",
-} as const
+import client from "@services/http/client"
 
-type TypeAuthStatus = typeof authStatus
-//type AuthStatus = TypeAuthStatus[keyof TypeAuthStatus]
+import type { users as User } from "@codegen"
+import type { NavigateFunction } from "react-router"
 
-const initialState = {
-  status: authStatus.INITIAL,
-  authError: null,
-  userError: null,
+interface AuthState {
+  user: User | null
+  status: "idle" | "pending" | "fulfilled" | "rejected" | "refreshing"
+  error: SerializedError | null
+}
+
+const initialState: AuthState = {
+  status: "idle",
   user: null,
-  logoutError: null,
+  error: null,
 }
 
-// Actions
-const LOGIN_INITIALIZED = "[auth] Login was initialized"
-const LOGIN_SUCCESS = "[auth] Login was succesful"
-const LOGIN_FAILURE = "[auth] Login has failed"
-
-const FETCH_USER_INITIALIZED = "[auth] Fetching user has started"
-const FETCH_USER_SUCCESS = "[auth] Fetching user was succesful"
-const FETCH_USER_FAILURE = "[auth] Fetching user has failed"
-
-const LOGOUT_INITIALIZED = "[auth] Logout was initialized"
-const LOGOUT_SUCCESS = "[auth] Logout was succesful"
-const LOGOUT_FAILURE = "[auth] Logout has failed"
-
-// Reducer
-export default function reducer(state = initialState, action = {}) {
-  switch (action.type) {
-    case LOGIN_INITIALIZED:
-      return {
-        ...state,
-        status: authStatus.PENDING,
-        authError: null,
-      }
-    case LOGIN_SUCCESS:
-      return {
-        ...state,
-        status: authStatus.FULFILLED,
-        user: action.user,
-      }
-    case LOGIN_FAILURE:
-      return {
-        ...state,
-        authError: action.error,
-      }
-    case FETCH_USER_INITIALIZED:
-      return {
-        ...state,
-        authStatus: authStatus.PENDING,
-      }
-    case FETCH_USER_SUCCESS:
-      return {
-        ...state,
-        status: authStatus.FULFILLED,
-        user: action.user,
-      }
-    case FETCH_USER_FAILURE:
-      return {
-        ...state,
-        status: authStatus.REJECTED,
-        userError: action.error,
-      }
-    case LOGOUT_INITIALIZED:
-      return {
-        ...state,
-      }
-    case LOGOUT_SUCCESS:
-      return {
-        ...state,
-        status: authStatus.REJECTED,
-        user: null,
-      }
-    case LOGOUT_FAILURE:
-      return {
-        ...state,
-        logoutError: action.error,
-      }
-    default:
-      return state
-  }
-}
-
-// Action creators
-export const loginInit = () => ({ type: LOGIN_INITIALIZED })
-
-export const loginSuccess = user => ({ type: LOGIN_SUCCESS, user })
-
-export const loginFailure = error => ({ type: LOGIN_FAILURE, error })
-
-export const fetchUserInit = () => ({ type: FETCH_USER_INITIALIZED })
-
-export const fetchUserSuccess = user => ({ type: FETCH_USER_SUCCESS, user })
-
-export const fetchUserFailure = error => ({ type: FETCH_USER_FAILURE, error })
-
-export const logoutInit = () => ({ type: LOGOUT_INITIALIZED })
-
-export const logoutSuccess = () => ({ type: LOGOUT_SUCCESS })
-
-export const logoutFailure = error => ({ type: LOGOUT_FAILURE, error })
-
-// Thunks
-export const submitLoginData = credentials => async dispatch => {
-  dispatch(loginInit())
-  try {
-    const response = await client.post("auth/login", {
-      ...credentials,
+const authSlice = createSlice({
+  name: "auth",
+  initialState,
+  reducers: {
+    fetchUserFailure: (state, action) => {
+      state.user = null
+      state.status = "rejected"
+      state.error = action.payload.error
+    },
+  },
+  extraReducers: builder => {
+    builder.addCase(submitLoginData.pending, state => {
+      state.status = "pending"
     })
-    client.defaults.headers["Authorization"] = `Bearer ${response.data.access_token}`
+    builder.addCase(submitLoginData.fulfilled, (state, action) => {
+      state.user = action.payload
+      state.status = "fulfilled"
+    })
+    builder.addCase(submitLoginData.rejected, (state, action) => {
+      state.user = null
+      state.error = action.error
+      state.status = "rejected"
+    })
+    builder.addCase(fetchUser.pending, state => {
+      state.status = "refreshing"
+    })
+    builder.addCase(fetchUser.fulfilled, (state, action) => {
+      state.user = action.payload
+      state.status = "fulfilled"
+    })
+    builder.addCase(logout.fulfilled, state => {
+      state.user = null
+      state.status = "rejected"
+    })
+  },
+})
 
-    dispatch(loginSuccess(response.data.user))
-  } catch (error) {
-    dispatch(loginFailure(error.response.data))
+export const submitLoginData = createAsyncThunk<
+  User,
+  { user_name: string; password: string },
+  {
+    rejectValue: string
   }
-}
+>("auth/submitLoginData", async credentials => {
+  const response = await client.post("auth/login", {
+    ...credentials,
+  })
+  client.defaults.headers["Authorization"] = `Bearer ${response.data.access_token}`
+  const { user } = response.data
+  return user
+})
 
-export const fetchUser = () => async dispatch => {
+export const fetchUser = createAsyncThunk<
+  User,
+  void,
+  {
+    rejectValue: Error
+  }
+>("auth/fetchUser", async (_, { dispatch, rejectWithValue }) => {
   try {
-    dispatch(fetchUserInit())
     const response = await client.get("auth/user")
-    if (response) dispatch(fetchUserSuccess(response.data))
-  } catch (e) {
-    dispatch(fetchUserFailure(e))
+    return response.data
+  } catch (error) {
+    dispatch(fetchUserFailure(error as Error))
+    return rejectWithValue(error as Error)
   }
-}
+})
 
-export const logout = navigate => async dispatch => {
-  try {
-    dispatch(logoutInit())
-    const response = await client.get("auth/logout")
-    if (response) {
-      dispatch(logoutSuccess())
-      navigate("/")
-    }
-  } catch (e) {
-    dispatch(logoutFailure(e))
+export const logout = createAsyncThunk("auth/logout", async (navigate: NavigateFunction) => {
+  const response = await client.get("auth/logout")
+  if (response) {
+    navigate("/")
+    return response
   }
-}
+})
+
+export const { fetchUserFailure } = authSlice.actions
+export default authSlice.reducer

@@ -1,4 +1,4 @@
-import { useSelector, useDispatch } from "react-redux"
+import { useState } from "react"
 
 import { deleteInvoice } from "../../../store/invoices"
 import { status } from "../../../store/projects"
@@ -16,14 +16,19 @@ type Props = {
 }
 
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }: Props) => {
-  const dispatch = useDispatch()
-  const isLoading = useSelector(
-    (store: AppState) => store.projects.invoiceStatus === status.LOADING,
-  )
+  const [isPending, setIsPending] = useState(false)
+  const dispatch = useAppDispatch()
+
   const { id_zaznam: invoiceId, akce_id: projectId, typ_castky, c_faktury = "", castka = "" } = data
 
   const handleClick = () => {
+    setIsPending(true)
     dispatch(deleteInvoice({ invoiceId, projectId, typ_castky }))
+      .unwrap()
+      .then(() => {
+        setIsPending(false)
+        onModalClose()
+      })
   }
 
   return (
@@ -47,7 +52,8 @@ const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }: Props) => 
         <button
           tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none ring transition-shadow duration-300)"
           onClick={handleClick}
-          className={`${isLoading ? "spinner" : ""}`}
+          className={`${isPending ? "spinner" : ""}`}
+          disabled={isPending}
         >
           Odstranit fakturu
         </button>

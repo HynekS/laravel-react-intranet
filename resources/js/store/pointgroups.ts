@@ -1,149 +1,92 @@
-import client from "../utils/axiosWithDefaults"
+import { createSlice, createAsyncThunk, isAnyOf } from "@reduxjs/toolkit"
 
-import pointReducer, {
-  CREATE_POINT_INITIALIZED,
-  CREATE_POINT_SUCCESS,
-  CREATE_POINT_FAILURE,
-  UPDATE_POINT_INITIALIZED,
-  UPDATE_POINT_SUCCESS,
-  UPDATE_POINT_FAILURE,
-  DELETE_POINT_INITIALIZED,
-  DELETE_POINT_SUCCESS,
-  DELETE_POINT_FAILURE,
-} from "./points"
+import client from "@services/http/client"
 
-// Actions
-export const CREATE_POINTGROUP_INITIALIZED = "[pointgroups] creating new pointgroup has started"
-export const CREATE_POINTGROUP_SUCCESS = "[pointgroups] creating new pointgroup was succesful"
-export const CREATE_POINTGROUP_FAILURE = "[pointgroups] creating new pointgroup has failed"
+import store from "./configuredStore"
+import { setActivePointgroupIndex } from "./projects"
+import pointReducer, { createPoint, updatePoint, deletePoint } from "./points"
 
-export const UPDATE_POINTGROUP_INITIALIZED = "[pointgroups] updating an pointgroup has started"
-export const UPDATE_POINTGROUP_SUCCESS = "[pointgroups] updating an pointgroup was succesful"
-export const UPDATE_POINTGROUP_FAILURE = "[pointgroups] updating an pointgroup has failed"
+import type { pointgroups as Pointgroup } from "@codegen"
+import type { PointgroupWithPoins } from "./points"
 
-export const DELETE_POINTGROUP_INITIALIZED = "[pointgroups] deleting an pointgroup has started"
-export const DELETE_POINTGROUP_SUCCESS = "[pointgroups] deleting an pointgroup was succesful"
-export const DELETE_POINTGROUP_FAILURE = "[pointgroups] deleting an pointgroup has failed"
+type FeatureType = "point" | "line" | "polygon"
 
-// Reducer
-export default function reducer(state = [], action = {}) {
-  switch (action.type) {
-    case CREATE_POINTGROUP_SUCCESS: {
-      return [...state, { ...action.response, points: [] }]
-    }
-    case UPDATE_POINTGROUP_SUCCESS: {
-      let { id } = action.response
-      return state.map(pointgroup => (pointgroup.id === id ? action.response : pointgroup))
-    }
-    case DELETE_POINTGROUP_SUCCESS: {
-      let { id } = action.response
+export const pointgroupsSlice = createSlice({
+  name: "pointgroups",
+  initialState: [] as Pointgroup[],
+  reducers: {},
+  extraReducers: builder => {
+    builder.addCase(createPointgroup.fulfilled, (state, { payload }) => {
+      return [...state, { ...payload.data, points: [] }]
+    })
+    builder.addCase(updatePointgroup.fulfilled, (state, { payload }) => {
+      let { id } = payload.data
+      return state.map(pointgroup => (pointgroup.id === id ? payload.data : pointgroup))
+    })
+    builder.addCase(deletePointgroup.fulfilled, (state, { payload }) => {
+      let { id } = payload.data
       return state.filter(pointgroup => pointgroup.id !== id)
-    }
-    // These are being handled in projects reducer
-    case CREATE_POINTGROUP_INITIALIZED:
-    case CREATE_POINTGROUP_FAILURE:
-    case UPDATE_POINTGROUP_INITIALIZED:
-    case UPDATE_POINTGROUP_FAILURE:
-    case DELETE_POINTGROUP_INITIALIZED:
-    case DELETE_POINTGROUP_FAILURE:
-      return state
-    case CREATE_POINT_SUCCESS:
-    case UPDATE_POINT_SUCCESS:
-    case DELETE_POINT_SUCCESS:
-      return state.map(pointgroup =>
-        pointgroup.id === action.response.pointgroup_id
-          ? pointReducer(pointgroup, action)
-          : pointgroup,
-      )
-    default:
-      return state
-  }
-}
-
-// Action creators
-export const createPointgroupInit = () => ({ type: CREATE_POINTGROUP_INITIALIZED })
-
-export const createPointgroupSuccess = ({ response, projectId }) => ({
-  type: CREATE_POINTGROUP_SUCCESS,
-  response,
-  projectId,
+    })
+    builder.addMatcher(
+      isAnyOf(createPoint.fulfilled, updatePoint.fulfilled, deletePoint.fulfilled),
+      (state, { type, payload }) => {
+        return state.map(pointgroup =>
+          pointgroup.id === payload.data.pointgroup_id
+            ? pointReducer(pointgroup as PointgroupWithPoins, { type, payload })
+            : pointgroup,
+        )
+      },
+    )
+  },
 })
 
-export const createPointgroupFailure = error => ({ type: CREATE_POINTGROUP_FAILURE, error })
+export const createPointgroup = createAsyncThunk<
+  { projectId: number; data: Pointgroup },
+  { projectId: number },
+  {
+    rejectValue: string
+  }
+>("pointgroups/createPointgroup", async ({ projectId }, { dispatch }) => {
+  const currentLength = store.getState().projects.byId[projectId].pointgroups.length
+  console.log("pointgroups/createPointgroup", { currentLength })
 
-export const updatePointgroupInit = () => ({ type: UPDATE_POINTGROUP_INITIALIZED })
-
-export const updatePointgroupSuccess = ({ response, projectId }) => ({
-  type: UPDATE_POINTGROUP_SUCCESS,
-  response,
-  projectId,
+  const response = await client.post("/pointgroup", { projectId })
+  dispatch(setActivePointgroupIndex({ newIndex: currentLength, projectId }))
+  return { projectId, data: response.data }
 })
 
-export const updatePointgroupFailure = error => ({ type: UPDATE_POINTGROUP_FAILURE, error })
-
-export const deletePointgroupInit = () => ({ type: DELETE_POINTGROUP_INITIALIZED })
-
-export const deletePointgroupSuccess = ({ response, projectId }) => ({
-  type: DELETE_POINTGROUP_SUCCESS,
-  response,
-  projectId,
+export const updatePointgroup = createAsyncThunk<
+  { projectId: number; data: Pointgroup },
+  { pointgroupId: number; feature_type: FeatureType; projectId: number },
+  {
+    rejectValue: string
+  }
+>("pointgroups/updatePointgroup", async ({ pointgroupId, feature_type, projectId }) => {
+  const response = await client.put(`/pointgroup/${pointgroupId}`, { feature_type })
+  return { projectId, data: response.data }
 })
 
-export const deletePointgroupFailure = error => ({ type: DELETE_POINTGROUP_FAILURE, error })
-
-// Thunks
-export const createPointgroup = ({ projectId }) => async dispatch => {
-  try {
-    dispatch(createPointgroupInit())
-    let response = await client.post("/pointgroup", { projectId })
-    if (response) {
-      dispatch(
-        createPointgroupSuccess({
-          response: response.data,
-          projectId,
-        }),
-      )
-
-      return response.data
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(createPointgroupFailure(error))
+export const deletePointgroup = createAsyncThunk<
+  { projectId: number; data: Pointgroup },
+  { pointgroupId: number; projectId: number },
+  {
+    rejectValue: string
   }
-}
+>("pointgroups/deletePointgroup", async ({ pointgroupId, projectId }, { dispatch }) => {
+  const currentLength = store.getState().projects.byId[projectId].pointgroups.length
+  console.log({ currentLength })
 
-export const updatePointgroup = ({ pointgroupId, feature_type, projectId }) => async dispatch => {
-  try {
-    dispatch(updatePointgroupInit())
-    let response = await client.put(`/pointgroup/${pointgroupId}`, { feature_type })
-    if (response) {
-      dispatch(
-        updatePointgroupSuccess({
-          response: response.data,
-          projectId,
-        }),
-      )
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(updatePointgroupFailure(error))
+  const response = await client.delete(`/pointgroup/${pointgroupId}`)
+  dispatch(
+    setActivePointgroupIndex({
+      newIndex: currentLength - 2 >= 0 ? currentLength - 2 : undefined,
+      projectId,
+    }),
+  )
+  return {
+    projectId,
+    data: response.data,
   }
-}
+})
 
-export const deletePointgroup = ({ pointgroupId, projectId }) => async dispatch => {
-  try {
-    dispatch(deletePointgroupInit())
-    let response = await client.delete(`/pointgroup/${pointgroupId}`)
-    if (response) {
-      dispatch(
-        deletePointgroupSuccess({
-          response: response.data,
-          projectId,
-        }),
-      )
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(deletePointgroupFailure(error))
-  }
-}
+export default pointgroupsSlice.reducer

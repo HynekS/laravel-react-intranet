@@ -1,18 +1,10 @@
-import type { AnyAction } from "redux"
-import type { akce as Akce } from "../types/model"
-
-/*
-  The below object is copied straight from react-base-table source code,
-  because importing it caused to include the whole react-base-table
-  in the main, 'entry point' bundle.
-
-  Let's try import only the type…
-*/
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { SortOrder } from "react-base-table"
 
+import type { akce as Akce } from "../types/model"
+
 export type Filters = {
-  // Is it really? check twice!
-  [prop in keyof Akce]?: string
+  [key in keyof Akce]?: string
 }
 
 type SortBy = {
@@ -20,7 +12,7 @@ type SortBy = {
   order: SortOrder
 }
 
-type InitialState = {
+interface InitialState {
   sortBy: SortBy
   filters: Filters
 }
@@ -33,41 +25,34 @@ const initialState: InitialState = {
   filters: {},
 }
 
-// Actions
-const SET_SORT_BY = (key: SortBy["key"], order: SortOrder) =>
-  `[table] updated table sorting (key: ${key}, order: ${order})`
-const UPDATE_FILTERS = "[table] updating table filters"
-const CLEAR_FILTERS = "[table] all filters have been cleared"
-
-// Reducer
-export default function reducer(state = initialState, action: AnyAction) {
-  switch (action.type) {
-    case SET_SORT_BY(action.key, action.order):
+export const tableSlice = createSlice({
+  name: "name",
+  initialState,
+  reducers: {
+    setSortBy: (state, { payload }: PayloadAction<{ key: SortBy["key"]; order: SortOrder }>) => {
       return {
         ...state,
         sortBy: {
-          key: action.key,
-          order: action.order,
+          key: payload.key,
+          order: payload.order,
         },
       }
-    case UPDATE_FILTERS:
+    },
+    updateFilters: (state, { payload }: PayloadAction<Filters>) => {
       return {
         ...state,
-        filters: { ...state.filters, ...action.filters },
+        filters: { ...state.filters, ...payload },
       }
-    case CLEAR_FILTERS:
+    },
+    clearFilters: state => {
       return {
         ...state,
         filters: {},
       }
-    default:
-      return state
-  }
-}
+    },
+  },
+})
 
-// Action creators
-export const setSortBy = ({ key, order }: SortBy) => ({ type: SET_SORT_BY(key, order), key, order })
+export const { setSortBy, updateFilters, clearFilters } = tableSlice.actions
 
-export const updateFilters = (filters: Filters) => ({ type: UPDATE_FILTERS, filters })
-
-export const clearFilters = () => ({ type: CLEAR_FILTERS })
+export default tableSlice.reducer

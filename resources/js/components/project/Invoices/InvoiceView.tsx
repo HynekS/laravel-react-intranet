@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react"
-import { useSelector, useDispatch } from "react-redux"
-
-import { setInvoiceStatus } from "../../../store/invoices"
+import { useState } from "react"
 import Button from "../../common/Button"
 import DetailWrapper from "../DetailWrapper"
 import InvoiceList from "./InvoiceList"
@@ -31,30 +28,19 @@ type SummaryProps = {
 }
 
 export type ModalState = {
-  status: typeof modalStatus[keyof typeof modalStatus]
+  status: "closed" | "create" | "update" | "delete"
   data: Props["detail"] | null
 }
 
 const InvoicePage = ({ detail, ...props }: Props) => {
   const [modalState, setModalState] = useState<ModalState>({
-    status: modalStatus.CLOSED,
+    status: "closed",
     data: null,
   })
 
-  const modalStateFromStore = useSelector((store: AppState) => store.projects.invoiceStatus)
-  const dispatch = useDispatch()
-
-  // NOTE: This works, but it would be probably much cleaner to move that logic to redux altogether.
-  useEffect(() => {
-    if (["success", "error"].includes(modalStateFromStore)) {
-      onModalClose()
-      dispatch(setInvoiceStatus("idle"))
-    }
-  }, [modalStateFromStore])
-
   const onModalClose = (e?: React.MouseEvent<HTMLButtonElement>) => {
     e && e.preventDefault()
-    setModalState({ status: modalStatus.CLOSED, data: null })
+    setModalState({ status: "closed", data: null })
   }
 
   const {
@@ -98,12 +84,12 @@ const InvoicePage = ({ detail, ...props }: Props) => {
               <InvoiceSummary budget={rozpocet_vyzkum} sum={fakturyVyzkumSum} label="Výzkum" />
             )}
           </div>
-          <Button onClick={() => setModalState({ status: modalStatus.CREATE, data: detail })}>
+          <Button onClick={() => setModalState({ status: "create", data: detail })}>
             <PlusIcon tw="w-5 mr-1" />
             Nová faktura
           </Button>
           <Modal
-            isOpen={modalState.status !== modalStatus.CLOSED}
+            isOpen={modalState.status !== "closed"}
             shouldCloseOnOverlayClick={true}
             onRequestClose={onModalClose}
             closeTimeoutMS={500}
@@ -111,19 +97,19 @@ const InvoicePage = ({ detail, ...props }: Props) => {
           >
             <header tw="flex justify-between p-6">
               <h2 tw="text-lg font-medium">
-                {modalState.status === modalStatus.CREATE && "Vytvořit fakturu"}
-                {modalState.status === modalStatus.UPDATE && "Upravit fakturu"}
-                {modalState.status === modalStatus.DESTROY && "Odstranit fakturu"}
+                {modalState.status === "create" && "Vytvořit fakturu"}
+                {modalState.status === "update" && "Upravit fakturu"}
+                {modalState.status === "delete" && "Odstranit fakturu"}
               </h2>
               <ModalCloseButton handleClick={onModalClose} />
             </header>
-            {modalState.status === modalStatus.CREATE && (
+            {modalState.status === "create" && (
               <InvoiceCreateForm modalState={modalState} onModalClose={onModalClose} />
             )}
-            {modalState.status === modalStatus.UPDATE && (
+            {modalState.status === "update" && (
               <InvoiceUpdateForm modalState={modalState} onModalClose={onModalClose} />
             )}
-            {modalState.status === modalStatus.DESTROY && (
+            {modalState.status === "delete" && (
               <InvoiceDestroyDialog modalState={modalState} onModalClose={onModalClose} />
             )}
           </Modal>

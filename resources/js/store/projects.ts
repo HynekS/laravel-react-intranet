@@ -1,465 +1,337 @@
-import type { AnyAction } from "redux"
-import { loadProgressBar } from "axios-progress-bar"
-import type { akce as Akce } from "../types/model"
-import type { NavigateFunction } from "react-router"
-
-import client from "../utils/axiosWithDefaults"
-
-import type { AppDispatch } from "../store/configuredStore"
-
-import invoiceReducer, {
-  CREATE_INVOICE_INITIALIZED,
-  UPDATE_INVOICE_INITIALIZED,
-  DELETE_INVOICE_INITIALIZED,
-  CREATE_INVOICE_SUCCESS,
-  UPDATE_INVOICE_SUCCESS,
-  DELETE_INVOICE_SUCCESS,
-  CREATE_INVOICE_FAILURE,
-  UPDATE_INVOICE_FAILURE,
-  DELETE_INVOICE_FAILURE,
-  SET_INVOICE_STATUS,
-} from "./invoices"
-import fileReducer, { DELETE_FILE_SUCCESS } from "./files"
-import { BATCH_UPLOAD_FILES_DONE } from "./upload"
-import pointgroupsReducer, {
-  CREATE_POINTGROUP_INITIALIZED,
-  CREATE_POINTGROUP_SUCCESS,
-  CREATE_POINTGROUP_FAILURE,
-  UPDATE_POINTGROUP_INITIALIZED,
-  UPDATE_POINTGROUP_SUCCESS,
-  UPDATE_POINTGROUP_FAILURE,
-  DELETE_POINTGROUP_INITIALIZED,
-  DELETE_POINTGROUP_FAILURE,
-  DELETE_POINTGROUP_SUCCESS,
-} from "./pointgroups"
 import {
-  CREATE_POINT_INITIALIZED,
-  CREATE_POINT_SUCCESS,
-  CREATE_POINT_FAILURE,
-  UPDATE_POINT_INITIALIZED,
-  UPDATE_POINT_SUCCESS,
-  UPDATE_POINT_FAILURE,
-  DELETE_POINT_INITIALIZED,
-  DELETE_POINT_SUCCESS,
-  DELETE_POINT_FAILURE,
-} from "./points"
+  createSlice,
+  createAsyncThunk,
+  SerializedError,
+  PayloadAction,
+  isAnyOf,
+} from "@reduxjs/toolkit"
+
+import client from "@services/http/client"
+
+import invoiceReducer, { createInvoice, updateInvoice, deleteInvoice } from "./invoices"
+import pointgroupsReducer, {
+  createPointgroup,
+  updatePointgroup,
+  deletePointgroup,
+} from "./pointgroups"
+import { createPoint, updatePoint, deletePoint } from "./points"
+import { uploadMultipleFiles } from "./upload"
+import fileReducer, { deleteFile } from "./files"
+
+import type { NavigateFunction } from "react-router"
+import type { akce as Akce, faktury as Faktura, pointgroups as Pointgroup } from "../types/model"
+import type { Model } from "./files"
+import type { FileRecord } from "./upload"
 
 export const yearsSince2013 = Array.from(
   { length: new Date().getFullYear() - 2013 + 1 },
   (_, i) => i + 2013,
 )
 
-export const status = {
-  IDLE: "idle",
-  LOADING: "loading",
-  SUCCESS: "success",
-  ERROR: "error",
+type RequestLifecycle = "idle" | "pending" | "fulfilled" | "rejected"
+
+type AkceWithAll = Akce & { faktury_dohled: Faktura[]; faktury_vyzkum: Faktura[] } & {
+  pointgroups: Pointgroup[]
+} & { [key in Model]: FileRecord } & { activePointgroupIndex?: number }
+
+interface ProjectsState {
+  getSingle: {
+    status: RequestLifecycle
+    error: null | SerializedError
+  }
+  getMultiple: {
+    status: RequestLifecycle
+    error: null | SerializedError
+  }
+  createProject: {
+    status: RequestLifecycle
+    error: null | SerializedError
+  }
+  updateProject: {
+    status: RequestLifecycle
+    error: null | SerializedError
+  }
+  deleteProject: {
+    status: RequestLifecycle
+    error: null | SerializedError
+  }
+  byYear: { [year: string]: { [id: string]: Akce } }
+  byId: {
+    [id: string]: AkceWithAll
+  }
+  allIds: string[]
+  idsByYear: {
+    [key: string]: string[]
+  }
 }
 
-const initialState: InitialState = {
-  projectStatus: status.IDLE,
-  projectError: null,
-  invoiceStatus: status.IDLE,
-  invoiceError: null,
-  pointgroupStatus: status.IDLE,
-  pointgroupError: null,
-  pointStatus: status.IDLE,
-  pointError: null,
+// TODO remove all the statuses, handle directly using unwrap()
+const initialState: ProjectsState = {
+  getSingle: { status: "idle", error: null },
+  getMultiple: { status: "idle", error: null },
+  createProject: { status: "idle", error: null },
+  updateProject: { status: "idle", error: null },
+  deleteProject: { status: "idle", error: null },
   byYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: {} }))),
   byId: {},
   allIds: [],
   idsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
 }
 
-type InitialState = {
-  projectStatus: typeof status.IDLE
-  projectError: string | null
-  invoiceStatus: typeof status.IDLE
-  invoiceError: string | null
-  pointgroupStatus: typeof status.IDLE
-  pointgroupError: string | null
-  pointStatus: typeof status.IDLE
-  pointError: string | null
-  byYear: {
-    [key: string]: {}
-  }
-  byId: {
-    [key: string]: Akce
-  }
-  allIds: string[]
-  idsByYear: {
-    [key: string]: number[]
-  }
+const setDefaulPointgroupIndex = (obj: AkceWithAll) => {
+  return obj.pointgroups && obj.pointgroups.length ? 0 : undefined
 }
 
-// Actions
-const FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED = (year: number) =>
-  `[projects] Fetching projects of year ${year} has started`
-const FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS = (year: number) =>
-  `[projects] Fetching projects of year ${year} was succesful`
-const FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE = (year: number) =>
-  `[projects] Fetching projects of year ${year} has failed`
+const projectsSlice = createSlice({
+  name: "projects",
+  initialState,
+  reducers: {
+    fetchProjectByYearsInit: state => {
+      state.getMultiple.status = "pending"
+    },
+    fetchProjectByYearsSuccess: state => {
+      state.getMultiple.status = "fulfilled"
+    },
+    setActivePointgroupIndex: (
+      state,
+      { payload }: PayloadAction<{ projectId: number; newIndex: number | undefined }>,
+    ) => {
+      state.byId[payload.projectId].activePointgroupIndex = payload.newIndex
+    },
+  },
 
-const FETCH_PROJECTS_BY_YEARS_INITIALIZED = "[projects] Fetching projects by years has started"
-const FETCH_PROJECTS_BY_YEARS_SUCCESS = "[projects] Fetching projects by years was succesful"
-const FETCH_PROJECTS_BY_YEARS_FAILURE = "[projects] Fetching projects by years has failed"
-
-const FETCH_SINGLE_PROJECT_INITIALIZED = "[projects] Fetching single project has started"
-const FETCH_SINGLE_PROJECT_SUCCESS = "[projects] Fetching single project was succesful"
-const FETCH_SINGLE_PROJECT_FAILURE = "[projects] Fetching single project has failed"
-
-const CREATE_PROJECT_INITIALIZED = "[projects] Creating project has started"
-const CREATE_PROJECT_SUCCESS = "[projects] Creating projects was succesful"
-const CREATE_PROJECT_FAILURE = "[projects] Creating project has failed"
-
-const UPDATE_PROJECT_INITIALIZED = "[projects] Updating project has started"
-const UPDATE_PROJECT_SUCCESS = "[projects] Updating projects was succesful"
-const UPDATE_PROJECT_FAILURE = "[projects] Updating project has failed"
-
-const DELETE_PROJECT_INITIALIZED = "[projects] Deleting project has started"
-const DELETE_PROJECT_SUCCESS = "[projects] Deleting projects was succesful"
-const DELETE_PROJECT_FAILURE = "[projects] Deleting project has failed"
-
-// Reducer
-export default function reducer(state: InitialState = initialState, action: AnyAction) {
-  switch (action.type) {
-    case FETCH_PROJECTS_BY_YEARS_INITIALIZED:
-    case FETCH_SINGLE_PROJECT_INITIALIZED:
-      return {
-        ...state,
-        projectStatus: status.LOADING,
-        projectError: null,
-      }
-    case FETCH_SINGLE_PROJECT_SUCCESS:
-      return {
-        ...state,
-        projectStatus: status.SUCCESS,
-        byId: {
+  extraReducers: builder => {
+    builder.addCase(fetchProject.pending, state => {
+      state.getSingle.status = "pending"
+    }),
+      builder.addCase(fetchProject.fulfilled, (state, { payload }) => {
+        state.getSingle.status = "fulfilled"
+        state.byId = {
           ...state.byId,
-          [action.project.id_akce]: { ...action.project },
-        },
-      }
-    case FETCH_SINGLE_PROJECT_FAILURE:
-    case FETCH_PROJECTS_BY_YEARS_FAILURE:
-      return {
-        ...state,
-        projectStatus: status.ERROR,
-        projectError: action.error,
-      }
-    case FETCH_PROJECTS_BY_YEARS_SUCCESS:
-      return {
-        ...state,
-        projectStatus: status.SUCCESS,
-      }
-    case FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(action.year):
-      return {
-        ...state,
-        byId: Object.assign({}, state.byId, action.projectsOfOneYear),
-        allIds: state.allIds.concat(Object.keys(action.projectsOfOneYear)),
-        idsByYear: {
+          [payload.id_akce]: {
+            activePointgroupIndex: setDefaulPointgroupIndex(payload),
+            ...payload,
+          },
+        }
+      }),
+      builder.addCase(fetchProject.rejected, (state, { error }) => {
+        state.getSingle.status = "rejected"
+        state.getSingle.error = error
+      }),
+      builder.addCase(fetchProjectsOfOneYear.fulfilled, (state, { payload }) => {
+        state.byId = Object.assign({}, state.byId, payload.projectsOfOneYear)
+
+        for (const project of Object.values(state.byId)) {
+          project["activePointgroupIndex"] = setDefaulPointgroupIndex(project)
+        }
+        state.allIds = state.allIds.concat(Object.keys(payload.projectsOfOneYear))
+        state.idsByYear = {
           ...state.idsByYear,
-          [action.year]: [
+          [payload.year]: [
             ...new Set([
-              ...(state.idsByYear[action.year] || []),
-              ...Object.keys(action.projectsOfOneYear),
+              ...(state.idsByYear[payload.year] || []),
+              ...Object.keys(payload.projectsOfOneYear),
             ]),
           ],
-        },
-      }
-    case CREATE_PROJECT_SUCCESS:
-      return {
-        ...state,
-        byId: {
+        }
+      }),
+      builder.addCase(createProject.fulfilled, (state, { payload }) => {
+        state.createProject.status = "fulfilled"
+        state.byId = {
           ...state.byId,
-          [action.id]: {
-            ...state.byId[action.id],
-            ...action.createdProject,
+          [payload.id]: {
+            ...state.byId[payload.id],
+            ...payload.createdProject,
           },
-        },
-      }
-    case UPDATE_PROJECT_SUCCESS:
-      return {
-        ...state,
-        byId: {
+        }
+      }),
+      builder.addCase(createProject.rejected, (state, { error }) => {
+        state.createProject.status = "rejected"
+        state.createProject.error = error as SerializedError
+      }),
+      builder.addCase(updateProject.fulfilled, (state, { payload }) => {
+        state.updateProject.status = "fulfilled"
+        state.byId = {
           ...state.byId,
-          [action.id]: {
-            ...state.byId[action.id],
-            ...action.updatedProject,
+          [payload.id]: {
+            ...state.byId[payload.id],
+            ...payload.updatedProject,
           },
-        },
-      }
-    case DELETE_PROJECT_SUCCESS:
-      const { [action.id]: deleted, ...withoutDeletedProject } = state.byId
-      return {
-        ...state,
-        byId: withoutDeletedProject,
-      }
-    case CREATE_INVOICE_INITIALIZED:
-    case UPDATE_INVOICE_INITIALIZED:
-    case DELETE_INVOICE_INITIALIZED:
-      return {
-        ...state,
-        invoiceStatus: status.LOADING,
-        invoiceError: null,
-      }
-    case CREATE_INVOICE_SUCCESS:
-    case UPDATE_INVOICE_SUCCESS:
-    case DELETE_INVOICE_SUCCESS:
-      let invoiceType = ["faktury_dohled", "faktury_vyzkum"][action.typ_castky]
-      return {
-        ...state,
-        invoiceStatus: status.SUCCESS,
-        byId: {
-          ...state.byId,
-          [action.projectId]: {
-            ...state.byId[action.projectId],
-            [invoiceType]: invoiceReducer(state.byId[action.projectId][invoiceType], action),
+        }
+      }),
+      builder.addCase(updateProject.rejected, (state, { error }) => {
+        state.updateProject.status = "rejected"
+        state.updateProject.error = error as SerializedError
+      }),
+      builder.addCase(deleteProject.fulfilled, (state, { payload }) => {
+        const { [payload.id]: deleted, ...withoutDeletedProject } = state.byId
+        return {
+          ...state,
+          byId: withoutDeletedProject,
+        }
+      }),
+      builder
+        .addCase(deleteProject.rejected, (state, { error }) => {
+          state.deleteProject.status = "rejected"
+          state.deleteProject.error = error as SerializedError
+        })
+
+        .addMatcher(
+          isAnyOf(createInvoice.fulfilled, updateInvoice.fulfilled, deleteInvoice.fulfilled),
+          (state, { type, payload }) => {
+            let invoiceType = (["faktury_dohled", "faktury_vyzkum"] as const)[
+              payload.data.typ_castky as 0 | 1
+            ]
+            let stateSlice = state.byId[payload.projectId][invoiceType]
+            state.byId[payload.projectId][invoiceType] = invoiceReducer(stateSlice, {
+              type,
+              payload,
+            })
           },
-        },
-      }
-    case CREATE_INVOICE_FAILURE:
-    case UPDATE_INVOICE_FAILURE:
-    case DELETE_INVOICE_FAILURE:
-      return {
-        ...state,
-        invoiceStatus: status.ERROR,
-        invoiceError: action.error,
-      }
-    case SET_INVOICE_STATUS:
-      return {
-        ...state,
-        invoiceStatus: action.status,
-      }
-    case DELETE_FILE_SUCCESS:
-    case BATCH_UPLOAD_FILES_DONE:
-      return {
-        ...state,
-        byId: {
-          ...state.byId,
-          [action.projectId]: {
-            ...state.byId[action.projectId],
-            [action.model]: fileReducer(state.byId[action.projectId][action.model], action),
+        )
+        .addMatcher(
+          isAnyOf(
+            createPointgroup.fulfilled,
+            updatePointgroup.fulfilled,
+            deletePointgroup.fulfilled,
+          ),
+          (state, { type, payload }) => {
+            return {
+              ...state,
+              byId: {
+                ...state.byId,
+                [payload.projectId]: {
+                  ...state.byId[payload.projectId],
+                  pointgroups: pointgroupsReducer(state.byId[payload.projectId].pointgroups, {
+                    type,
+                    payload,
+                  }),
+                },
+              },
+            }
           },
-        },
-      }
-    case CREATE_POINTGROUP_INITIALIZED:
-    case UPDATE_POINTGROUP_INITIALIZED:
-    case DELETE_POINTGROUP_INITIALIZED:
-      return {
-        ...state,
-        pointgroupStatus: status.LOADING,
-        pointgroupError: null,
-      }
-    case CREATE_POINTGROUP_SUCCESS:
-    case UPDATE_POINTGROUP_SUCCESS:
-    case DELETE_POINTGROUP_SUCCESS:
-      return {
-        ...state,
-        pointgroupStatus: status.SUCCESS,
-        byId: {
-          ...state.byId,
-          [action.projectId]: {
-            ...state.byId[action.projectId],
-            pointgroups: pointgroupsReducer(state.byId[action.projectId].pointgroups, action),
+        )
+        .addMatcher(
+          isAnyOf(createPoint.fulfilled, updatePoint.fulfilled, deletePoint.fulfilled),
+          (state, { type, payload }) => {
+            return {
+              ...state,
+              byId: {
+                ...state.byId,
+                [payload.projectId]: {
+                  ...state.byId[payload.projectId],
+                  pointgroups: pointgroupsReducer(state.byId[payload.projectId].pointgroups, {
+                    type,
+                    payload,
+                  }),
+                },
+              },
+            }
           },
-        },
-      }
-    case CREATE_POINT_SUCCESS:
-    case UPDATE_POINT_SUCCESS:
-    case DELETE_POINT_SUCCESS:
-      // Should points have statuses too?
-      return {
-        ...state,
-        byId: {
-          ...state.byId,
-          [action.projectId]: {
-            ...state.byId[action.projectId],
-            pointgroups: pointgroupsReducer(state.byId[action.projectId].pointgroups, action),
+        )
+        .addMatcher(
+          isAnyOf(deleteFile.fulfilled, uploadMultipleFiles.fulfilled),
+          (state, { type, payload }) => {
+            return {
+              ...state,
+              byId: {
+                ...state.byId,
+                [payload.projectId]: {
+                  ...state.byId[payload.projectId],
+                  [payload.model]: fileReducer(state.byId[payload.projectId][payload.model], {
+                    type,
+                    payload,
+                  }),
+                },
+              },
+            }
           },
-        },
-      }
-    case CREATE_POINTGROUP_FAILURE:
-    case UPDATE_POINTGROUP_FAILURE:
-    case DELETE_POINTGROUP_FAILURE:
-      return {
-        ...state,
-        pointgroupStatus: status.ERROR,
-      }
-    default:
-      return state
-  }
-}
-
-// Action creators
-export const fetchProjectByYearsInit = () => ({
-  type: FETCH_PROJECTS_BY_YEARS_INITIALIZED,
+        )
+  },
 })
 
-export const fetchProjectByYearsSuccess = () => ({
-  type: FETCH_PROJECTS_BY_YEARS_SUCCESS,
-})
+export const {
+  fetchProjectByYearsInit,
+  fetchProjectByYearsSuccess,
+  setActivePointgroupIndex,
+} = projectsSlice.actions
 
-export const fetchProjectByYearsFailure = (error: Error) => ({
-  type: FETCH_PROJECTS_BY_YEARS_FAILURE,
-  error,
-})
-
-export const fetchProjectsOfOneYearInit = (year: number) => ({
-  type: FETCH_PROJECTS_OF_SINGLE_YEAR_INITIALIZED(year),
-  year,
-})
-
-export const fetchProjectsOfOneYearSuccess = (
-  projectsOfOneYear: { [key: string]: Akce },
-  year: number,
-) => ({
-  type: FETCH_PROJECTS_OF_SINGLE_YEAR_SUCCESS(year),
-  projectsOfOneYear,
-  year,
-})
-
-export const fetchProjectsOfOneYearFailure = (year: number, error: Error) => ({
-  type: FETCH_PROJECTS_OF_SINGLE_YEAR_FAILURE(year),
-  error,
-  year,
-})
-
-export const createProjectInit = () => ({ type: CREATE_PROJECT_INITIALIZED })
-
-export const createProjectSuccess = (id: number, createdProject: Akce) => ({
-  type: CREATE_PROJECT_SUCCESS,
-  id,
-  createdProject,
-})
-
-export const createProjectFailure = (error: Error) => ({ type: CREATE_PROJECT_FAILURE, error })
-
-export const updateProjectInit = () => ({ type: UPDATE_PROJECT_INITIALIZED })
-
-export const updateProjectSuccess = (id: number, updatedProject: Akce) => ({
-  type: UPDATE_PROJECT_SUCCESS,
-  id,
-  updatedProject,
-})
-
-export const updateProjectFailure = (error: Error) => ({ type: UPDATE_PROJECT_FAILURE, error })
-
-export const deleteProjectInit = () => ({ type: DELETE_PROJECT_INITIALIZED })
-
-export const deleteProjectSuccess = (id: number) => ({
-  type: DELETE_PROJECT_SUCCESS,
-  id,
-})
-
-export const deleteProjectFailure = (error: Error) => ({ type: DELETE_PROJECT_FAILURE, error })
-
-export const fetchSingleProjectInit = () => ({ type: FETCH_SINGLE_PROJECT_INITIALIZED })
-
-export const fetchSingleProjectSuccess = (project: Akce) => ({
-  type: FETCH_SINGLE_PROJECT_SUCCESS,
-  project,
-})
-
-export const fetchSingleProjectFailure = (error: Error) => ({
-  type: FETCH_SINGLE_PROJECT_FAILURE,
-  error,
-})
-
-// Thunks
-export const fetchProjectsByYears = (years: number[]) => async (
-  dispatch: (args: unknown) => void,
-) => {
-  try {
+export const fetchProjectsByYears = createAsyncThunk(
+  "projects/fetchProjectByYears",
+  async (years: number[], { dispatch }) => {
     dispatch(fetchProjectByYearsInit())
     Promise.all(years.map(async year => dispatch(fetchProjectsOfOneYear(year)))).then(() =>
       dispatch(fetchProjectByYearsSuccess()),
     )
-  } catch (error) {
-    dispatch(fetchProjectByYearsFailure(error as Error))
-  }
-}
+  },
+)
 
-export const fetchProjectsOfOneYear = (year: number) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(fetchProjectsOfOneYearInit(year))
-    const response = await client.get(`akce/${year}`)
-    if (response) {
-      dispatch(fetchProjectsOfOneYearSuccess(response.data, year))
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(fetchProjectsOfOneYearFailure(year, error as Error))
+export const fetchProjectsOfOneYear = createAsyncThunk<
+  { projectsOfOneYear: AkceWithAll[]; year: number },
+  number,
+  {
+    rejectValue: string
   }
-}
+>("projects/fetchProjectsOfOneYear", async (year: number) => {
+  const response = await client.get(`akce/${year}`)
+  return { projectsOfOneYear: response.data, year }
+})
 
-export const fetchProject = ({ year, id }) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(fetchSingleProjectInit())
-    loadProgressBar({}, client)
-    const response = await client.get(`akce/${year}/${id}`)
-    if (response) {
-      dispatch(fetchSingleProjectSuccess(response.data))
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(fetchSingleProjectFailure(error as Error))
+export const fetchProject = createAsyncThunk<
+  AkceWithAll,
+  { year: number; id: number },
+  {
+    rejectValue: string
   }
-  loadProgressBar({ progress: false })
-}
+>("projects/fetchProject", async ({ year, id }) => {
+  const response = await client.get(`akce/${year}/${id}`)
+  return response.data
+})
 
-export const updateProject = ({ id, userId, ...project }) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(updateProjectInit())
-    loadProgressBar({}, client)
-    const response = await client.put(`akce/${id}`, { id_akce: id, userId, ...project })
-    if (response) {
-      dispatch(updateProjectSuccess(id, response.data))
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(updateProjectFailure(error as Error))
+export const createProject = createAsyncThunk<
+  { id: number; createdProject: Akce },
+  {
+    navigate: NavigateFunction
+    userId: number
+    project: Akce
+  },
+  {
+    rejectValue: string
   }
-  loadProgressBar({ progress: false })
-}
+>("projects/createProject", async ({ navigate, userId, ...project }) => {
+  const response = await client.post(`akce`, { userId, ...project })
+  const data = response.data
 
-export const createProject = (
-  { userId, ...project }: { userId: number; project: Akce },
-  navigate: NavigateFunction,
-) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(createProjectInit())
-    loadProgressBar({}, client)
-    const response = await client.post(`akce`, { userId, ...project })
-    if (response) {
-      const data = response.data || {}
-      dispatch(createProjectSuccess(data.id_akce, data))
-      navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(createProjectFailure(error as Error))
-  }
-  loadProgressBar({ progress: false })
-}
+  navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
+  return { id: data.id_akce, createdProject: data }
+})
 
-export const deleteProject = (
-  { id, userId, year, ...project }: { id: number; userId: number; year: number; project: Akce },
-  navigate: NavigateFunction,
-) => async (dispatch: AppDispatch) => {
-  try {
-    dispatch(deleteProjectInit())
-    loadProgressBar({}, client)
-    const response = await client.delete(`akce/${id}`, {
-      data: { userId, id_akce: id, ...project },
-    })
-    if (response) {
-      const data = response.data || {}
-      dispatch(deleteProjectSuccess(id))
-      navigate(`/akce/${year}`)
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(deleteProjectFailure(error as Error))
+export const updateProject = createAsyncThunk<
+  { id: number; updatedProject: Akce },
+  {
+    id: number
+    userId: number
+    project: Akce
+  },
+  {
+    rejectValue: string
   }
-  loadProgressBar({ progress: false })
-}
+>("projects/updateProject", async ({ id, userId, ...project }) => {
+  const response = await client.put(`akce/${id}`, { id_akce: id, userId, ...project })
+  return { id, updatedProject: response.data }
+})
+
+export const deleteProject = createAsyncThunk<
+  { id: number },
+  { id: number; userId: number; project: Akce },
+  {
+    rejectValue: string
+  }
+>("projects/deleteProject", async ({ id, userId }) => {
+  await client.delete(`akce/${id}`, {
+    data: { userId, id_akce: id },
+  })
+  return { id }
+})
+
+export default projectsSlice.reducer

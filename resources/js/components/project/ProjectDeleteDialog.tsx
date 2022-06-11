@@ -1,10 +1,12 @@
 import { useDispatch } from "react-redux"
+import { useState } from "react"
 import { useNavigate } from "react-router"
 
 import { ExclamationIcon } from "@heroicons/react/outline"
 
 import { deleteProject } from "../../store/projects"
 import type { akce as Akce, users as User } from "@/types/model"
+import triggerToast from "../common/Toast"
 
 type Props = {
   onModalClose: React.MouseEventHandler<HTMLButtonElement>
@@ -13,14 +15,31 @@ type Props = {
 }
 
 const ProjectDeleteDialog = ({ onModalClose, userId, detail }: Props) => {
-  const dispatch = useDispatch()
+  const [isLoading, setIsLoading] = useState(false)
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { id_akce: id, c_akce, nazev_akce, rok_per_year } = detail
 
   const handleClick = () => {
-    return dispatch(
-      deleteProject({ id, userId, year: Number(rok_per_year), project: detail }, navigate),
-    )
+    setIsLoading(true)
+    dispatch(deleteProject({ id, userId, project: detail }))
+      .unwrap()
+      .then(() => {
+        setIsLoading(false)
+        navigate(`/akce/${Number(rok_per_year)}`)
+        triggerToast({
+          type: "success",
+          message: "Akce byla úspěšně odstraněna.",
+          options: { duration: 3000 },
+        })
+      })
+      .catch(err => {
+        triggerToast({
+          type: "error",
+          message: err.message,
+          options: { duration: 4000 },
+        })
+      })
   }
 
   return (
@@ -47,7 +66,7 @@ const ProjectDeleteDialog = ({ onModalClose, userId, detail }: Props) => {
         <button
           tw="bg-red-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-red-700) focus:(outline-none ring transition-shadow duration-300)"
           onClick={handleClick}
-          // className={`${isLoading ? "spinner" : ""}`}
+          className={`${isLoading ? "spinner" : ""}`}
         >
           Odstranit akci
         </button>

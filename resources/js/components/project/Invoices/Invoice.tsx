@@ -24,12 +24,12 @@ const Invoice = ({ invoice, modalOpenCallback }: Props) => {
         <td tw="px-2 py-2 text-right">
           <Dropdown>
             <DropdownItem
-              onClick={() => modalOpenCallback({ status: modalStatus.DESTROY, data: invoice })}
+              onClick={() => modalOpenCallback({ status: "delete", data: invoice })}
               Icon={TrashIcon}
               label="Odstranit"
             />
             <DropdownItem
-              onClick={() => modalOpenCallback({ status: modalStatus.UPDATE, data: invoice })}
+              onClick={() => modalOpenCallback({ status: "update", data: invoice })}
               Icon={PencilIcon}
               label="Upravit"
             />

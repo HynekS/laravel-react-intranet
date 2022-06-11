@@ -477,16 +477,16 @@ const Table = ({ rawData }: Props) => {
             }}
             rowKey="id_akce"
             emptyRenderer={() => {
-              switch (projectStatus) {
-                case status.LOADING:
+              switch (status) {
+                case "pending":
                   return <div tw="flex items-center justify-center h-full">Načítám data…</div>
-                case status.SUCCESS:
+                case "fulfilled":
                   return (
                     <div tw="flex items-center justify-center h-full">
                       Zadaným parametrům neodpovídá žádná akce 🤔.
                     </div>
                   )
-                case status.ERROR:
+                case "rejected":
                   return <div>Ajaj! Někde se stala chyba… 😬</div>
                 default:
                   return null

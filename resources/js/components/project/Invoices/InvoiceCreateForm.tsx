@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -60,13 +61,18 @@ const styles = css`
 `
 
 const InvoiceCreateForm = ({ modalState: { data }, onModalClose }) => {
+  const [isPending, setIsPending] = useState(false)
   const { register, handleSubmit, errors } = useForm()
-  const isLoading = useSelector(store => store.projects.invoiceStatus === status.LOADING)
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const { c_akce, id_akce: projectId } = data
 
   const onSubmit = formData => {
     dispatch(createInvoice({ ...formData, c_akce, projectId }))
+      .unwrap()
+      .then(() => {
+        setIsPending(false)
+        onModalClose()
+      })
   }
 
   return (
@@ -114,7 +120,8 @@ const InvoiceCreateForm = ({ modalState: { data }, onModalClose }) => {
           </button>
           <button
             tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4  ml-4 rounded hover:(bg-blue-700) focus:(outline-none ring transition-shadow duration-300)"
-            className={`${isLoading ? "spinner" : ""}`}
+            className={`${isPending ? "spinner" : ""}`}
+            disabled={isPending}
           >
             Vytvořit fakturu
           </button>

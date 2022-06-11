@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -61,14 +61,20 @@ const styles = css`
 `
 
 const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => {
+  const [isPending, setIsPending] = useState(false)
   const { register, setValue, handleSubmit, errors } = useForm()
-  const isLoading = useSelector(store => store.projects.invoiceStatus === status.LOADING)
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const { id_zaznam: invoiceId, akce_id: projectId } = data
 
   const onSubmit = formData => {
     dispatch(updateInvoice({ invoiceId, projectId, ...formData }))
+      .unwrap()
+      .then(() => {
+        setIsPending(false)
+        onModalClose()
+      })
   }
+
   useEffect(() => {
     if (data) {
       for (let [key, value] of Object.entries(data)) {
@@ -123,8 +129,8 @@ const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => 
           </button>
           <button
             tw="bg-blue-600 transition-colors duration-300 text-white font-medium py-2 px-4 ml-4 rounded hover:(bg-blue-700) focus:(outline-none ring transition-shadow duration-300)"
-            className={`${isLoading ? "spinner" : ""}`}
-            type="submit"
+            className={`${isPending ? "spinner" : ""}`}
+            disabled={isPending}
           >
             Uložit změny
           </button>

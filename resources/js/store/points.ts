@@ -1,163 +1,109 @@
-import client from "../utils/axiosWithDefaults"
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+
+import client from "@services/http/client"
+
+import type { pointgroups as Pointgroup, points as Point } from "@codegen"
 
 import { createPointgroup } from "./pointgroups"
 
-// Actions
-export const CREATE_POINT_INITIALIZED = "[points] creating new point has started"
-export const CREATE_POINT_SUCCESS = "[points] creating new point was succesful"
-export const CREATE_POINT_FAILURE = "[points] creating new point has failed"
+export type PointgroupWithPoins = Pointgroup & { points: Point[] }
 
-export const UPDATE_POINT_INITIALIZED = "[points] updating an point has started"
-export const UPDATE_POINT_SUCCESS = "[points] updating an point was succesful"
-export const UPDATE_POINT_FAILURE = "[points] updating an point has failed"
-
-export const DELETE_POINT_INITIALIZED = "[points] deleting an point has started"
-export const DELETE_POINT_SUCCESS = "[points] deleting an point was succesful"
-export const DELETE_POINT_FAILURE = "[points] deleting an point has failed"
-
-// Reducer
-export default function reducer(state = [], action = {}) {
-  switch (action.type) {
-    case CREATE_POINT_SUCCESS: {
-      return { ...state, points: [...state.points, action.response] }
-    }
-    case UPDATE_POINT_SUCCESS: {
-      let { id } = action.response
+export const pointsSlice = createSlice({
+  name: "points",
+  initialState: {} as PointgroupWithPoins,
+  reducers: {},
+  extraReducers: builder => {
+    builder.addCase(createPoint.fulfilled, (state, { payload }) => {
+      return { ...state, points: [...state.points, payload.data] }
+    })
+    builder.addCase(updatePoint.fulfilled, (state, { payload }) => {
+      let { id } = payload.data
       return {
         ...state,
-        points: state.points.map(point => (point.id === id ? action.response : point)),
+        points: state.points.map(point => (point.id === id ? payload.data : point)),
       }
-    }
-    case DELETE_POINT_SUCCESS: {
-      let { id } = action.response
+    })
+    builder.addCase(deletePoint.fulfilled, (state, { payload }) => {
+      let { id } = payload.data
       return { ...state, points: state.points.filter(point => point.id !== id) }
-    }
-    // These are being handled in projects reducer
-    case CREATE_POINT_INITIALIZED:
-    case CREATE_POINT_FAILURE:
-    case UPDATE_POINT_INITIALIZED:
-    case UPDATE_POINT_FAILURE:
-    case DELETE_POINT_INITIALIZED:
-    case DELETE_POINT_FAILURE:
-      return state
-    default:
-      return state
+    })
+  },
+})
+
+export const createPoint = createAsyncThunk<
+  { projectId: number; data: Point },
+  {
+    pointgroupId: number | undefined
+    latitude: number
+    longitude: number
+    projectId: number
+    userId: number
+  },
+  {
+    rejectValue: string
   }
-}
+>(
+  "points/createPoint",
+  async ({ pointgroupId, latitude, longitude, projectId, userId }, { dispatch }) => {
+    const maybeId = pointgroupId
+      ? pointgroupId
+      : await dispatch(createPointgroup({ projectId }))
+          .unwrap()
+          .then(res => res.data.id)
 
-// Action creators
-export const createPointInit = () => ({ type: CREATE_POINT_INITIALIZED })
-
-export const createPointSuccess = ({ response, projectId }) => ({
-  type: CREATE_POINT_SUCCESS,
-  response,
-  projectId,
-})
-
-export const createPointFailure = error => ({ type: CREATE_POINT_FAILURE, error })
-
-export const updatePointInit = () => ({ type: UPDATE_POINT_INITIALIZED })
-
-export const updatePointSuccess = ({ response, projectId }) => ({
-  type: UPDATE_POINT_SUCCESS,
-  response,
-  projectId,
-})
-
-export const updatePointFailure = error => ({ type: UPDATE_POINT_FAILURE, error })
-
-export const deletePointInit = () => ({ type: DELETE_POINT_INITIALIZED })
-
-export const deletePointSuccess = ({ response, projectId }) => ({
-  type: DELETE_POINT_SUCCESS,
-  response,
-  projectId,
-})
-
-export const deletePointFailure = error => ({ type: DELETE_POINT_FAILURE, error })
-
-// Thunks
-export const createPoint = ({
-  pointgroupId,
-  latitude,
-  longitude,
-  projectId,
-  userId,
-}) => async dispatch => {
-  if (pointgroupId == undefined) {
-    dispatch(createPointgroup({ projectId })).then(response =>
-      dispatch(createPoint({ pointgroupId: response.id, latitude, longitude, projectId, userId })),
-    )
-  } else {
-    try {
-      dispatch(createPointInit())
-      let response = await client.post("/point", {
-        pointgroup_id: pointgroupId,
-        latitude,
-        longitude,
-        akce_id: projectId,
-        userId,
-      })
-      if (response) {
-        dispatch(
-          createPointSuccess({
-            response: response.data,
-            projectId,
-          }),
-        )
-      }
-    } catch (error) {
-      console.log(error)
-      dispatch(createPointFailure(error))
-    }
-  }
-}
-
-export const updatePoint = ({
-  pointId,
-  longitude,
-  latitude,
-  projectId,
-  userId,
-}) => async dispatch => {
-  try {
-    dispatch(updatePointInit())
-    let response = await client.put(`/point/${pointId}`, {
-      longitude,
+    const response = await client.post("/point", {
+      pointgroup_id: maybeId,
       latitude,
+      longitude,
       akce_id: projectId,
       userId,
     })
-    if (response) {
-      dispatch(
-        updatePointSuccess({
-          response: response.data,
-          projectId,
-        }),
-      )
+    return {
+      projectId,
+      data: response.data,
     }
-  } catch (error) {
-    console.log(error)
-    dispatch(updatePointFailure(error))
-  }
-}
+  },
+)
 
-export const deletePoint = ({ pointId, projectId, userId }) => async dispatch => {
-  try {
-    dispatch(deletePointInit())
-    let response = await client.delete(`/point/${pointId}`, {
-      data: { akce_id: projectId, userId },
-    })
-    if (response) {
-      dispatch(
-        deletePointSuccess({
-          response: response.data,
-          projectId,
-        }),
-      )
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(deletePointFailure(error))
+export const updatePoint = createAsyncThunk<
+  { projectId: number; data: Point },
+  {
+    pointId: number
+    longitude: number
+    latitude: number
+    projectId: number
+    userId: number
+  },
+  {
+    rejectValue: string
   }
-}
+>("points/updatePoint", async ({ pointId, longitude, latitude, projectId, userId }) => {
+  const response = await client.put(`/point/${pointId}`, {
+    longitude,
+    latitude,
+    akce_id: projectId,
+    userId,
+  })
+  return {
+    projectId,
+    data: response.data,
+  }
+})
+
+export const deletePoint = createAsyncThunk<
+  { projectId: number; data: Point },
+  { pointId: number; projectId: number; userId: number },
+  {
+    rejectValue: string
+  }
+>("points/deletePoint", async ({ pointId, projectId, userId }) => {
+  const response = await client.delete(`/point/${pointId}`, {
+    data: { akce_id: projectId, userId },
+  })
+  return {
+    projectId,
+    data: response.data,
+  }
+})
+
+export default pointsSlice.reducer

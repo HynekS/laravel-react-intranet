@@ -10,9 +10,9 @@ import {
   uploadMultipleFiles,
   removeFileFromUploads,
   setInitialState,
-  filesStatus,
   FileObject,
-} from "../../../store/upload"
+} from "@store/upload"
+import triggerToast from "../../common/Toast"
 import Button from "../../common/Button"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import DropIcon from "./DropIcon"
@@ -52,7 +52,25 @@ const FileUpload = ({
   const onFormSubmit: React.FormEventHandler<HTMLFormElement> = (e: FormEvent) => {
     e.preventDefault()
     if (!filesToUpload.length) return false
-    dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }, modalCloseCallback))
+
+    dispatch(uploadMultipleFiles({ filesToUpload, model, projectId, userId }))
+      .unwrap()
+      .then(() => {
+        modalCloseCallback()
+        triggerToast({
+          type: "success",
+          message: "Soubory byly úspěšně uloženy na server",
+          options: { duration: 4000 },
+        })
+      })
+      .catch(err => {
+        modalCloseCallback()
+        triggerToast({
+          type: "error",
+          message: err.message,
+          options: { duration: 4000 },
+        })
+      })
   }
 
   const onChange = (e: React.DragEvent<HTMLDivElement> | React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +86,7 @@ const FileUpload = ({
 
   return (
     <div tw="flex flex-col flex-1 h-full">
-      {status !== filesStatus.UPLOADING && (
+      {status !== "uploading" && (
         <div tw="px-5 pb-5">
           <div
             onDrop={onChange}
@@ -130,12 +148,12 @@ const FileUpload = ({
                   klikněte pro výběr
                 </label>
               </div>
-              <span css={[status !== filesStatus.READING && tw`hidden`]}>čtení souborů…</span>
+              <span css={[status !== "reading" && tw`hidden`]}>čtení souborů…</span>
             </form>
           </div>
         </div>
       )}
-      {status === filesStatus.UPLOADING && (
+      {status === "uploading" && (
         <div tw="p-4">
           <div tw="p-2 text-xl font-medium text-center">
             <span>nahrávání: {Math.round(uploadProgress)} %</span>
@@ -143,7 +161,7 @@ const FileUpload = ({
           <ProgressBar progress={uploadProgress} />
         </div>
       )}
-      {[filesStatus.READING, filesStatus.READING_DONE].includes(status) && (
+      {["reading", "reading_done"].includes(status) && (
         <div>
           <ul tw="flex flex-wrap pt-4">
             {filesToUpload.map((file, i) => (
@@ -193,7 +211,7 @@ const FileUpload = ({
           </ul>
         </div>
       )}
-      {filesToUpload.length > 0 && status !== filesStatus.UPLOADING && (
+      {filesToUpload.length > 0 && status !== "uploading" && (
         <footer tw="flex p-6 bg-gray-100 rounded-lg rounded-t-none">
           <div tw="flex items-center justify-between w-full">
             <span tw="text-sm font-medium text-gray-700">

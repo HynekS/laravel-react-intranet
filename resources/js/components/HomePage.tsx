@@ -5,18 +5,16 @@ import { Toaster } from "react-hot-toast"
 import ServerSyncProvider from "./authenticatedApp/ServerSyncProvider"
 import LoginPage from "./login/LoginPage"
 import Layout from "./authenticatedApp/Layout"
-import { authStatus, fetchUser } from "../store/auth"
-
-import type { AppState } from "./../store/rootReducer"
+import { fetchUser } from "@store/auth"
 
 const HomePage = () => {
-  const dispatch = useDispatch()
-  const status = useSelector((store: AppState) => store.auth.status)
-  useEffect(() => {}, [status])
+  const dispatch = useAppDispatch()
+  const status = useAppSelector(store => store.auth.status)
+  useEffect(() => {
+    if (status === "idle") dispatch(fetchUser())
+  }, [status])
 
-  if (status === authStatus.INITIAL) dispatch(fetchUser())
-
-  if (status === authStatus.FULFILLED) {
+  if (status === "fulfilled") {
     return (
       <ServerSyncProvider>
         <Toaster position="bottom-right" />
@@ -24,7 +22,7 @@ const HomePage = () => {
       </ServerSyncProvider>
     )
   }
-  if (status === authStatus.INITIAL || status === authStatus.PENDING) {
+  if (status === "idle" || status === "refreshing") {
     return null
   }
   return <LoginPage />

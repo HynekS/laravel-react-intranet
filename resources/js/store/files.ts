@@ -1,9 +1,11 @@
-import client from "../utils/axiosWithDefaults"
-import { BATCH_UPLOAD_FILES_DONE } from "./upload"
+import { createSlice, createAsyncThunk, PayloadAction, isAnyOf } from "@reduxjs/toolkit"
 
-import type { AnyAction } from "redux"
-import type { AppDispatch } from "../store/configuredStore"
+import client from "@services/http/client"
+import { uploadMultipleFiles, UploadResponse } from "./upload"
 
+import type { FileRecord } from "./upload"
+
+// TODO extract to a separate file (can be used in uploads file)
 export type Model =
   | "teren_databaze"
   | "LAB_databaze"
@@ -15,73 +17,54 @@ export type Model =
   | "geodet_plany"
 
 export type FileType = {
-  type?: typeof DELETE_FILE_INITIALIZED | typeof DELETE_FILE_SUCCESS | typeof DELETE_FILE_FAILURE
   model: Model
   projectId: number
   fileId: number
   userId?: number
 }
 
-// Constants
-const DELETE_FILE_INITIALIZED = "[files] File deletion was initialized"
-const DELETE_FILE_SUCCESS = "[files] Deleting a file was successful"
-const DELETE_FILE_FAILURE = "[files] Deleting a file has failed"
-
-export { DELETE_FILE_INITIALIZED, DELETE_FILE_SUCCESS, DELETE_FILE_FAILURE }
-
-type FileState = Array<{
-  id: number
-}>
-
-// Reducer
-export default function reducer(state: FileState = [], action: AnyAction) {
-  switch (action.type) {
-    case DELETE_FILE_SUCCESS:
-      return state.filter(file => file.id && file.id !== action.fileId)
-    case BATCH_UPLOAD_FILES_DONE:
-      return ["teren_databaze", "LAB_databaze"].includes(action.model)
-        ? [...action.responses.map(response => response.data.file)]
-        : [...state, ...action.responses.map(response => response.data.file)]
-    default:
-      return state
-  }
-}
-
-export const deleteFileInitialized = () => ({
-  type: DELETE_FILE_INITIALIZED,
-})
-
-export const deleteFileSuccess = ({ model, projectId, fileId }: Omit<FileType, "type">) => ({
-  type: DELETE_FILE_SUCCESS,
-  model,
-  projectId,
-  fileId,
-})
-
-export const deleteFileFailure = (error: Error) => ({
-  type: DELETE_FILE_FAILURE,
-  error,
-})
-
-// Thunks
-export const deleteFile = ({ model, projectId, fileId, userId }: Omit<FileType, "type">) => async (
-  dispatch: AppDispatch,
-) => {
-  try {
-    dispatch(deleteFileInitialized())
-    const response = await client.delete(`file`, {
-      data: {
-        model,
-        projectId,
-        fileId,
-        userId,
-      },
+export const filesSlice = createSlice({
+  name: "files",
+  initialState: [] as FileRecord[],
+  reducers: {},
+  extraReducers: builder => {
+    builder.addCase(deleteFile.fulfilled, (state, { payload }) => {
+      return state.filter(file => file.id && file.id !== payload.fileId)
     })
-    if (response) {
-      dispatch(deleteFileSuccess({ model, projectId, fileId }))
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(deleteFileFailure(error as Error))
+    builder.addMatcher(
+      isAnyOf(uploadMultipleFiles.fulfilled),
+      (
+        state,
+        {
+          payload,
+        }: PayloadAction<{ model: string; projectId: number; responses: UploadResponse[] }>,
+      ) => {
+        console.log({ state, payload })
+
+        return ["teren_databaze", "LAB_databaze"].includes(payload.model)
+          ? payload.responses.map(response => response.file)
+          : [...state, ...payload.responses.map(response => response.file)]
+      },
+    )
+  },
+})
+
+export const deleteFile = createAsyncThunk<
+  { model: Model; projectId: number; fileId: number },
+  { model: Model; projectId: number; fileId: number; userId: number },
+  {
+    rejectValue: string
   }
-}
+>("files/deleteFile", async ({ model, projectId, fileId, userId }) => {
+  await client.delete(`file`, {
+    data: {
+      model,
+      fileId,
+      userId,
+      projectId,
+    },
+  })
+  return { model, projectId, fileId }
+})
+
+export default filesSlice.reducer

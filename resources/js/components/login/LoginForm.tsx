@@ -73,8 +73,8 @@ const LoginForm = () => {
         </HiddenMessage>
         <Button
           type="submit"
-          className={`${status === authStatus.PENDING ? "spinner" : ""}`}
-          disabled={status === authStatus.PENDING}
+          className={`${status === "pending" ? "spinner" : ""}`}
+          disabled={status === "pending"}
           tw="justify-center w-full"
         >
           Přihlásit

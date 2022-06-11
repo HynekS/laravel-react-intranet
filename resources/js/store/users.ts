@@ -1,59 +1,38 @@
-// @ts-check
-import client from "../utils/axiosWithDefaults"
+import { createSlice, createAsyncThunk, SerializedError } from "@reduxjs/toolkit"
+import client from "@services/http/client"
 
-const initialState = {
-  isFetchingActiveUsersList: false,
-  isFetchingActiveUsersListError: null,
+import type { users as User } from "@codegen"
+
+interface UsersState {
+  activeUsers: User[]
+  error: SerializedError | null
+}
+
+const initialState: UsersState = {
   activeUsers: [],
+  error: null,
 }
 
-// Actions
-const FETCH_ACTIVE_USERS_LIST_INITIALIZED = "[users] fetching the list of users was initialized"
-const FETCH_ACTIVE_USERS_LIST_SUCCESS = "[users] fetching the list of users was successful"
-const FETCH_ACTIVE_USERS_LIST_FAILURE = "[users] fetching the list of users has failed"
+const activeUsersSlice = createSlice({
+  name: "users",
+  initialState,
+  reducers: {},
+  extraReducers: builder => {
+    builder.addCase(fetchActiveUsers.fulfilled, (state, action) => {
+      state.activeUsers = action.payload
+    })
+  },
+})
 
-// Reducer
-export default function reducer(state = initialState, action = {}) {
-  switch (action.type) {
-    case FETCH_ACTIVE_USERS_LIST_INITIALIZED:
-      return {
-        ...state,
-        isFetchingActiveUsersList: true,
-      }
-    case FETCH_ACTIVE_USERS_LIST_SUCCESS:
-      return {
-        ...state,
-        isFetchingActiveUsersList: false,
-        activeUsers: action.users,
-      }
-    case FETCH_ACTIVE_USERS_LIST_FAILURE:
-      return {
-        ...state,
-        isFetchingActiveUsersList: false,
-        isFetchingActiveUsersListError: action.error,
-      }
-    default:
-      return state
+export const fetchActiveUsers = createAsyncThunk<
+  User[],
+  void,
+  {
+    rejectValue: string
   }
-}
+>("users/fetchActiveUsers", async () => {
+  const response = await client.get("users/get_active")
+  return response.data
+})
 
-// Action creators
-export const fetchActiveUsersInit = () => ({ type: FETCH_ACTIVE_USERS_LIST_INITIALIZED })
-
-export const fetchActiveUsersSuccess = users => ({ type: FETCH_ACTIVE_USERS_LIST_SUCCESS, users })
-
-export const fetchActiveUsersFailure = error => ({ type: FETCH_ACTIVE_USERS_LIST_FAILURE, error })
-
-// Thunks
-export const fetchActiveUsers = () => async dispatch => {
-  try {
-    dispatch(fetchActiveUsersInit())
-    const response = await client.get("users/get_active")
-    if (response) {
-      dispatch(fetchActiveUsersSuccess(response.data))
-    }
-  } catch (error) {
-    console.log(error)
-    dispatch(fetchActiveUsersFailure(error))
-  }
-}
+export default activeUsersSlice.reducer
