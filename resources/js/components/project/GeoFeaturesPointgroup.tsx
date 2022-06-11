@@ -10,7 +10,7 @@ import SvgPoint from "../icons/SvgPoint"
 import SvgPolygon from "../icons/SvgPolygon"
 import { TrashIcon } from "@heroicons/react/solid"
 
-import type { pointgroups as Pointgroup, points as Point } from "@/types/model"
+import type { pointgroups as Pointgroup, points as Point } from "@codegen"
 
 type Props = Pointgroup & {
   points: Point[]
