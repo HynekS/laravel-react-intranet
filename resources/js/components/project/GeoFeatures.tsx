@@ -25,17 +25,12 @@ declare global {
   }
 }
 
-type Props = { detail: Akce & { pointgroups: Pointgroup & { points: Point[] }[] } }
+type Props = { detail: Akce & { pointgroups: Array<Pointgroup & { points: Point[] }> } }
 
 const GeoFeatures = ({ detail }: Props) => {
   const dispatch = useAppDispatch()
   const { id: userId } = useAppSelector(store => store.auth.user)
   const { id_akce: projectId } = detail
-
-  // redraw on new props
-  useEffect(() => {
-    setGeometryData((detail || {}).pointgroups || [])
-  }, [detail])
 
   const { coordinates: wikiCoordinates, error: wikiError } = useGetCoordsFromWiki(
     String(detail.katastr),
@@ -47,37 +42,32 @@ const GeoFeatures = ({ detail }: Props) => {
   const geometryLayerRef = useRef<any>()
 
   const { loaded, error } = useScript("https://api.mapy.cz/loader.js")
-
-  const [geometryData, setGeometryData] = useState(() => (detail || {}).pointgroups || [])
-
-  // Stale state hack!
-  const activeGroupIndexRef = useRef<number | undefined>(
-    geometryData.length ? geometryData.length - 1 : undefined,
-  )
-  const [activeGroupIndex, setActiveGroupIndex] = useState(
-    geometryData.length ? geometryData.length - 1 : undefined,
-  )
-  console.log("activeGroupIndexRef ", activeGroupIndexRef.current, "run component")
+  const isLoaderLoaded = useRef(false)
 
   // load map
   useEffect(() => {
     // This is ugly, but we need to try our best to get the center before we show the map
     if (loaded && (findCenter(allPoints) || wikiCoordinates || wikiError)) {
+      if (isLoaderLoaded.current) return
+      // @ts-ignore
       window.Loader.async = true
+      // @ts-ignore
       window.Loader.load(null, null, bootstrapMap)
+      isLoaderLoaded.current = true
     }
     return () => {}
   }, [loaded, wikiCoordinates, wikiError])
 
-  // Rerender map contents on state change
   useEffect(() => {
     if (markerLayerRef.current && geometryLayerRef.current) {
-      renderMarkersToMap(geometryData)
+      renderMarkersToMap(detail.pointgroups)
     }
-  }, [geometryData])
+  }, [detail.pointgroups])
 
-  const allPoints = geometryData
-    .map(pointgroup => pointgroup.points.map(point => [point.latitude, point.longitude]))
+  const allPoints = detail.pointgroups
+    .map(pointgroup =>
+      pointgroup.points.map(point => [point.latitude, point.longitude] as [number, number]),
+    )
     .flat()
 
   const getCenter = () => {
@@ -123,12 +113,13 @@ const GeoFeatures = ({ detail }: Props) => {
 
       setupEventListeners()
 
-      renderMarkersToMap(geometryData)
+      renderMarkersToMap(detail.pointgroups)
     }
   }
 
-  const renderMarkersToMap = (pointgroups = [] as any[]) => {
+  const renderMarkersToMap = (pointgroups: Array<Pointgroup & { points: Point[] }>) => {
     let { SMap } = window
+    console.log("rendering markers")
 
     markerLayerRef.current.removeAll()
     geometryLayerRef.current.removeAll()
@@ -170,139 +161,45 @@ const GeoFeatures = ({ detail }: Props) => {
     geometryLayerRef.current.addGeometry(geometry)
   }
 
-  const addMarker = e => {
-    /*
-    const doOptimisticAddition = stateUpdater => {
-      stateUpdater(prevState => {
-        if (!prevState.length) return prevState
-        const uiOnlyPoint = {
-          __id: marker.getId(),
-          id: marker.getId(), // needed for key prop
-          pointgroup_id: prevState[activeGroupIndexRef.current || 0]?.id,
-          latitude,
-          longitude,
-        }
-
-        return prevState.map((pointgroup, i) =>
-          i === activeGroupIndexRef.current
-            ? { ...pointgroup, points: pointgroup.points.concat(uiOnlyPoint) }
-            : pointgroup,
-        )
-      })
-    }
-    */
+  const addMarker = (e: any) => {
     let { SMap } = window
 
     let coords = SMap.Coords.fromEvent(e.data.event, mapRef.current)
     let marker = new SMap.Marker(coords)
     marker.decorate(SMap.Marker.Feature.Draggable)
-    // markerLayerRef.current.addMarker(marker)
+
     const [longitude, latitude] = marker.getCoords().toWGS84()
 
-    setGeometryData(prevState => {
-      if (!prevState.length) {
-        activeGroupIndexRef.current = prevState.length
-        setActiveGroupIndex(prevState.length)
-      }
+    const activeIndex = store.getState().projects.byId[projectId].activePointgroupIndex
 
-      dispatch(
-        createPoint({
-          pointgroupId: prevState[activeGroupIndexRef.current || 0]?.id,
-          latitude,
-          longitude,
-          projectId,
-          userId,
-        }),
-      )
-      return prevState
-    })
-
-    /*
-    Allow for optimistic updates?
-    setGeometryData(prevState => {
-      const newPoint = {
-        __id: marker.getId(),
-        id: marker.getId(),
-        pointgroup_id: prevState[activeGroupIndexRef.current || 0]?.id,
+    dispatch(
+      createPoint({
+        pointgroupId:
+          activeIndex == undefined
+            ? undefined
+            : store.getState().projects.byId[projectId].pointgroups[activeIndex]?.id,
         latitude,
         longitude,
-      }
-      if (prevState.length) {
-        return prevState.map((pointgroup, i) =>
-          i === activeGroupIndexRef.current
-            ? { ...pointgroup, points: pointgroup.points.concat(newPoint) }
-            : pointgroup,
-        )
-      } else {
-        // We don't have any pointgroup, so we need to create one
-        activeGroupIndexRef.current = 0
-        setActiveGroupIndex(prevState.length)
-
-        return [
-          {
-            akce_id: projectId,
-            type: "line",
-            id: uuidv4(),
-            points: [newPoint],
-          },
-        ]
-      }
-    })*/
+        projectId,
+        userId,
+      }),
+    )
   }
 
-  const dragMarker = e => {
+  const dragMarker = (e: any) => {
     const __id = e.target.__id
     const [longitude, latitude] = e.target.getCoords().toWGS84()
 
-    setGeometryData(prevState => {
-      dispatch(updatePoint({ pointId: __id, longitude, latitude, projectId, userId }))
-      return prevState
-    })
-
-    /*
-    Allow for optimistic updates?
-    setGeometryData(prevState => {
-      const pointgoupIndex = prevState.findIndex(pointgroup =>
-        pointgroup.points.some(point => point.id === __id),
-      )
-
-      return prevState.map((pointgroup, i) =>
-        i === pointgoupIndex
-          ? {
-              ...pointgroup,
-              points: pointgroup.points.map(point =>
-                point.id !== __id ? point : { ...point, latitude, longitude },
-              ),
-            }
-          : pointgroup,
-      )
-    })*/
+    dispatch(updatePoint({ pointId: __id, longitude, latitude, projectId, userId }))
   }
 
-  const removeMarker = e => {
+  const removeMarker = (e: any) => {
     const marker = e.target
     const __id = marker.__id
 
     markerLayerRef.current.removeMarker(marker)
 
-    setGeometryData(prevState => {
-      dispatch(deletePoint({ pointId: __id, projectId, userId }))
-      return prevState
-    })
-
-    /*
-     Allow for optimistic updates?
-    setGeometryData(prevState => {
-      const pointgoupIndex = prevState.findIndex(pointgroup =>
-        pointgroup.points.some(point => point.id === __id),
-      )
-
-      return prevState.map((pointgroup, i) =>
-        i === pointgoupIndex
-          ? { ...pointgroup, points: pointgroup.points.filter(point => point.id !== __id) }
-          : pointgroup,
-      )
-    })*/
+    dispatch(deletePoint({ pointId: __id, projectId, userId }))
   }
 
   const setupEventListeners = () => {
@@ -332,14 +229,6 @@ const GeoFeatures = ({ detail }: Props) => {
             <button
               tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 pl-2 pr-3 text-sm rounded focus:(outline-none ring)"
               onClick={() => {
-                /* Update current index */
-                setGeometryData(prevState => {
-                  activeGroupIndexRef.current = prevState.length
-                  setActiveGroupIndex(prevState.length)
-                  return prevState
-                })
-
-                activeGroupIndexRef.current
                 dispatch(createPointgroup({ projectId }))
               }}
             >
@@ -347,19 +236,16 @@ const GeoFeatures = ({ detail }: Props) => {
               Přidat
             </button>
           </div>
-          {geometryData.length
-            ? geometryData.map(({ feature_type, id, points = [] }, i) => (
+          {detail.pointgroups.length
+            ? detail.pointgroups.map(({ feature_type, id, points = [] }, i) => (
                 <GeoFeaturesPointgroup
                   feature_type={feature_type}
                   id={id}
                   projectId={projectId}
                   points={points}
                   i={i}
-                  setData={setGeometryData}
-                  activeIndexRef={activeGroupIndexRef}
-                  activeIndex={activeGroupIndex}
-                  setActiveIndex={setActiveGroupIndex}
                   key={id}
+                  activeIndex={store.getState().projects.byId[projectId].activePointgroupIndex}
                 />
               ))
             : null}

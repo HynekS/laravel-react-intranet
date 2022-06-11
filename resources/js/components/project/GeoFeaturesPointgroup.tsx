@@ -12,35 +12,17 @@ import { TrashIcon } from "@heroicons/react/solid"
 
 import type { pointgroups as Pointgroup, points as Point } from "@codegen"
 
-type Props = Pointgroup & {
+type Props = Omit<Pointgroup, "akce_id"> & {
   points: Point[]
   i: number
   projectId: number
-  setData: Dispatch<(prevState: Pointgroup[]) => Pointgroup[]>
-  activeIndexRef: React.MutableRefObject<number>
-  activeIndex: number
-  setActiveIndex: Dispatch<number>
+  activeIndex: number | undefined
 }
 
-const GeoFeaturesPointgroup = ({
-  feature_type,
-  id,
-  points,
-  projectId,
-  i,
-  setData,
-  activeIndexRef,
-  activeIndex,
-  setActiveIndex,
-}: Props) => {
-  const dispatch = useDispatch()
+const GeoFeaturesPointgroup = ({ feature_type, id, points, projectId, i, activeIndex }: Props) => {
+  const dispatch = useAppDispatch()
 
-  const switchType = (feature_type: Pointgroup["feature_type"], id: number, i: number) => {
-    setData(prevState =>
-      prevState.map((pointgroup, idx) =>
-        i === idx ? { ...pointgroup, feature_type } : pointgroup,
-      ),
-    )
+  const switchType = (feature_type: Pointgroup["feature_type"], id: number) => {
     dispatch(updatePointgroup({ pointgroupId: id, feature_type, projectId }))
   }
 
@@ -52,11 +34,10 @@ const GeoFeaturesPointgroup = ({
           tw` opacity-100 shadow before:(absolute top-0 left-0 right-0 block h-0.5 bg-blue-400)`,
       ]}
       onClick={() => {
-        // This is sadly neccessary to sync the map markers with the state
-        activeIndexRef.current = i
-        setActiveIndex(i)
+        dispatch(setActivePointgroupIndex({ newIndex: i, projectId }))
       }}
     >
+      {id}
       <div tw="flex justify-between mb-2">
         <h4 tw="font-medium">
           {i + 1}: {feature_type}
@@ -68,7 +49,7 @@ const GeoFeaturesPointgroup = ({
               tw`border`,
               feature_type === "point" && tw`text-blue-800 bg-blue-200 border-blue-300`,
             ]}
-            onClick={() => switchType("point", id, i)}
+            onClick={() => switchType("point", id)}
           >
             <SvgPoint tw="w-6 h-6 p-0.5 fill-current" />
           </button>
@@ -78,7 +59,7 @@ const GeoFeaturesPointgroup = ({
               tw`border`,
               feature_type === "line" && tw`text-blue-800 bg-blue-200 border-blue-300`,
             ]}
-            onClick={() => switchType("line", id, i)}
+            onClick={() => switchType("line", id)}
           >
             <SvgLine tw="w-6 h-6 p-0.5 fill-current" />
           </button>
@@ -88,7 +69,7 @@ const GeoFeaturesPointgroup = ({
               tw`border`,
               feature_type === "polygon" && tw`text-blue-800 bg-blue-200 border-blue-300`,
             ]}
-            onClick={() => switchType("polygon", id, i)}
+            onClick={() => switchType("polygon", id)}
           >
             <SvgPolygon tw="w-6 h-6 p-1 fill-current" />
           </button>
