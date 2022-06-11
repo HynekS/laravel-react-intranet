@@ -111,7 +111,6 @@ const InvoiceCreateForm = ({ modalState: { data }, onModalClose }) => {
         </div>
         <footer tw="flex justify-end p-6 bg-gray-100 rounded-lg rounded-t-none">
           <button
-            tw="transition-colors duration-300 text-gray-500 font-medium py-2 px-4 ml-4 rounded hover:(text-gray-600) focus:(outline-none ring transition-shadow duration-300)"
             tw="text-gray-500 font-medium py-2 px-4 ml-4 rounded transition-colors duration-300 hover:(text-gray-600) focus:(outline-none ring transition-shadow duration-300)"
             onClick={onModalClose}
           >
