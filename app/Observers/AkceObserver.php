@@ -18,7 +18,7 @@ class AkceObserver
     public function saveEvent(Akce $akce, string $type)
     {
         $update = new Update();
-        $update->akce_id = $type === "created" ? $akce->id_akce : $this->request->id_akce;
+        $update->akce_id = $type === "created" ? $akce->id_akce : ($this->request->id_akce || $this->request->projectId);
         $update->user_id = $this->request->userId; // current user id
         $update->update_type = $type;
         $update->update_scope = "info";

@@ -58,6 +58,9 @@ class UploadController extends Controller
     public function upload(Request $request)
     {
         $data = json_decode($request->data);
+        // for Observers. Request is not decoded for singular models when it hit them, which is causing error.
+        $request->merge(["userId" => $data->userId]);
+
         $file = $data->file;
         $directory = $data->projectId . "/";
         $data->path = $directory;
