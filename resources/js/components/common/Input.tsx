@@ -2,7 +2,7 @@ import { TwStyle } from "twin.macro"
 
 import { ExclamationCircleIcon } from "@heroicons/react/solid"
 
-export type TwStyles = TwStyle | TwStyle[]
+// export type TwStyles = TwStyle | TwStyle[]
 
 export type StyleScope =
   | "fieldWrapper"
@@ -13,7 +13,7 @@ export type StyleScope =
   | "inputError"
   | "errorMessage"
 
-export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
+export type StyleScopeObject = { [key in StyleScope]?: TwStyle | TwStyle[] }
 
 export type InputProps = {
   name: string
