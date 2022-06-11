@@ -1,7 +1,7 @@
 import { useEffect, Fragment } from "react"
-import { useDispatch } from "react-redux"
+import { useAppDispatch } from "@hooks/useRedux"
 
-import { fetchLatestUpdateId } from "../../store/updates"
+import { fetchLatestUpdateId } from "@store/updates"
 
 function usePoll(func: (...args: any) => any, deps: any[], interval = 5000) {
   return useEffect(() => {
@@ -26,7 +26,7 @@ type Props = {
 }
 
 const ServerSyncProvider = ({ children }: Props) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   usePoll(() => dispatch(fetchLatestUpdateId()), [], 60000)
 

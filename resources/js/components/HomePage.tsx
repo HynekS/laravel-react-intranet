@@ -1,7 +1,7 @@
 import { useEffect } from "react"
-import { useSelector, useDispatch } from "react-redux"
 import { Toaster } from "react-hot-toast"
 
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import ServerSyncProvider from "./authenticatedApp/ServerSyncProvider"
 import LoginPage from "./login/LoginPage"
 import Layout from "./authenticatedApp/Layout"

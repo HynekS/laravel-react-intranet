@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
-import { useSelector, useDispatch } from "react-redux"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -11,10 +10,10 @@ import dateFnsParse from "date-fns/parse"
 import { DateUtils } from "react-day-picker"
 import { TrashIcon } from "@heroicons/react/solid"
 
-import { createProject, updateProject } from "../../store/projects"
-import { fetchActiveUsers } from "../../store/users"
-
-import { monthsCZ, daysCZ, daysShortCZ } from "../../services/Date/terms_cs-CZ"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import { createProject, updateProject } from "@store/projects"
+import { fetchActiveUsers } from "@store/users"
+import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
@@ -26,8 +25,7 @@ import Modal from "../common/StyledModal"
 import ProjectDeleteDialog from "./ProjectDeleteDialog"
 import ModalCloseButton from "../common/ModalCloseButton"
 
-import type { AppState } from "../../store/rootReducer"
-import type { akce as Akce, users as User } from "../../types/model"
+import type { akce as Akce, users as User } from "@codegen"
 
 const styles = {
   fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
@@ -94,10 +92,10 @@ type DetailProps = {
 }
 
 const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const userId = useSelector((store: AppState) => store.auth.user.id)
-  const activeUsers: User[] = useSelector((store: AppState) => store.users.activeUsers)
+  const userId = useAppSelector(store => store.auth.user!.id)
+  const activeUsers = useAppSelector(store => store.users.activeUsers)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
 

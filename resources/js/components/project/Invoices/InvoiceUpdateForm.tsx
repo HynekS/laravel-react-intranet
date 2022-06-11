@@ -2,10 +2,9 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
-import { useSelector, useDispatch } from "react-redux"
 
-import { updateInvoice } from "../../../store/invoices"
-import { status } from "../../../store/projects"
+import { useAppDispatch } from "@hooks/useRedux"
+import { updateInvoice } from "@store/invoices"
 
 import Input from "../../common/Input"
 import Select from "../../common/Select"

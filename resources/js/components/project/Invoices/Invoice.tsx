@@ -1,9 +1,8 @@
 import { Fragment } from "react"
 import { Dropdown, DropdownItem } from "../../common/Dropdown"
-import { modalStatus } from "./InvoiceModalStatus"
 import { TrashIcon, PencilIcon } from "@heroicons/react/solid"
 
-import type { faktury as Faktura } from "@/types/model"
+import type { faktury as Faktura } from "@codegen"
 
 type Props = {
   invoice: Faktura

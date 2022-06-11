@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
-import { useSelector, useDispatch, shallowEqual } from "react-redux"
+import { shallowEqual } from "react-redux"
 import { useWindowHeight } from "@react-hook/window-size"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -9,12 +9,6 @@ import deburr from "lodash.deburr"
 import Highlighter from "react-highlight-words"
 import BaseTable, { Column, AutoResizer, SortOrder, BaseTableProps } from "react-base-table"
 import "react-base-table/styles.css"
-
-import { status } from "../../store/projects"
-import { setSortBy, updateFilters, Filters, clearFilters } from "../../store/table"
-import sortIdSlashYear from "../../services/sorting/sortIdSlashYear"
-import { Detail } from "./lazyImports"
-import budgetCellRenderer from "./BudgetCellRenderer"
 import {
   CheckIcon,
   PencilIcon,
@@ -23,15 +17,20 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/outline"
 
-import type { AppState } from "../../store/rootReducer"
-import type { akce as Akce } from "@/types/model"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import { setSortBy, updateFilters, Filters, clearFilters } from "@store/table"
+import sortIdSlashYear from "@services/sorting/sortIdSlashYear"
+import { Detail } from "./lazyImports"
+import budgetCellRenderer from "./BudgetCellRenderer"
+
+import type { akce as Akce } from "@codegen"
 
 type Props = {
   rawData: Akce[]
 }
 
 const Table = ({ rawData }: Props) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const formRef = useRef<HTMLFormElement>(null)
   const tableRef = useRef<BaseTable<Akce>>(null)
   const scrollOffset = useRef(0)
@@ -41,9 +40,9 @@ const Table = ({ rawData }: Props) => {
   const { year } = useParams<{ year: string }>()
   const currentHeight = useWindowHeight()
 
-  const projectStatus = useSelector((store: AppState) => store.projects.projectStatus)
-  const sortBy = useSelector((store: AppState) => store.table.sortBy, shallowEqual)
-  const filters: Filters = useSelector((store: AppState) => store.table.filters, shallowEqual)
+  const status = useAppSelector(store => store.projects.getMultiple.status)
+  const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
+  const filters: Filters = useAppSelector(store => store.table.filters, shallowEqual)
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (tableRef.current === undefined || scrollOffset.current === undefined) return

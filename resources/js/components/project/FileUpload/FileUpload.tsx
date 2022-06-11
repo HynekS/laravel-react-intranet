@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from "uuid"
 import filesize from "filesize.js"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
-import { useSelector, useDispatch } from "react-redux"
 
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import {
   batchReadFiles,
   uploadMultipleFiles,
@@ -17,8 +17,7 @@ import Button from "../../common/Button"
 import { ProgressBar } from "../../common/ProgressBar/ProgressBar"
 import DropIcon from "./DropIcon"
 
-import type { AppState } from "../../../store/rootReducer"
-import type { Model } from "../../../store/files"
+import type { Model } from "@store/files"
 
 type Props = {
   model: Model
@@ -37,12 +36,12 @@ const FileUpload = ({
 }: Props) => {
   const [isItemOverDropArea, setIsItemOverDropArea] = useState(false)
 
-  const dispatch = useDispatch()
-  const { id: userId } = useSelector((store: AppState) => store.auth.user)
+  const dispatch = useAppDispatch()
+  const { id: userId } = useAppSelector(store => store.auth.user)
 
-  const filesToUpload = useSelector((store: AppState) => store.upload.filesToUpload as FileObject[])
-  const status = useSelector((store: AppState) => store.upload.status)
-  const uploadProgress = useSelector((store: AppState) =>
+  const filesToUpload = useAppSelector(store => store.upload.filesToUpload as FileObject[])
+  const status = useAppSelector(store => store.upload.status)
+  const uploadProgress = useAppSelector(store =>
     (store.upload.uploadProgress as number[]).reduce(
       (acc: number, val: number, _: number, self: number[]) => (acc + val) / self.length,
       0,

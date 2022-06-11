@@ -1,22 +1,21 @@
 import { useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
+
 import { useForm } from "react-hook-form"
 import { EyeIcon } from "@heroicons/react/solid"
 import { EyeOffIcon } from "@heroicons/react/solid"
 
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import Logo from "./Logo"
 import Button from "../../components/common/Button"
 import HiddenMessage from "../common/HiddenMessage"
-import { submitLoginData, authStatus } from "../../store/auth"
-import useFocusNextOnEnter from "../../hooks/useFocusNextOnEnter"
-
-import type { AppState } from "../../store/rootReducer"
+import { submitLoginData } from "@store/auth"
+import useFocusNextOnEnter from "@hooks/useFocusNextOnEnter"
 
 const LoginForm = () => {
   const [passwordShown, setPasswordShown] = useState(false)
-  const status = useSelector((store: AppState) => store.auth.status)
-  const error = useSelector((store: AppState) => store.auth.authError)
-  const dispatch = useDispatch()
+  const status = useAppSelector(store => store.auth.status)
+  const error = useAppSelector(store => store.auth.error)
+  const dispatch = useAppDispatch()
   const { register, handleSubmit, errors } = useForm()
   const formRef = useFocusNextOnEnter()
   const onSubmit = data => dispatch(submitLoginData(data))

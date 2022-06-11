@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react"
 import { useParams, useLocation } from "react-router-dom"
-import { useSelector, useDispatch } from "react-redux"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { ExclamationCircleIcon } from "@heroicons/react/outline"
 
-import { fetchProject } from "../../store/projects"
+import { fetchProject } from "@store/projects"
 import DetailRoutes from "./DetailRoutes"
 import DetailNav from "./DetailNav"
 import DetailPage from "./DetailPage"
 
-import type { AppState } from "../../store/rootReducer"
-import type { akce as Akce } from "@/types/model"
+import type { akce as Akce } from "@codegen"
 
 type Params = {
   year: string | undefined
@@ -18,24 +17,23 @@ type Params = {
 
 const DetailProvider = () => {
   const [data, setData] = useState()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
 
   const { state } = useLocation()
   const params = useParams<Params>()
 
   // Using state from spreadsheet view link – old way, probably redundant, but maybe faster?
-  const projectFromLinkState = useSelector(
-    (store: AppState) => state && store.projects.byId[(state as Akce)["id_akce"]],
+  const projectFromLinkState = useAppSelector(
+    store => state && store.projects.byId[(state as Akce)["id_akce"]],
   )
   // When accessing detail directly from url or after refreshing browser
-  const projectFromUrl = useSelector((store: AppState) =>
+  const projectFromUrl = useAppSelector(store =>
     Object.values<Akce>(store.projects.byId).find(
       needle => needle.c_akce === `${params.num}/${params?.year?.slice(2)}`,
     ),
   )
 
-  const status = useSelector((store: AppState) => store.projects.projectStatus)
-  const error = useSelector((store: AppState) => store.projects.projectError)
+  const error = useAppSelector(store => store.projects.getSingle.error)
 
   useEffect(() => {
     if (projectFromLinkState || projectFromUrl) {

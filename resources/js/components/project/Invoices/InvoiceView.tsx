@@ -7,11 +7,9 @@ import InvoiceUpdateForm from "./InvoiceUpdateForm"
 import InvoiceDestroyDialog from "./InvoiceDestroyDialog"
 import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"
-import { modalStatus } from "./InvoiceModalStatus"
 
 import { PlusIcon } from "@heroicons/react/outline"
 
-import type { AppState } from "../../../store/rootReducer"
 import type { akce as Akce, faktury as Faktura } from "@/types/model"
 
 type Props = {

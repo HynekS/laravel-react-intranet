@@ -1,12 +1,12 @@
-import { useDispatch } from "react-redux"
 import { useState } from "react"
 import { useNavigate } from "react-router"
-
 import { ExclamationIcon } from "@heroicons/react/outline"
 
-import { deleteProject } from "../../store/projects"
-import type { akce as Akce, users as User } from "@/types/model"
+import { useAppDispatch } from "@hooks/useRedux"
+import { deleteProject } from "@store/projects"
 import triggerToast from "../common/Toast"
+
+import type { akce as Akce, users as User } from "@codegen"
 
 type Props = {
   onModalClose: React.MouseEventHandler<HTMLButtonElement>

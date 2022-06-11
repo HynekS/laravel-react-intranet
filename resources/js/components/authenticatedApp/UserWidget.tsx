@@ -1,15 +1,14 @@
-import { useSelector, useDispatch } from "react-redux"
 import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
 import { LogoutIcon } from "@heroicons/react/solid"
-import { logout } from "../../store/auth"
+import { logout } from "@store/auth"
 import { useNavigate } from "react-router"
 
-import type { RootState } from "../../store/configuredStore"
-import type { users as User } from "@/types/model"
+import type { users as User } from "@codegen"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 
 const UserWidget = () => {
-  const user: User = useSelector((store: RootState) => store.auth.user)
-  const dispatch = useDispatch()
+  const user: User = useAppSelector(store => store.auth.user)
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   return user ? (

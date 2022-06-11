@@ -2,17 +2,6 @@ const mix = require("laravel-mix")
 require("laravel-mix-bundle-analyzer")
 require("laravel-mix-react-typescript-extension")
 
-/*
- |--------------------------------------------------------------------------
- | Mix Asset Management
- |--------------------------------------------------------------------------
- |
- | Mix provides a clean, fluent API for defining some Webpack build steps
- | for your Laravel application. By default, we are compiling the Sass
- | file for the application as well as bundling up all the JS files.
- |
-*/
-
 const RemovePlugin = require("remove-files-webpack-plugin")
 
 const removePlugin = new RemovePlugin({
@@ -43,12 +32,25 @@ const removePlugin = new RemovePlugin({
   after: {},
 })
 
+const pathAliases = {
+  "@hooks": path.join(__dirname, "resources/js/hooks"),
+  "@store": path.join(__dirname, "resources/js/store"),
+  "@services": path.join(__dirname, "resources/js/services"),
+  "@utils": path.join(__dirname, "resources/js/utils"),
+}
+
 mix
   .webpackConfig({
     plugins: [removePlugin],
+    resolve: {
+      alias: {
+        ...pathAliases,
+      },
+    },
     ...(mix.inProduction() && {
       resolve: {
         alias: {
+          ...pathAliases,
           react: "preact/compat",
           "react-dom": "preact/compat",
         },

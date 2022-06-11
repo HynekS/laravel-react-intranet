@@ -5,7 +5,7 @@ import { Provider } from "react-redux"
 import { GlobalStyles } from "twin.macro"
 import { Global } from "@emotion/react"
 
-import configuredStore from "./store/configuredStore"
+import configuredStore from "@store/configuredStore"
 import globalStyles from "./globalStyles"
 
 import HomePage from "./components/HomePage"

@@ -3,12 +3,13 @@ import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import { Link } from "react-router-dom"
 import { XIcon, SearchIcon } from "@heroicons/react/solid"
 
-import client from "../../utils/axiosWithDefaults"
-
-// Todo move DetailPage out of project (it is a layout stuff)
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import client from "@services/http/client"
+import { fetchStatsByYears } from "@store/stats"
+import { fetchSearchResults, resetSearchResult } from "@store/search"
 import DetailPage from "../project/DetailPage"
 
-import type { akce as Akce, updates as Update, users as User } from "@/types/model"
+import type { akce as Akce, updates as Update, users as User } from "@codegen"
 
 const DistrictsMap = lazy(() => import("./Districts"))
 

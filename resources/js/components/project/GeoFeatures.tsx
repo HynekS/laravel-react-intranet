@@ -1,22 +1,19 @@
-import { useState, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { css } from "@emotion/react"
-import { useSelector, useDispatch } from "react-redux"
+import { PlusIcon } from "@heroicons/react/outline"
 
-import useScript from "../../hooks/useScript"
-import findCenter from "../../services/geometry/findCenterOfCoords"
-import useGetCoordsFromWiki from "../../hooks/useGetCoordsFromWiki"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import useScript from "@hooks/useScript"
+import useGetCoordsFromWiki from "@hooks/useGetCoordsFromWiki"
+import findCenter from "@services/geometry/findCenterOfCoords"
+import { createPointgroup } from "@store/pointgroups"
+import { createPoint, updatePoint, deletePoint } from "@store/points"
+import store from "@store/configuredStore"
 
 import GeoFeaturesPointgroup from "./GeoFeaturesPointgroup"
 import DetailWrapper from "./DetailWrapper"
 
-import { createPointgroup } from "../../store/pointgroups"
-import { createPoint, updatePoint, deletePoint } from "../../store/points"
-
-import { PlusIcon } from "@heroicons/react/outline"
-
-import type { AppState } from "../../store/rootReducer"
-
-import type { akce as Akce, pointgroups as Pointgroup, points as Point } from "@/types/model"
+import type { akce as Akce, pointgroups as Pointgroup, points as Point } from "@codegen"
 
 declare global {
   interface Window {
@@ -31,8 +28,8 @@ declare global {
 type Props = { detail: Akce & { pointgroups: Pointgroup & { points: Point[] }[] } }
 
 const GeoFeatures = ({ detail }: Props) => {
-  const dispatch = useDispatch()
-  const { id: userId } = useSelector((store: AppState) => store.auth.user)
+  const dispatch = useAppDispatch()
+  const { id: userId } = useAppSelector(store => store.auth.user)
   const { id_akce: projectId } = detail
 
   // redraw on new props

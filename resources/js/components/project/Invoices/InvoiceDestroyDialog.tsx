@@ -1,12 +1,11 @@
 import { useState } from "react"
 
-import { deleteInvoice } from "../../../store/invoices"
-import { status } from "../../../store/projects"
+import { useAppDispatch } from "@hooks/useRedux"
+import { deleteInvoice } from "@store/invoices"
 
 import { ExclamationIcon } from "@heroicons/react/outline"
 
-import type { AppState } from "../../../store/rootReducer"
-import type { faktury as Faktura } from "@/types/model"
+import type { faktury as Faktura } from "@codegen"
 
 type Props = {
   modalState: {

@@ -1,7 +1,7 @@
 import fileDownload from "js-file-download"
 
 import Button from "../../common/Button"
-import client from "../../../utils/axiosWithDefaults"
+import client from "@services/http/client"
 import where from "../../../utils/where"
 import DetailWrapper from "../DetailWrapper"
 import FilesListGroup from "./FilesListGroup"
@@ -17,7 +17,7 @@ import type {
   geodet_plany as GeodetPlan,
   geodet_body as GeodetBod,
   analyzy as Analyza,
-} from "@/types/model"
+} from "@codegen"
 
 export type Model =
   | "teren_foto"

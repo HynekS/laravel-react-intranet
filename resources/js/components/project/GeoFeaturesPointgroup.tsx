@@ -1,8 +1,8 @@
-import { Dispatch } from "react"
-import { useDispatch } from "react-redux"
 import tw from "twin.macro"
 
-import { deletePointgroup, updatePointgroup } from "../../store/pointgroups"
+import { useAppDispatch } from "@hooks/useRedux"
+import { deletePointgroup, updatePointgroup } from "@store/pointgroups"
+import { setActivePointgroupIndex } from "@store/projects"
 
 import { Dropdown, DropdownItem } from "../common/Dropdown"
 import SvgLine from "../icons/SvgLine"

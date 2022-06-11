@@ -14,7 +14,7 @@ import type {
   geodet_plany as GeodetPlan,
   geodet_body as GeodetBod,
   analyzy as Analyza,
-} from "@/types/model"
+} from "@codegen"
 
 type FileTable =
   | TerenFoto
@@ -25,7 +25,7 @@ type FileTable =
   | TerenScan
   | Analyza
 
-import type { FileType } from "../../../store/files"
+import type { FileType } from "@store/files"
 
 type Props = {
   detail: Akce

@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from "react"
 
-import client from "../../utils/axiosWithDefaults"
+import client from "@services/http/client"
 
 type SecuredImageProps = {
   path: string

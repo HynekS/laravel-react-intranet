@@ -1,9 +1,9 @@
-import { useSelector, useDispatch } from "react-redux"
 import fileDownload from "js-file-download"
 
-import { deleteFile } from "../../../store/files"
-import client from "../../../utils/axiosWithDefaults"
-import getFileExtension from "../../../utils/getFileExtension"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import { deleteFile } from "@store/files"
+import client from "@services/http/client"
+import getFileExtension from "@utils/getFileExtension"
 
 import { DownloadIcon } from "@heroicons/react/outline"
 import { TrashIcon } from "@heroicons/react/solid"
@@ -11,7 +11,6 @@ import { TrashIcon } from "@heroicons/react/solid"
 import { Dropdown, DropdownItem } from "../../common/Dropdown"
 import SecuredImage from "../../common/SecuredImage"
 
-import type { AppState } from "../../../store/rootReducer"
 import type {
   teren_foto as TerenFoto,
   teren_scan as TerenScan,
@@ -20,8 +19,8 @@ import type {
   geodet_plany as GeodetPlan,
   geodet_body as GeodetBod,
   analyzy as Analyza,
-} from "@/types/model"
-import type { FileType } from "../../../store/files"
+} from "@codegen"
+import type { FileType } from "@store/files"
 
 type FileTable =
   | TerenFoto
@@ -48,8 +47,8 @@ type FileProps = FileType & {
 }
 
 const File = ({ file, model, projectId, fileId }: FileProps) => {
-  const { id: userId } = useSelector((store: AppState) => store.auth.user)
-  const dispatch = useDispatch()
+  const { id: userId } = useAppSelector(store => store.auth.user)
+  const dispatch = useAppDispatch()
 
   const path = file?.file_path
 

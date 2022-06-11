@@ -1,8 +1,8 @@
 import axios from "axios"
 import createAuthRefreshInterceptor from "axios-auth-refresh"
 
-import store from "../store/configuredStore"
-import { fetchUserFailure } from "../store/auth"
+import store from "@store/configuredStore"
+import { fetchUserFailure } from "@store/auth"
 
 const API_URL =
   process.env.NODE_ENV === "test"
@@ -25,15 +25,12 @@ const refreshAuthLogic = () =>
       return Promise.resolve()
     })
     .catch(e => {
-      // Maybe clear the prevoious refresh token?
       store.dispatch(fetchUserFailure(e))
       history.pushState({}, "Pueblo intranet", "/")
       return Promise.reject(e)
     })
 
-createAuthRefreshInterceptor(axios, refreshAuthLogic, {
-  // pauseInstanceWhileRefreshing: true,
-})
+createAuthRefreshInterceptor(axios, refreshAuthLogic)
 
 axios.interceptors.response.use(
   response => response,
@@ -44,10 +41,6 @@ axios.interceptors.response.use(
       // let's retry
       return axios(request)
     }
-    /*
-    if (error && error.response && error.response.status !== 404) {
-      store.dispatch(fetchUserFailure(error))
-    }*/
     throw error
   },
 )

@@ -1,19 +1,18 @@
 import { useEffect } from "react"
-import { useSelector, useDispatch } from "react-redux"
 import { useForm } from "react-hook-form"
 import tw from "twin.macro"
-
-import client from "../../utils/axiosWithDefaults"
-import DetailWrapper from "./DetailWrapper"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
+
+import client from "@services/http/client"
+import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
 import Input, { InputProps, StyleScopeObject } from "../common/Input"
 import TextArea from "../common/TextArea"
 
-import { updateProject } from "../../store/projects"
+import { updateProject } from "@store/projects"
 
-import type { AppState } from "../../store/rootReducer"
-import type { akce as Akce } from "../../types/model"
+import type { akce as Akce } from "@codegen"
 
 type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
 
@@ -38,8 +37,8 @@ const DefaultInput = ({ overrides, ...props }: InputProps) => (
 )
 
 const ApprovalSheet = ({ detail }: DetailProps) => {
-  const userId = useSelector((store: AppState) => store.auth.user.id)
-  const dispatch = useDispatch()
+  const userId = useAppSelector(store => store.auth.user.id)
+  const dispatch = useAppDispatch()
   const { register, control, handleSubmit, setValue, watch, errors } = useForm()
   const { id_akce: id } = detail || {}
 
