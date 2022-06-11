@@ -130,7 +130,6 @@ class AuthController extends Controller
     $this->setHttpOnlyCookie($data->refresh_token);
 
     return response()->json([
-      'user' => User::where('user_name', '=', $request->user_name)->first(),
       'token_type' => $data->token_type,
       'expires_in' => $data->expires_in,
       'access_token' => $data->access_token,
