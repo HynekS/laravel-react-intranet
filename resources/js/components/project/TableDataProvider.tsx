@@ -5,15 +5,20 @@ import { shallowEqual } from "react-redux"
 import "axios-progress-bar/dist/nprogress.css"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import BaseTable from "./BaseTable"
-import { yearsSince2013, fetchProjectsByYears } from "@store/projects"
+import { fetchProjectsByYears } from "@store/projects"
+import getYearsSince from "@utils/getYearsSince"
 
-const TableDataProvider = (props: unknown) => {
+const TableDataProvider = (props: { [key: string]: any }) => {
   const { year } = useParams<{ year: string }>()
   const dispatch = useAppDispatch()
 
   const idsByYear = useAppSelector(store => store.projects.idsByYear, shallowEqual)
   const allById = useAppSelector(state => state.projects.byId, shallowEqual)
 
+  const yearsSince2013 = getYearsSince(2013)
+
+  // An array of projects is being requested (it would contain only one element with the exception when ALL are queried).
+  // We can have some already in our store. Let's check it and request only those that are not already cached.
   useEffect(() => {
     const requestYearsNotFetchedAllready = requestYears.filter(year => !idsByYear[year]?.length)
     if (requestYearsNotFetchedAllready.length) {
@@ -26,8 +31,7 @@ const TableDataProvider = (props: unknown) => {
   const result = useMemo(
     () =>
       requestYears
-        /* Replaced .flatMap(year => idsByYear[year]) for better compatibility */
-        .reduce((acc, year) => acc.concat(idsByYear[year]), [])
+        .flatMap(year => idsByYear[year])
         .map(id => allById[id])
         .filter(Boolean),
     [year, requestYears, allById],
