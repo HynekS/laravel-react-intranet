@@ -1,4 +1,4 @@
-import { toast } from "react-hot-toast"
+import { toast, DefaultToastOptions } from "react-hot-toast"
 import { XIcon, CheckIcon } from "@heroicons/react/outline"
 import { css } from "@emotion/react"
 
@@ -63,7 +63,16 @@ const animations = css`
   }
 `
 
-const Toast = ({ type, message, ...t }) => {
+const Toast = ({
+  type,
+  message,
+  ...t
+}: {
+  type: "success" | "error"
+  message: string
+  visible: boolean
+  id: string
+}) => {
   return (
     <div css={animations}>
       <div
@@ -89,7 +98,15 @@ const Toast = ({ type, message, ...t }) => {
   )
 }
 
-const triggerToast = ({ type, message, options = {}, ...props }) =>
-  toast.custom(t => <Toast {...t} {...{ type, message, ...props }} />, { ...options })
+const triggerToast = ({
+  type,
+  message,
+  options = {},
+  ...props
+}: {
+  type: "success" | "error"
+  message: string
+  options?: DefaultToastOptions
+}) => toast.custom(t => <Toast {...t} {...{ type, message, ...props }} />, { ...options })
 
 export default triggerToast
