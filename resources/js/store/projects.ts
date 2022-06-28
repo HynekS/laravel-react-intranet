@@ -19,7 +19,7 @@ import { uploadMultipleFiles } from "./upload"
 import fileReducer, { deleteFile } from "./files"
 
 import type { NavigateFunction } from "react-router"
-import type { akce as Akce, faktury as Faktura, pointgroups as Pointgroup } from "../types/model"
+import type { akce as Akce, faktury as Faktura, pointgroups as Pointgroup } from "@codegen"
 import type { Model } from "./files"
 import type { FileRecord } from "./upload"
 
