@@ -8,6 +8,7 @@ import {
 
 import client from "@services/http/client"
 
+import getYearsSince from "@utils/getYearsSince"
 import invoiceReducer, { createInvoice, updateInvoice, deleteInvoice } from "./invoices"
 import pointgroupsReducer, {
   createPointgroup,
@@ -23,10 +24,9 @@ import type { akce as Akce, faktury as Faktura, pointgroups as Pointgroup } from
 import type { Model } from "./files"
 import type { FileRecord } from "./upload"
 
-export const yearsSince2013 = Array.from(
-  { length: new Date().getFullYear() - 2013 + 1 },
-  (_, i) => i + 2013,
-)
+const yearsSince2013 = getYearsSince(2013)
+
+type ValidationError = { message: string; errors: { [key: string]: string[] } }
 
 type RequestLifecycle = "idle" | "pending" | "fulfilled" | "rejected"
 
@@ -296,14 +296,21 @@ export const createProject = createAsyncThunk<
     project: Akce
   },
   {
-    rejectValue: string
+    rejectValue: ValidationError | unknown
   }
->("projects/createProject", async ({ navigate, userId, ...project }) => {
-  const response = await client.post(`akce`, { userId, ...project })
-  const data = response.data
-
-  navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
-  return { id: data.id_akce, createdProject: data }
+>("projects/createProject", async ({ navigate, userId, ...project }, { rejectWithValue }) => {
+  try {
+    const response = await client.post(`akce`, { userId, ...project })
+    const data = response.data
+    if (response.status < 400) {
+      navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
+      return { id: data.id_akce, createdProject: data }
+    } else {
+      return rejectWithValue(response.response.data)
+    }
+  } catch (error) {
+    return rejectWithValue(error.response.data)
+  }
 })
 
 export const updateProject = createAsyncThunk<
