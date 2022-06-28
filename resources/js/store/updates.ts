@@ -63,7 +63,7 @@ export const fetchLastMonthUpdates = createAsyncThunk<
     rejectValue: string
   }
 >("updates/fetchLastMonthUpdates", async () => {
-  const response = await client("/updates/get_last_month")
+  const response = await client("/updates/last_month")
   return response.data
 })
 
