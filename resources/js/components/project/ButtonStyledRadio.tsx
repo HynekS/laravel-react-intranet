@@ -1,17 +1,7 @@
 import { css } from "@emotion/react"
-import tw, { TwStyle } from "twin.macro"
+import tw from "twin.macro"
 
-export type TwStyles = TwStyle | TwStyle[]
-
-export type StyleScope =
-  | "fieldWrapper"
-  | "labelWrapper"
-  | "label"
-  | "inputWrapper"
-  | "input"
-  | "errorMessage"
-
-export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
+import type { StyleScopeObject } from "../common/Input"
 
 type Props = {
   name: string
@@ -33,7 +23,7 @@ const ButtonStyledRadio = ({
   overrides = {},
   ...props
 }: Props) => {
-  const renderRadioButtons = (key, index, self) => {
+  const renderRadioButtons = (key: string, index: number, self: Record<string, any>) => {
     return (
       <span key={key} tw="relative">
         <input
