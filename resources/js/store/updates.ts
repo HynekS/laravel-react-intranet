@@ -2,11 +2,22 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 
 import client from "@services/http/client"
 
-import { updates as Update } from "@codegen"
+import { updates as Update, users as User } from "@codegen"
 
+type UpdateListItem = {
+  akce: {
+    id_akce: number
+    cislo_per_year: number
+    rok_per_year: number
+    nazev_akce: string
+  } | null
+  akce_id: number
+  id: number
+  updates: Array<Update & { user: Pick<User, "id" | "full_name" | "avatar_path"> }>
+}
 interface InitialState {
   latestId: number | null
-  latestUpdates: Update[]
+  latestUpdates: UpdateListItem[]
 }
 
 const initialState: InitialState = {
@@ -46,7 +57,7 @@ export const fetchLatestUpdateId = createAsyncThunk<
 })
 
 export const fetchLastMonthUpdates = createAsyncThunk<
-  Update[],
+  UpdateListItem[],
   void,
   {
     rejectValue: string
