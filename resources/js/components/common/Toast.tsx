@@ -78,7 +78,7 @@ const Toast = ({
       <div
         className={`${t.visible ? "animate-enter" : "animate-leave"}`}
         id="toast-success"
-        tw="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:(text-gray-400 bg-gray-800)"
+        tw="flex items-center w-full p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:(text-gray-400 bg-gray-800)"
         role="alert"
       >
         {type === "success" && <SuccessIcon />}
@@ -86,7 +86,7 @@ const Toast = ({
         <div tw="ml-3 text-sm font-normal">{message}</div>
         <button
           type="button"
-          tw="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:(text-gray-900 bg-gray-100) rounded-lg focus:(ring-2 ring-gray-300) p-1.5 inline-flex h-8 w-8 dark:(text-gray-500 bg-gray-800) dark:hover:(text-white bg-gray-700)"
+          tw="ml-auto bg-white text-gray-400 hover:(text-gray-900 bg-gray-100) rounded-lg focus:(ring-2 ring-gray-300) p-1.5 inline-flex h-8 w-8 dark:(text-gray-500 bg-gray-800) dark:hover:(text-white bg-gray-700)"
           aria-label="Close"
           onClick={() => toast.dismiss(t.id)}
         >
