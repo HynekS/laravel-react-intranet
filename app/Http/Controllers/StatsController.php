@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Akce;
 
 class StatsController extends Controller
@@ -15,7 +14,7 @@ class StatsController extends Controller
             ->distinct('okres')
             ->get()
             ->toArray();
-            
+
         $all_by_districts = collect($districts)
             ->map(fn ($d) => [$d['okres'] =>
             [
@@ -29,10 +28,50 @@ class StatsController extends Controller
             ]])
             ->toArray();
 
-            return response()->json($all_by_districts, 200);
+        return response()->json($all_by_districts, 200);
     }
 
+
     public function getStatsByYears()
+    {
+
+        $years = Akce::select('rok_per_year')->distinct()->get()->keyBy('rok_per_year')->keys();
+
+        $all_by_years = $years
+            ->mapWithKeys(function ($y) {
+                $not_cancelled = Akce::notCancelled()->where('rok_per_year', '=', $y)->get();
+
+                return [$y => [
+
+                    'all' => $not_cancelled->where('rok_per_year', '=', $y)->count(),
+                    'negative' => $not_cancelled->where('nalez', '=', 0)->count(),
+                    'positive' => $not_cancelled->where('nalez', '=', 1)->count(),
+                    '1' => $not_cancelled->where('id_stav', '=', 1)->count(),
+                    '2' => $not_cancelled->where('id_stav', '=', 2)->count(),
+                    '3' => $not_cancelled->where('id_stav', '=', 3)->count(),
+                    '4' => $not_cancelled->where('id_stav', '=', 4)->count(),
+                ]];
+            });
+        return response()->json($all_by_years, 200);
+    }
+
+    
+    public function getCurrentStateSummary()
+    {
+        $not_cancelled = Akce::notCancelled()->get();
+
+        $summary =  [
+            '1' => $not_cancelled->where('id_stav', '=', 1)->count(),
+            '2' => $not_cancelled->where('id_stav', '=', 2)->count(),
+            '3' => $not_cancelled->where('id_stav', '=', 3)->count(),
+            '4' => $not_cancelled->where('id_stav', '=', 4)->count(),
+        ];
+
+        return response()->json($summary, 200);
+    }
+
+
+    public function getStatsByYearsAndDistricts()
     {
         $by_years = Akce::select(['id_akce', 'rok_per_year', 'okres', 'nalez', 'id_stav'])
             ->notCancelled()
@@ -54,6 +93,6 @@ class StatsController extends Controller
                 ])
                 ->toArray());
 
-                return response()->json($all_by_years, 200);
+        return response()->json($all_by_years, 200);
     }
 }

@@ -1,32 +1,24 @@
 import { useState, useEffect, lazy, Suspense } from "react"
-import { useDebouncedValue } from "../../hooks/useDebouncedValue"
 import { Link } from "react-router-dom"
-import { XIcon, SearchIcon } from "@heroicons/react/solid"
 
+import { useDebouncedValue } from "@hooks/useDebouncedValue"
+import { XIcon, SearchIcon } from "@heroicons/react/solid"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
-import client from "@services/http/client"
-import { fetchStatsByYears } from "@store/stats"
+import {
+  fetchStatsByYears,
+  fetchStatsByYearsAndDistricts,
+  fetchCurrentStateSummary,
+} from "@store/stats"
+import { fetchLastMonthUpdates } from "@store/updates"
 import { fetchSearchResults, resetSearchResult } from "@store/search"
 import DetailPage from "../project/DetailPage"
 
-import type { akce as Akce, updates as Update, users as User } from "@codegen"
+import type { akce as Akce } from "@codegen"
 
 const DistrictsMap = lazy(() => import("./Districts"))
 
-type UpdateListItem = {
-  akce: {
-    id_akce: number
-    cislo_per_year: number
-    rok_per_year: number
-    nazev_akce: string
-  } | null
-  akce_id: number
-  id: number
-  updates: Array<Update & { user: Pick<User, "id" | "full_name"> }>
-}
-
 const SearchResults = ({ results }: { results: null | Akce[] }) => {
-  if (results === null) {
+  if (!results) {
     return null
   }
   if (!results.length) {
@@ -77,10 +69,14 @@ const SearchResults = ({ results }: { results: null | Akce[] }) => {
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState<string>("")
-  const [updateList, setUpdateList] = useState<UpdateListItem[]>([])
   const dispatch = useAppDispatch()
-  const statsByYears = useAppSelector(store => store.stats.stats)
+
+  const statsByYearsAndDistricts = useAppSelector(store => store.stats.statsByYearsAndDistricts)
+  const statsByYears = useAppSelector(store => store.stats.statsByYears)
+  const currentStateSummary = useAppSelector(store => store.stats.currentStateSummary)
+
   const searchResults = useAppSelector(store => store.search.results)
+  const lastMonthUpdates = useAppSelector(store => store.updates.latestUpdates)
 
   const debouncedValue = useDebouncedValue(searchTerm, 500)
 
@@ -88,25 +84,27 @@ const Dashboard = () => {
     if (searchTerm.length > 2) {
       dispatch(fetchSearchResults(debouncedValue))
     }
+    if (searchResults && !searchTerm.length) {
+      dispatch(resetSearchResult())
+    }
   }, [debouncedValue])
 
   useEffect(() => {
-    getUpdates()
-
-    async function getUpdates() {
-      try {
-        const response = await client.get(`/updates/last_month`)
-        if (response) {
-          setUpdateList(response.data)
-        }
-      } catch (e) {
-        // TODO: send a toast
-      }
+    if (!lastMonthUpdates.length) {
+      dispatch(fetchLastMonthUpdates())
     }
   }, [])
 
   useEffect(() => {
-    dispatch(fetchStatsByYears())
+    if (!statsByYearsAndDistricts) {
+      dispatch(fetchStatsByYearsAndDistricts())
+    }
+    if (!statsByYears) {
+      dispatch(fetchStatsByYears())
+    }
+    if (!currentStateSummary) {
+      dispatch(fetchCurrentStateSummary())
+    }
   }, [])
 
   return (
@@ -145,18 +143,15 @@ const Dashboard = () => {
             <SearchResults results={searchResults} />
             <Suspense fallback={<div>Loading…</div>}>
               <section tw="flex items-center justify-center p-8">
-                {statsByYears ? (
-                  <pre tw="text-xs">{JSON.stringify(statsByYears, null, 2)}</pre>
-                ) : null}
                 <DistrictsMap fill="#e5e7eb" />
               </section>
             </Suspense>
           </div>
           <section tw="md:(w-2/5)">
             <h2 tw="mb-2 text-sm font-bold text-gray-700">poslední aktualizace</h2>
-            {updateList.length ? (
+            {lastMonthUpdates.length ? (
               <ul tw="text-xs">
-                {updateList.map(project => (
+                {lastMonthUpdates.map(project => (
                   <li tw="py-2" key={project.id}>
                     <h3 tw="pb-1 text-xs font-semibold">
                       {project.akce ? (
