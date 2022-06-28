@@ -1,18 +1,6 @@
-import { TwStyle } from "twin.macro"
-
 import { ExclamationCircleIcon } from "@heroicons/react/solid"
 
-export type TwStyles = TwStyle | TwStyle[]
-
-export type StyleScope =
-  | "fieldWrapper"
-  | "labelWrapper"
-  | "label"
-  | "inputWrapper"
-  | "input"
-  | "errorMessage"
-
-export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
+import type { StyleScopeObject } from "./Input"
 
 export type TextAreaProps = {
   name: string

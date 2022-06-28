@@ -1,17 +1,7 @@
 import { ChevronDownIcon, ExclamationCircleIcon } from "@heroicons/react/solid"
-import tw, { TwStyle } from "twin.macro"
+import tw from "twin.macro"
 
-export type TwStyles = TwStyle | TwStyle[]
-
-export type StyleScope =
-  | "fieldWrapper"
-  | "labelWrapper"
-  | "label"
-  | "inputWrapper"
-  | "input"
-  | "errorMessage"
-
-export type StyleScopeObject = { [key in StyleScope]?: TwStyles }
+import type { StyleScopeObject } from "./Input"
 
 type Props = {
   name: string
