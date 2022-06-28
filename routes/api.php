@@ -75,5 +75,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('/file', 'FileController@destroy');
     Route::post('/report/{akce}', 'ReportController@generate_pdf');
     Route::get('/securedimage/{path}', 'SecuredImageController@show')->where('path', '(.*)');
-    Route::get('/stats/by_year', 'StatsController@getStatsByYears');
+    Route::get('/stats/current_state_summary', 'StatsController@getCurrentStateSummary');
+    Route::get('/stats/by_years', 'StatsController@getStatsByYears');
+    Route::get('/stats/by_years_and_districts', 'StatsController@getStatsByYearsAndDistricts');
 });
