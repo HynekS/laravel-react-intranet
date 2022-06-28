@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback, Fragment } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { shallowEqual } from "react-redux"
@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/outline"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
-import { setSortBy, updateFilters, Filters, clearFilters } from "@store/table"
+import { setSortBy, updateFilters, clearFilters } from "@store/table"
 import sortIdSlashYear from "@services/sorting/sortIdSlashYear"
 import { Detail } from "./lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
@@ -36,51 +36,58 @@ const Table = ({ rawData }: Props) => {
   const scrollOffset = useRef(0)
   const keydownIntervalRef = useRef<number | null>(null)
 
-  const [data, setData] = useState([])
+  const [data, setData] = useState<Akce[]>([])
   const { year } = useParams<{ year: string }>()
   const currentHeight = useWindowHeight()
 
   const status = useAppSelector(store => store.projects.getMultiple.status)
   const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
-  const filters: Filters = useAppSelector(store => store.table.filters, shallowEqual)
+  const filters = useAppSelector(store => store.table.filters, shallowEqual)
+  const filterLength = useAppSelector(store => Object.values(store.table.filters).length)
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (tableRef.current === undefined || scrollOffset.current === undefined) return
-    if (["PageUp", "PageDown", "Home", "End"].includes(e.code)) {
-      if (keydownIntervalRef.current) {
-        window.clearInterval(Number(keydownIntervalRef.current))
-        keydownIntervalRef.current = null
-      }
-      keydownIntervalRef.current = window.setInterval(() => {
-        if (tableRef && tableRef.current && tableRef.current.scrollToPosition) {
-          if (e.code === "PageUp") {
-            scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
-            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
-          }
-          if (e.code === "PageDown") {
-            scrollOffset.current = Math.min(
-              scrollOffset.current + currentHeight,
-              // TODO must probably add header and table header height into the formula
-              tableRef.current.getTotalRowsHeight() - (currentHeight - (81 + 59)),
-            )
-            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
-          }
-          if (e.code === "Home") {
-            scrollOffset.current = 0
-            tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
-          }
-          if (e.code === "End") {
-            scrollOffset.current = tableRef.current.getTotalRowsHeight()
-            // TODO must probably add header and table header height into the formula
-            tableRef.current.scrollToPosition({
-              scrollLeft: 0,
-              scrollTop: scrollOffset.current - currentHeight + (81 + 59),
-            })
-          }
+  const PRIMARY_HEADER_HEIGHT = 60
+  const SECONDARY_HEADER_HEIGHT = 39
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const offset = PRIMARY_HEADER_HEIGHT + Number(document.getElementById("header")?.offsetHeight)
+
+      if (tableRef.current === undefined || scrollOffset.current === undefined) return
+      if (["PageUp", "PageDown", "Home", "End"].includes(e.code)) {
+        if (keydownIntervalRef.current) {
+          window.clearInterval(Number(keydownIntervalRef.current))
+          keydownIntervalRef.current = null
         }
-      }, 20)
-    }
-  }
+        keydownIntervalRef.current = window.setInterval(() => {
+          if (tableRef && tableRef.current && tableRef.current.scrollToPosition) {
+            if (e.code === "PageUp") {
+              scrollOffset.current = Math.max(scrollOffset.current - currentHeight, 0)
+              tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+            }
+            if (e.code === "PageDown") {
+              scrollOffset.current = Math.min(
+                scrollOffset.current + currentHeight,
+                tableRef.current.getTotalRowsHeight() - (currentHeight - offset),
+              )
+              tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: scrollOffset.current })
+            }
+            if (e.code === "Home") {
+              scrollOffset.current = 0
+              tableRef.current.scrollToPosition({ scrollLeft: 0, scrollTop: 0 })
+            }
+            if (e.code === "End") {
+              scrollOffset.current = tableRef.current.getTotalRowsHeight()
+              tableRef.current.scrollToPosition({
+                scrollLeft: 0,
+                scrollTop: scrollOffset.current - currentHeight + offset,
+              })
+            }
+          }
+        }, 10)
+      }
+    },
+    [year, filterLength],
+  )
 
   const handleKeyUp = () => {
     if (keydownIntervalRef.current) {
@@ -239,10 +246,9 @@ const Table = ({ rawData }: Props) => {
       title: "Reg.",
       key: "registrovano_bit",
       dataKey: "registrovano_bit",
-      width: 40,
+      width: 60,
       cellRenderer: ({ cellData }) =>
         Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
-      sortable: true,
     },
     {
       title: "Číslo reg.",
@@ -250,14 +256,92 @@ const Table = ({ rawData }: Props) => {
       dataKey: "registrace_info",
       width: 100,
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            name={column.key}
+            autoComplete="off"
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "ZAA",
       key: "zaa_hlaseno",
       dataKey: "zaa_hlaseno",
-      width: 60,
+      width: 70,
       cellRenderer: ({ cellData }) =>
         Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <div tw="flex items-center my-2 bg-gray-200 border border-gray-200 rounded-full border-t-gray-300 border-l-gray-300">
+            <div tw="flex">
+              <input
+                tw="sr-only checked:sibling:(bg-gray-100 rounded-full h-3 w-3 border border-gray-300 border-b-gray-400 border-r-gray-400 shadow-sm)"
+                type="radio"
+                id={`${column.key}-1`}
+                name={column.key}
+                value={1}
+                aria-label="přepnout"
+                onClick={e => {
+                  e.stopPropagation()
+                }}
+                checked={filters[column.key] === "1"}
+                onChange={e => filterData(column, e)}
+              />
+              <label tw="w-3 h-3 -my-0.5 -ml-0.5" htmlFor={`${column.key}-1`}>
+                <span tw="sr-only">hlášeno</span>
+              </label>
+            </div>
+            <div tw="flex">
+              <input
+                tw="sr-only checked:sibling:(bg-gray-100 rounded-full h-3 w-3 border border-gray-300 border-b-gray-400 border-r-gray-400 shadow-sm)"
+                type="radio"
+                id={`${column.key}-empty`}
+                name={column.key}
+                value={""}
+                checked={filters[column.key] === "" || filters[column.key] === undefined}
+                aria-label="přepnout"
+                onClick={e => {
+                  e.stopPropagation()
+                }}
+                onChange={e => filterData(column, e)}
+              />
+              <label tw="w-3 h-3 -my-0.5" htmlFor={`${column.key}-empty`}>
+                <span tw="sr-only">(vypnout filtr)</span>
+              </label>
+            </div>
+            <div tw="flex">
+              <input
+                tw="sr-only checked:sibling:(bg-gray-100 rounded-full h-3 w-3 border border-gray-300 border-b-gray-400 border-r-gray-400 shadow-sm)"
+                type="radio"
+                id={`${column.key}-0`}
+                name={column.key}
+                value={0}
+                aria-label="přepnout"
+                onClick={e => {
+                  e.stopPropagation()
+                }}
+                checked={filters[column.key] === "0"}
+                onChange={e => filterData(column, e)}
+              />
+              <label tw="w-3 h-3 -my-0.5 -mr-0.5" htmlFor={`${column.key}-0`}>
+                <span tw="sr-only">nehlášeno</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      ),
     },
     {
       title: "Stav",
@@ -322,12 +406,62 @@ const Table = ({ rawData }: Props) => {
       key: "investor_kontakt",
       dataKey: "investor_kontakt",
       width: 180,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            name={column.key}
+            autoComplete="off"
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Kraj",
       key: "kraj",
       dataKey: "kraj",
-      width: 80,
+      width: 90,
+      sortable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            name={column.key}
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
+      cellRenderer: ({ cellData, column: { key } }) => (
+        <Highlighter
+          textToHighlight={cellData}
+          sanitize={deburr}
+          searchWords={[filters[key] || ""]}
+          highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */ }}
+        >
+          {cellData}
+        </Highlighter>
+      ),
+    },
+    {
+      title: "Okres",
+      key: "okres",
+      dataKey: "okres",
+      width: 90,
       sortable: true,
       headerRenderer: ({ column }) => (
         <div>
@@ -360,8 +494,25 @@ const Table = ({ rawData }: Props) => {
       title: "Katastr",
       key: "katastr",
       dataKey: "katastr",
-      width: 80,
+      width: 120,
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div>
+          <div>{column.title}</div>
+          <input
+            tw="relative"
+            type="text"
+            name={column.key}
+            autoComplete="off"
+            defaultValue={filters[column.key]}
+            aria-label="filtrovat"
+            onClick={e => {
+              e.stopPropagation()
+            }}
+            onChange={e => filterData(column, e)}
+          />
+        </div>
+      ),
     },
     {
       title: "Zahájeno",
@@ -405,7 +556,10 @@ const Table = ({ rawData }: Props) => {
   ]
 
   return (
-    <div
+    // Wrapping in form to allow simple reset of elements.
+    // It's certainly suboptimal, but wrapping only the header with inputs breaks AutoResizer behaviour
+    <form
+      ref={formRef}
       style={{
         width: "100%",
         height: currentHeight - (document.getElementById("header")?.offsetHeight || 0),
@@ -421,8 +575,6 @@ const Table = ({ rawData }: Props) => {
               }
               .BaseTable__header-cell--align-right {
                 ${tw`flex-row-reverse justify-start`}
-              }
-              .BaseTable__header-cell--sortable {
               }
               .BaseTable__row.negative {
                 ${tw`text-red-900 bg-red-50`}
@@ -448,10 +600,21 @@ const Table = ({ rawData }: Props) => {
               .BaseTable__header-row {
                 ${tw`bg-white`}
               }
+              .BaseTable__header-cell {
+                ${tw`pt-1`}
+              }
+              .BaseTable__table-main .BaseTable__header-cell:last-child {
+                padding-right: 8px;
+                /* This doesn't work as expected in the base css – being applied to all the header cells */
+              }
+              .BaseTable__table-main .BaseTable__header-cell:first-child {
+                padding-left: 8px;
+                /* This doesn't work as expected in the base css – being applied to all the header cells */
+              }
               input {
                 ${tw`w-full h-5 p-1 mt-1 text-xs bg-blue-100 border border-blue-200 rounded-sm border-b-gray-200 border-r-gray-200`}
                 &:focus:not(.focus-visible) {
-                  ${tw`outline-none focus:(ring ring-2 border-blue-500 bg-blue-100)`}
+                  ${tw`outline-none focus:(ring-2 border-blue-500 bg-blue-100)`}
                 }
                 &[value=""] {
                   ${tw`bg-gray-100 border-gray-300`}
@@ -460,7 +623,10 @@ const Table = ({ rawData }: Props) => {
             `}
             data={data}
             rowHeight={90}
-            headerHeight={[60, Object.values(filters).filter(Boolean).length ? 39 : 0]}
+            headerHeight={[
+              PRIMARY_HEADER_HEIGHT,
+              Object.values(filters).filter(Boolean).length ? SECONDARY_HEADER_HEIGHT : 0,
+            ]}
             width={width}
             height={height}
             sortBy={sortBy as { key: React.Key; order: SortOrder }}
@@ -493,11 +659,11 @@ const Table = ({ rawData }: Props) => {
             }}
             headerRenderer={({ cells, headerIndex }) =>
               headerIndex === 0 ? (
-                <form tw="flex h-full" key="primaryHeader" ref={formRef}>
-                  {cells.map(cell => (
-                    <div key={cell.key}>{cell}</div>
-                  ))}
-                </form>
+                cells.map(cell =>
+                  React.cloneElement(cell, {
+                    children: <div key={cell.dataKey}>{cell}</div>,
+                  }),
+                )
               ) : (
                 <div
                   role="cell"
@@ -528,7 +694,7 @@ const Table = ({ rawData }: Props) => {
           </BaseTable>
         )}
       </AutoResizer>
-    </div>
+    </form>
   )
 }
 
