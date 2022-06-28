@@ -8,7 +8,7 @@ export default function useFocusNextOnEnter() {
   const filterFormElements = el => {
     if (
       el.nodeName.toLowerCase() === "fieldset" ||
-      ["submit", "hidden"].includes(el.getAttribute("type"))
+      ["submit", "button", "hidden"].includes(el.getAttribute("type"))
     ) {
       return false
     }
