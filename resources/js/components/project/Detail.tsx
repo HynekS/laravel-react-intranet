@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useForm, Controller, ManualFieldError } from "react-hook-form"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -17,46 +17,19 @@ import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
-import Input, { InputProps, StyleScopeObject } from "../common/Input"
 import Select from "../common/Select"
 import ButtonStyledRadio from "./ButtonStyledRadio"
 import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
 import Modal from "../common/StyledModal"
 import ProjectDeleteDialog from "./ProjectDeleteDialog"
 import ModalCloseButton from "../common/ModalCloseButton"
+import triggerToast from "../common/Toast"
+import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
 import type { akce as Akce, users as User } from "@codegen"
 
-const styles = {
-  fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
-  labelWrapper: tw`pr-4 md:(w-60 flex items-center justify-end) lg:(w-72) xl:(w-80)`,
-  label: tw`font-semibold`,
-  inputWrapper: tw`relative flex-1 w-full`,
-  input: tw`border border-gray-200 text-gray-600 rounded-sm py-0.5 px-1.5 width[20ch] focus:(border-transparent outline-none ring-2 transition-shadow duration-300) placeholder:(text-gray-300)`,
-  inputError: tw`border-red-400 focus:(ring-red-400)`,
-  errorMessage: tw`absolute left-0 z-10 inline-block p-1 pr-2 text-xs text-red-400 bg-white border-red-300 rounded shadow-sm top-full`,
-}
-
-const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScopeObject = {}) => {
-  let result = { ...styles }
-  ;(Object.keys(result) as Array<keyof StyleScopeObject>).forEach(key => {
-    result[key] = overrides[key] ? [result[key]].concat(overrides[key]).flat() : result[key]
-  })
-  return result
-}
-
-const DefaultInput = ({ overrides, ...props }: InputProps) => (
-  <Input {...props} styles={mergeStyles(styles, overrides)} />
-)
-
-const DefaultFieldset = ({ children, ...props }) => (
-  <fieldset tw="pb-5" {...props}>
-    {children}
-  </fieldset>
-)
-
 /* A lot of that can be probably delegated to 'valueAsNumber' prop, but we still has to deal with isNaN or null value */
-const transformFormValues = data => ({
+const transformFormValues = (data: Akce) => ({
   ...data,
   objednavka: Number(data.objednavka),
   smlouva: Number(data.objednavka),
@@ -64,7 +37,6 @@ const transformFormValues = data => ({
   rozpocet_B: Number(data.rozpocet_B),
   registrovano_bit: Number(data.registrovano_bit),
   id_stav: Number(data.id_stav),
-  nalez: data.nalez === "null" ? null : Number(data.nalez),
   user_id: Number(data.user_id),
   zaa_hlaseno: Number(data.zaa_hlaseno),
 
@@ -97,9 +69,10 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
   const userId = useAppSelector(store => store.auth.user!.id)
   const activeUsers = useAppSelector(store => store.users.activeUsers)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { register, control, handleSubmit, setValue, watch, errors } = useForm()
+  const [isPending, setIsPending] = useState(false)
+  const { register, control, handleSubmit, setValue, watch, setError, errors } = useForm<Akce>()
 
-  const { c_akce, id_akce: id, rok_per_year } = detail
+  const { c_akce, id_akce: id } = detail
 
   useEffect(() => {
     if (detail) {
@@ -119,12 +92,31 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
     }
   }, [])
 
-  const onSubmit = data => {
+  const onSubmit = (data: Akce) => {
     if (type === "update")
       return dispatch(updateProject({ id, userId, ...transformFormValues(data) }))
-    if (type === "create")
-      return dispatch(createProject({ userId, ...transformFormValues(data) }, navigate))
-    return
+    if (type === "create") setIsPending(true)
+    return dispatch(createProject({ navigate, userId, ...transformFormValues(data) }))
+      .unwrap()
+      .then(() => {
+        // setResponse and navigate here?
+        setIsPending(false)
+      })
+      .catch(err => {
+        setIsPending(false)
+        setError(
+          Object.entries(err.errors).map(([key, val]) => ({
+            name: key,
+            message: val,
+            type: "required", //?
+          })) as ManualFieldError<Akce>[],
+        )
+        triggerToast({
+          type: "error",
+          message: err.message,
+          options: { duration: 3000 },
+        })
+      })
   }
 
   const boundTitle = watch("nazev_akce")
@@ -143,20 +135,13 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                 <DropdownItem
                   onClick={() => {
                     setIsModalOpen(true)
-                    /*
-                    return dispatch(
-                      deleteProject(
-                        { id, userId, year: Number(rok_per_year), project: detail },
-                        navigate,
-                      ),
-                    )*/
                   }}
                   Icon={TrashIcon}
                   label="Odstranit&nbsp;akci"
                 />
               </Dropdown>
             )}
-            <Button type="submit">
+            <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
               {type === "update" ? "Uložit\u00a0změny" : "Vytvořit\u00a0akci"}
             </Button>
           </div>

@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useState, useEffect } from "react"
+import { useForm, ManualFieldError } from "react-hook-form"
 import tw from "twin.macro"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
 
@@ -7,39 +7,21 @@ import client from "@services/http/client"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
-import Input, { InputProps, StyleScopeObject } from "../common/Input"
 import TextArea from "../common/TextArea"
-
 import { updateProject } from "@store/projects"
+import triggerToast from "../common/Toast"
+import { DefaultInput, mergeStyles, styles } from "./DefaultInputs"
 
 import type { akce as Akce } from "@codegen"
 
 type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
 
-const styles = {
-  fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
-  labelWrapper: tw`pr-4 md:(w-2/6 flex items-center justify-end) lg:(w-3/12) xl:(w-2/12)`,
-  label: tw`font-semibold`,
-  inputWrapper: tw`w-full`,
-  input: tw`border border-gray-200 text-gray-500 rounded-sm py-0.5 px-1.5 width[24ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300)`,
-}
-
-const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScopeObject = {}) => {
-  let result = { ...styles }
-  ;(Object.keys(result) as Array<keyof StyleScopeObject>).forEach(key => {
-    result[key] = overrides[key] ? [result[key]].concat(overrides[key]).flat() : result[key]
-  })
-  return result
-}
-
-const DefaultInput = ({ overrides, ...props }: InputProps) => (
-  <Input {...props} styles={mergeStyles(styles, overrides)} />
-)
-
 const ApprovalSheet = ({ detail }: DetailProps) => {
-  const userId = useAppSelector(store => store.auth.user.id)
+  const [isPending, setIsPending] = useState(false)
+
+  const userId = useAppSelector(store => store.auth!.user!.id)
   const dispatch = useAppDispatch()
-  const { register, control, handleSubmit, setValue, watch, errors } = useForm()
+  const { register, handleSubmit, setValue, setError } = useForm()
   const { id_akce: id } = detail || {}
 
   useEffect(() => {
@@ -54,7 +36,29 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
     }
   }, [detail])
 
-  const onSubmit = data => dispatch(updateProject({ id, userId, ...data }))
+  const onSubmit = data => {
+    setIsPending(true)
+    dispatch(updateProject({ id, userId, ...data }))
+      .unwrap()
+      .then(() => {
+        setIsPending(false)
+      })
+      .catch(err => {
+        setIsPending(false)
+        setError(
+          Object.entries(err.errors).map(([key, val]) => ({
+            name: key,
+            message: val,
+            type: "required", //?
+          })) as ManualFieldError<{ [name: string]: string }>[],
+        )
+        triggerToast({
+          type: "error",
+          message: err.message,
+          options: { duration: 3000 },
+        })
+      })
+  }
 
   return (
     <DetailWrapper>
@@ -132,37 +136,44 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
           register={register}
           overrides={{ input: tw`w-auto` }}
         />
+        <div tw="flex items-start pt-8">
+          <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
+            Uložit změny
+          </Button>
+          <Button
+            tw="bg-gray-100 text-gray-500 hover:(bg-gray-200 text-gray-600) ml-4"
+            type="button"
+            onClick={async e => {
+              e.preventDefault()
+              client({
+                url: `/report/${detail.id_akce}`,
+                method: "POST",
+                responseType: "blob",
+                data: {
+                  ...detail,
+                },
+              }).then(response => {
+                const url = window.URL.createObjectURL(
+                  new Blob([response.data], { type: "application/pdf" }),
+                )
+                const link = document.createElement("a")
+                link.href = url
+                link.setAttribute("download", "Examen.pdf")
+                link.target = "_blank"
+                link.download = `expertni_list_${
+                  detail
+                    ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….pdf`
+                    : `.pdf`
+                }`
+                link.click()
+              })
+            }}
+          >
+            <DocumentDownloadIcon tw="w-5 mr-1" />
+            Stáhnout PDF
+          </Button>
+        </div>
       </form>
-      <Button
-        type="button"
-        onClick={async () => {
-          client({
-            url: `/report/${detail.id_akce}`,
-            method: "POST",
-            responseType: "blob",
-            data: {
-              ...detail,
-            },
-          }).then(response => {
-            const url = window.URL.createObjectURL(
-              new Blob([response.data], { type: "application/pdf" }),
-            )
-            const link = document.createElement("a")
-            link.href = url
-            link.setAttribute("download", "Examen.pdf")
-            link.target = "_blank"
-            link.download = `expertni_list_${
-              detail
-                ? `${detail.c_akce}_${detail.nazev_akce?.split(" ").slice(0, 5).join(" ")}….pdf`
-                : `.pdf`
-            }`
-            link.click()
-          })
-        }}
-      >
-        <DocumentDownloadIcon tw="w-5 mr-1" />
-        Stáhnout PDF
-      </Button>
     </DetailWrapper>
   )
 }
