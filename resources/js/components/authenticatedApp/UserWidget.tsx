@@ -3,11 +3,10 @@ import { LogoutIcon } from "@heroicons/react/solid"
 import { logout } from "@store/auth"
 import { useNavigate } from "react-router"
 
-import type { users as User } from "@codegen"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 
 const UserWidget = () => {
-  const user: User = useAppSelector(store => store.auth.user)
+  const user = useAppSelector(store => store.auth.user)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
