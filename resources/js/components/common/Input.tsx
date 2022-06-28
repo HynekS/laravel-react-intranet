@@ -60,7 +60,7 @@ const Input = ({
         />
         {error[name] ? (
           <div className="errorMessage" css={[styles.errorMessage]}>
-            <ExclamationCircleIcon tw="w-4 h-4 fill-current mr-2 inline-block" />
+            <ExclamationCircleIcon tw="inline-block w-4 h-4 mr-2 fill-current" />
             {error[name].message || "Something is wrong with this field"}
           </div>
         ) : null}
