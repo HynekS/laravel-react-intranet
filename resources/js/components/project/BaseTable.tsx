@@ -113,11 +113,14 @@ const Table = ({ rawData }: Props) => {
   /*
     filtering
   */
-  const filterData = ({ dataKey }, e: React.ChangeEvent<HTMLInputElement>) => {
+  const filterData = (
+    { dataKey }: { dataKey: keyof Akce },
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const { value } = e.target
     dispatch(updateFilters({ ...filters, [dataKey]: value }))
 
-    const wasDeletion = filters[dataKey] && filters[dataKey].length > value.length
+    const wasDeletion = filters[dataKey] && (filters[dataKey] || "").length > value.length
     const filteredData = wasDeletion ? applyFilters(rawData) : applyFilters(data)
 
     setData(filteredData)
@@ -661,7 +664,7 @@ const Table = ({ rawData }: Props) => {
               headerIndex === 0 ? (
                 cells.map(cell =>
                   React.cloneElement(cell, {
-                    children: <div key={cell.dataKey}>{cell}</div>,
+                    children: <div key={cell.key}>{cell}</div>,
                   }),
                 )
               ) : (
