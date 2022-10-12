@@ -12,9 +12,14 @@ type SortBy = {
   order: SortOrder
 }
 
+type ScrollState = {
+  [key: string]: number
+}
+
 interface InitialState {
   sortBy: SortBy
   filters: Filters
+  scrollState: ScrollState
 }
 
 const initialState: InitialState = {
@@ -23,6 +28,7 @@ const initialState: InitialState = {
     order: "asc",
   },
   filters: {},
+  scrollState: {},
 }
 
 export const tableSlice = createSlice({
@@ -50,9 +56,15 @@ export const tableSlice = createSlice({
         filters: {},
       }
     },
+    updateScrollState: (state, { payload }: PayloadAction<ScrollState>) => {
+      return {
+        ...state,
+        scrollState: { ...state.scrollState, ...payload },
+      }
+    },
   },
 })
 
-export const { setSortBy, updateFilters, clearFilters } = tableSlice.actions
+export const { setSortBy, updateFilters, clearFilters, updateScrollState } = tableSlice.actions
 
 export default tableSlice.reducer

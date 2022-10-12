@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, Fragment } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { shallowEqual } from "react-redux"
@@ -18,7 +18,7 @@ import {
 } from "@heroicons/react/outline"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
-import { setSortBy, updateFilters, clearFilters } from "@store/table"
+import { setSortBy, updateFilters, clearFilters, updateScrollState } from "@store/table"
 import sortIdSlashYear from "@services/sorting/sortIdSlashYear"
 import { Detail } from "./lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
@@ -32,8 +32,9 @@ type Props = {
 const Table = ({ rawData }: Props) => {
   const dispatch = useAppDispatch()
   const formRef = useRef<HTMLFormElement>(null)
-  const tableRef = useRef<BaseTable<Akce>>(null)
+  const tableRef = useRef<BaseTable<Akce> | null>(null)
   const scrollOffset = useRef(0)
+  const scrollTopRef = useRef(0)
   const keydownIntervalRef = useRef<number | null>(null)
 
   const [data, setData] = useState<Akce[]>([])
@@ -44,6 +45,7 @@ const Table = ({ rawData }: Props) => {
   const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
   const filters = useAppSelector(store => store.table.filters, shallowEqual)
   const filterLength = useAppSelector(store => Object.values(store.table.filters).length)
+  const scrollStateByYear = useAppSelector(store => store.table.scrollState[String(year)])
 
   const PRIMARY_HEADER_HEIGHT = 60
   const SECONDARY_HEADER_HEIGHT = 39
@@ -108,6 +110,9 @@ const Table = ({ rawData }: Props) => {
 
   useEffect(() => {
     setData(applyFilters(sortData(rawData, { ...sortBy })))
+    return () => {
+      dispatch(updateScrollState({ [String(year)]: scrollTopRef.current }))
+    }
   }, [rawData, filters])
 
   /*
@@ -165,7 +170,7 @@ const Table = ({ rawData }: Props) => {
       key: "c_akce",
       dataKey: "c_akce",
       width: 80,
-      cellRenderer: ({ cellData: c_akce, rowData }) => (
+      cellRenderer: ({ cellData: c_akce, rowData, rowIndex }) => (
         <div onMouseOver={() => Detail.preload()}>
           <div key="numberPerYear">
             <strong>{c_akce}</strong>
@@ -689,7 +694,13 @@ const Table = ({ rawData }: Props) => {
                 </div>
               )
             }
-            ref={tableRef}
+            ref={node => {
+              tableRef.current = node
+              tableRef.current?.scrollToTop(scrollStateByYear ?? 0)
+            }}
+            onScroll={({ scrollTop }) => {
+              scrollTopRef.current = scrollTop
+            }}
           >
             {columns.map(column => (
               <Column data={data} key={column.data_key} rawData={rawData} {...column} />
