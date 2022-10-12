@@ -23,25 +23,18 @@ class CopyPuebloUsersToUsers extends Migration
             $table->string('password');
             $table->string('remember_token')->nullable()->default(null);
             $table->timestamps();
-            $table->string('typ_uzivatele')->nullable()->default(null);
             $table->integer('role')->nullable()->default(null);
             $table->integer('active')->nullable()->default(1);
         });
 
-        DB::unprepared("
-            /*
-            ALTER TABLE `users`
-            ADD COLUMN `typ_uzivatele` VARCHAR(20) NULL DEFAULT NULL AFTER `updated_at`,
-            ADD COLUMN `active` INT NULL DEFAULT '1' AFTER `typ_uzivatele`;
-        
+        DB::unprepared("       
             ALTER TABLE `users`
                 CHANGE COLUMN `email` `email` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci' AFTER `full_name`;
             
             ALTER TABLE `users`
                 CHANGE COLUMN `id` `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT FIRST;
-            */
             
-            INSERT INTO `users` (`id`, `user_name`, `full_name`, `password`, `created_at`, `updated_at`, `typ_uzivatele`, `active`)
+            INSERT INTO `users` (`id`, `user_name`, `full_name`, `password`, `created_at`, `updated_at`, `role`, `active`)
             SELECT `id_user`, `username`, CONCAT_WS(' ', `jmeno`, `prijmeni`) AS `full_name`, `password`, `datum_vytvoreni`, `datum_vytvoreni`, `typ_uzivatele`, `active`
             FROM `pueblo_users`;
             
@@ -51,10 +44,7 @@ class CopyPuebloUsersToUsers extends Migration
             
             ALTER TABLE `akce`
                 CHANGE COLUMN `user_id` `user_id` INT(11) UNSIGNED NULL DEFAULT NULL AFTER `datum_ukonceni`;
-            
-            ALTER TABLE `users`
-                CHANGE COLUMN `typ_uzivatele` `role` INT NULL DEFAULT NULL AFTER `updated_at`;
-            
+
             UPDATE `akce` SET `user_id` = null WHERE `user_id` = 0;
             
             ALTER TABLE `akce`

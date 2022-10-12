@@ -26,11 +26,11 @@ class AddAvatarFieldToUsersTable extends Migration
         });
 
         echo "Field added, running seeder";
-
+        /*
         Artisan::call('db:seed', [
             '--class' => 'PopulateUserAvatarSeeder'
         ]);
-
+        */
         echo "seeder complete";
     }
 

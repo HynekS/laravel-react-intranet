@@ -14,6 +14,7 @@ class CreateInvestorsTable extends Migration
      */
     public function up()
     {
+        return; // Temporarily disable, because not actually used and takes a lot of time
         $out = new \Symfony\Component\Console\Output\ConsoleOutput();
         $out->writeln("Creating a separate 'investors' table. This may take some time!");
 

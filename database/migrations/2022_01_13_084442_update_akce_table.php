@@ -22,6 +22,8 @@ class UpdateAkceTable extends Migration
             ALTER TABLE `akce` MODIFY `zaa_vlozeno` TIMESTAMP NULL;
             ALTER TABLE `akce` MODIFY `teren_databaze_vlozeno` TIMESTAMP NULL;
             ALTER TABLE `akce` MODIFY `LAB_databaze_vlozeno` TIMESTAMP NULL;
+            
+            ALTER TABLE `NZ_word` RENAME `nz_word`;
 
             UPDATE `akce`
             SET `nz_vlozeno` = NULL
@@ -40,7 +42,7 @@ class UpdateAkceTable extends Migration
             WHERE `LAB_databaze_vlozeno` = '0000-00-00 00:00:00';
           
             UPDATE `akce`
-            SET `cislo_per_year` = `c_akce`;
+            SET `cislo_per_year` = CAST(`c_akce` AS UNSIGNED);
 
             ALTER TABLE `akce` MODIFY `rok_per_year` VARCHAR(20) null;
 
@@ -55,9 +57,9 @@ class UpdateAkceTable extends Migration
 
             ALTER TABLE `akce`
 	        CHANGE COLUMN `registrace_info` `registrace_info` VARCHAR(20) NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `registrovano_bit`;
-
+            
             ALTER TABLE `akce`
-	        CHANGE COLUMN `user_id` `owner_id` INT(11) NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `datum_ukonceni`;
+	        CHANGE COLUMN `id_zajistuje` `user_id` INT(11) NULL DEFAULT NULL COLLATE 'utf8_czech_ci' AFTER `datum_ukonceni`;
 
             /* TODO: Should probably updated ALL empty values to null (in all the columns) */
             UPDATE `akce`
