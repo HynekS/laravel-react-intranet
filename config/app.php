@@ -106,7 +106,8 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    // NOTE this is being overridden by FakerProvider class
+    'faker_locale' => env('FAKER_LOCALE'),
 
     /*
     |--------------------------------------------------------------------------
@@ -165,7 +166,6 @@ return [
         /*
          * Package Service Providers...
          */
-        // Barryvdh\DomPDF\ServiceProvider::class, // I don't use it, do I?
         TeamTNT\Scout\TNTSearchScoutServiceProvider::class,
         Laravel\Scout\ScoutServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
@@ -178,7 +178,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
+        App\Providers\FakerServiceProvider::class,
     ],
 
     /*
