@@ -44,6 +44,8 @@ class SeedAndMigrateCommand extends Command
             $this->call("migrate");
             $this->call("passport:install");
             $this->info("Database was succesfully migrated!");
+            $this->call("storage:link");
+            $this->info("Storage symlink created!");
         }
         return 0;
     }
