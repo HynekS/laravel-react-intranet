@@ -1,18 +1,21 @@
 <?php
 
+use App\User;
 use Faker\Generator as Faker;
 use Illuminate\Support\Str;
- 
-$factory->define(App\User::class, function (Faker $faker) {
-    $name = $faker->unique()->name();
+use Illuminate\Support\Facades\Hash;
+
+$factory->define(User::class, function (Faker $faker) {
+    $gender = mt_rand(0, 1) ? "female" : "male";
+    $first_name = $faker->firstName($gender);
+    $lastName = $faker->lastName($gender);
+
     return [
-        'user_name' => $name,
-        'full_name' => $name,
-        'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-        'typ_uzivatele'=>rand(2,5),
+        'user_name' => transliterator_transliterate('Any-Latin; Latin-ASCII;', $first_name),
+        'full_name' => "{$first_name} {$lastName}",
+        'password' => Hash::make(Str::random(8, 16)),
+        'typ_uzivatele' => rand(2, 5),
         'created_at' => now(),
-        //'hints' => 0, //?
         'active' => 1,
-        //'remember_token' => Str::random(10),
     ];
 });
