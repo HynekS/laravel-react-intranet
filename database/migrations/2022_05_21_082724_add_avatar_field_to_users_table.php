@@ -25,12 +25,13 @@ class AddAvatarFieldToUsersTable extends Migration
             $table->string('avatar_path')->nullable()->default(null);
         });
 
+        /**
+         * Moved to a separate command – but will it work on Lightsail?
+         */
         echo "Field added, running seeder";
-        /*
-        Artisan::call('db:seed', [
-            '--class' => 'PopulateUserAvatarSeeder'
-        ]);
-        */
+        
+        Artisan::call('fetchavatars');
+        
         echo "seeder complete";
     }
 

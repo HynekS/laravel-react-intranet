@@ -1,18 +1,43 @@
 <?php
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use App\User;
+namespace App\Console\Commands;
 
-class PopulateUserAvatarSeeder extends Seeder
+use App\User;
+use Illuminate\Support\Facades\{Storage, Http};
+use Illuminate\Console\Command;
+
+class FetchUserAvatars extends Command
 {
     /**
-     * Run the database seeds.
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'fetchavatars';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Fetch user avatars and save them to storage and database';
+
+    /**
+     * Create a new command instance.
      *
      * @return void
      */
-    public function run()
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
     {
         $directory = "users/";
 
@@ -33,5 +58,6 @@ class PopulateUserAvatarSeeder extends Seeder
                 dd($e);
             }
         }
+        return 0;
     }
 }
