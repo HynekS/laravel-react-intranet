@@ -6,7 +6,7 @@ use App\User;
 use App\Akce;
 use Faker\Generator as Faker;
 use Illuminate\Console\Command;
-
+use DateTime, DateTimeImmutable, DateInterval;
 
 class CreatePlaceholderData extends Command
 {
@@ -76,6 +76,8 @@ class CreatePlaceholderData extends Command
             return $arr[$index];
         }
 
+
+
         $yearsSince2013 = getYearsSince(2013);
 
         // Generate users pool
@@ -86,7 +88,10 @@ class CreatePlaceholderData extends Command
         // print_r($investorsPool);
         
         $akcePool = factory(Akce::class, 50)->make();
+
         foreach($akcePool as $akce) {
+            $prominence = ceil(rand(1, 12) / rand(1, 12));
+
             $akce->investor_jmeno = biasedElement($investorsPool);
 
             $akce->user_id = User::inRandomOrder()->first()->id;
@@ -99,10 +104,21 @@ class CreatePlaceholderData extends Command
             $akce->cislo_per_year = $yearly_id;
             $akce->c_akce = $yearly_id . "/" . substr($currentYear, -2);
 
-            // RANDOMIZE!
-            $akce->nalez = 0;
-            $akce->id_stav = 0;
+            $baseDate = new DateTimeImmutable("1-1-2022");
+            $addedDays = floor((count($akcePool)) / 365 * $yearly_id);
+            $dateCreated = $baseDate->add(new DateInterval("P{$addedDays}D"));
+            $akce->datum_vytvoreni = date($dateCreated->format('Y-m-d H:i:s'));
+
+            $dateOfStart = $dateCreated->add(new DateInterval("P" . purebell(1, 240, 120) . "D"));
+            $dateOfEnd = $dateOfStart->add(new DateInterval("P" . pow($prominence, 2)  . "D"));
+
+            $akce->datum_pocatku = $dateOfStart < new DateTime() ? $dateOfStart : null;
+            $akce->datum_ukonceni = $dateOfEnd < new DateTime() ? $dateOfEnd : null;
             
+            // RANDOMIZE!
+            $akce->nalez = ($akce->datum_ukonceni) ? (int) purebell(1, 100, 50) < 20 : null;
+            $akce->id_stav = 0;
+
             $akce->create($akce->getAttributes());
             
         }
