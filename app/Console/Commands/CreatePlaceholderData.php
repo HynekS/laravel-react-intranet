@@ -15,7 +15,7 @@ class CreatePlaceholderData extends Command
      *
      * @var string
      */
-    protected $signature = 'command:cpd';
+    protected $signature = 'fakedatabase';
 
     /**
      * The console command description.
