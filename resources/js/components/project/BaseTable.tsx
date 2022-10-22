@@ -536,7 +536,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "datum_ukonceni",
       width: 100,
       cellRenderer: ({ rowData }) =>
-        rowData.datum_ukonceni ? rowData.datum_pocatku : rowData.datum_ukonceni_text,
+        rowData.datum_ukonceni ? rowData.datum_ukonceni : rowData.datum_ukonceni_text,
     },
     {
       title: "Zajišťuje",
