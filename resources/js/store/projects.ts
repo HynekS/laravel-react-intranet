@@ -43,14 +43,6 @@ interface ProjectsState {
     status: RequestLifecycle
     error: null | SerializedError
   }
-  createProject: {
-    status: RequestLifecycle
-    error: null | SerializedError
-  }
-  updateProject: {
-    status: RequestLifecycle
-    error: null | SerializedError
-  }
   deleteProject: {
     status: RequestLifecycle
     error: null | SerializedError
@@ -59,7 +51,6 @@ interface ProjectsState {
   byId: {
     [id: string]: AkceWithAll
   }
-  allIds: string[]
   idsByYear: {
     [key: string]: string[]
   }
@@ -69,12 +60,9 @@ interface ProjectsState {
 const initialState: ProjectsState = {
   getSingle: { status: "idle", error: null },
   getMultiple: { status: "idle", error: null },
-  createProject: { status: "idle", error: null },
-  updateProject: { status: "idle", error: null },
   deleteProject: { status: "idle", error: null },
   byYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: {} }))),
   byId: {},
-  allIds: [],
   idsByYear: Object.assign({}, ...yearsSince2013.map(val => ({ [val]: [] }))), // { 2013: [ids...], 2014: [ids..]}
 }
 
@@ -124,7 +112,6 @@ const projectsSlice = createSlice({
         for (const project of Object.values(state.byId)) {
           project["activePointgroupIndex"] = setDefaulPointgroupIndex(project)
         }
-        state.allIds = state.allIds.concat(Object.keys(payload.projectsOfOneYear))
         state.idsByYear = {
           ...state.idsByYear,
           [payload.year]: [
@@ -136,7 +123,6 @@ const projectsSlice = createSlice({
         }
       }),
       builder.addCase(createProject.fulfilled, (state, { payload }) => {
-        state.createProject.status = "fulfilled"
         state.byId = {
           ...state.byId,
           [payload.id]: {
@@ -150,7 +136,6 @@ const projectsSlice = createSlice({
         state.createProject.error = error as SerializedError
       }),
       builder.addCase(updateProject.fulfilled, (state, { payload }) => {
-        state.updateProject.status = "fulfilled"
         state.byId = {
           ...state.byId,
           [payload.id]: {
@@ -158,10 +143,6 @@ const projectsSlice = createSlice({
             ...payload.updatedProject,
           },
         }
-      }),
-      builder.addCase(updateProject.rejected, (state, { error }) => {
-        state.updateProject.status = "rejected"
-        state.updateProject.error = error as SerializedError
       }),
       builder.addCase(deleteProject.fulfilled, (state, { payload }) => {
         const { [payload.id]: deleted, ...withoutDeletedProject } = state.byId
@@ -250,11 +231,8 @@ const projectsSlice = createSlice({
   },
 })
 
-export const {
-  fetchProjectByYearsInit,
-  fetchProjectByYearsSuccess,
-  setActivePointgroupIndex,
-} = projectsSlice.actions
+export const { fetchProjectByYearsInit, fetchProjectByYearsSuccess, setActivePointgroupIndex } =
+  projectsSlice.actions
 
 export const fetchProjectsByYears = createAsyncThunk(
   "projects/fetchProjectByYears",
