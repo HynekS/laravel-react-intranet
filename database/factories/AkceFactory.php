@@ -25,7 +25,7 @@ $factory->define(Akce::class, function (Faker $faker) {
 
     return [
         "nazev_akce" => ucfirst(sprintf($format, $territory["municipality"], $faker->constructionProject())),
-        "kraj" => $territory["region"],
+        "kraj" => trim(str_ireplace("kraj", "", $territory["region"])),
         "okres" => $territory["district"],
         "katastr" => $territory["cadastral_territory"],
         "investor_jmeno" => $faker->company(),
