@@ -528,7 +528,9 @@ const Table = ({ rawData }: Props) => {
       dataKey: "datum_pocatku",
       width: 100,
       cellRenderer: ({ rowData }) =>
-        rowData.datum_pocatku ? rowData.datum_pocatku : rowData.datum_pocatku_text,
+        rowData.datum_pocatku
+          ? new Date(rowData.datum_pocatku).toLocaleDateString()
+          : rowData.datum_pocatku_text,
     },
     {
       title: "Ukončeno",
@@ -536,7 +538,9 @@ const Table = ({ rawData }: Props) => {
       dataKey: "datum_ukonceni",
       width: 100,
       cellRenderer: ({ rowData }) =>
-        rowData.datum_ukonceni ? rowData.datum_ukonceni : rowData.datum_ukonceni_text,
+        rowData.datum_ukonceni
+          ? new Date(rowData.datum_ukonceni).toLocaleDateString()
+          : rowData.datum_ukonceni_text,
     },
     {
       title: "Zajišťuje",
