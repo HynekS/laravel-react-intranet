@@ -15,7 +15,7 @@ import DetailPage from "../project/DetailPage"
 
 import type { akce as Akce } from "@codegen"
 
-const DistrictsMap = lazy(() => import("./Districts"))
+const DistrictsMap = lazy(() => import(/* webpackChunkName: 'DistrictsMap' */ "./Districts"))
 
 const SearchResults = ({ results }: { results: null | Akce[] }) => {
   if (!results) {
