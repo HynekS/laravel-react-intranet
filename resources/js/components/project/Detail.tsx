@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { useForm, Controller, ManualFieldError } from "react-hook-form"
+import { useState, useEffect, useRef } from "react"
+import { useForm, Controller, ManualFieldError, OnSubmit } from "react-hook-form"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
@@ -28,22 +28,6 @@ import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInp
 
 import type { akce as Akce, users as User } from "@codegen"
 
-/* A lot of that can be probably delegated to 'valueAsNumber' prop, but we still has to deal with isNaN or null value */
-const transformFormValues = (data: Akce) => ({
-  ...data,
-  objednavka: Number(data.objednavka),
-  smlouva: Number(data.objednavka),
-  rozpocet_A: Number(data.rozpocet_A),
-  rozpocet_B: Number(data.rozpocet_B),
-  registrovano_bit: Number(data.registrovano_bit),
-  id_stav: Number(data.id_stav),
-  user_id: Number(data.user_id),
-  zaa_hlaseno: Number(data.zaa_hlaseno),
-
-  datum_pocatku: data.datum_pocatku && data.datum_pocatku.toISOString().split("T")[0],
-  datum_ukonceni: data.datum_ukonceni && data.datum_ukonceni.toISOString().split("T")[0],
-})
-
 function parseDate(str: string, format: string, locale: Locale | undefined) {
   const parsed = dateFnsParse(str, format, new Date(), { locale })
   if (DateUtils.isDate(parsed)) {
@@ -61,30 +45,68 @@ type Detail = Akce & { user: User }
 type DetailProps = {
   detail?: Akce & { user: User }
   type: "update" | "create"
+  setProjectTitle: React.SetStateAction<string>
 }
 
-const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
+function transformDefaultValues(original: Akce | undefined) {
+  let obj = { ...original }
+  if (!obj) return {}
+  ;(Object.keys(obj) as Array<keyof Akce>).forEach((k: keyof Akce) => {
+    if (obj[k] instanceof Object) {
+      // (unneccessary in practise)
+      return transformDefaultValues(obj[k])
+    }
+    if (["datum_pocatku", "datum_ukonceni"].includes(k)) {
+      // Date objects
+      obj[k] = new Date(obj[k])
+      // TODO migrate all 'chackbox' fielsd to booleans
+    } else if (["objednavka", "smlouva", "registrovano_bit"].includes(k)) {
+      // checkboxes
+      obj[k] = Boolean(obj[k])
+    } else {
+      // other inputs
+      obj[k] = obj[k] ? String(obj[k]) : ""
+    }
+  })
+
+  return obj
+}
+
+const Detail = ({
+  detail = {} as Detail,
+  type = "update",
+  setProjectTitle = () => {
+    return ""
+  },
+}: DetailProps) => {
+  const defaultValues = transformDefaultValues(detail)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const userId = useAppSelector(store => store.auth.user!.id)
   const activeUsers = useAppSelector(store => store.users.activeUsers)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
-  const { register, control, handleSubmit, setValue, watch, setError, errors } = useForm<Akce>()
+  const getValuesRef = useRef(null)
 
-  const { c_akce, id_akce: id } = detail
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    setError,
+    errors,
+    formState,
+    getValues,
+  } = useForm<Akce>({ defaultValues })
+
+  const { touched } = formState
 
   useEffect(() => {
-    if (detail) {
-      for (let [key, value] of Object.entries(detail)) {
-        if (value && ["datum_pocatku", "datum_ukonceni"].includes(key)) {
-          setValue(key, new Date(value))
-        } else {
-          setValue(key, value)
-        }
-      }
-    }
-  }, [detail])
+    getValuesRef.current = getValues
+  })
+
+  const { id_akce: id } = detail
 
   useEffect(() => {
     if (!activeUsers.length) {
@@ -92,14 +114,49 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
     }
   }, [])
 
+  useEffect(() => {
+    window.addEventListener("beforeunload", submitOnUnmount)
+    return () => {
+      window.removeEventListener("beforeunload", submitOnUnmount)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (type === "update" && isFormDirty()) {
+        onSubmit(getValues())
+      }
+    }
+  }, [JSON.stringify(touched)])
+
+  const submitOnUnmount = () => {
+    ;(document.activeElement as HTMLElement)?.blur()
+    if (type === "update" && isFormDirty()) {
+      onSubmit(getValues())
+    }
+  }
+
+  const isFormDirty = () => {
+    let isDirty = false
+    let currentValues = getValues()
+    for (let key of Object.keys(currentValues) as Array<keyof Akce>) {
+      if (String(defaultValues[key]) !== String(currentValues[key])) {
+        isDirty = true
+        break
+      }
+    }
+    return isDirty
+  }
+
   const onSubmit = (data: Akce) => {
     if (type === "update")
-      return dispatch(updateProject({ id, userId, ...transformFormValues(data) }))
+      return dispatch(updateProject({ id, userId, project: data }))
+        .unwrap()
+        .then(() => {})
     if (type === "create") setIsPending(true)
-    return dispatch(createProject({ navigate, userId, ...transformFormValues(data) }))
+    return dispatch(createProject({ navigate, userId, project: data }))
       .unwrap()
       .then(() => {
-        // setResponse and navigate here?
         setIsPending(false)
       })
       .catch(err => {
@@ -119,16 +176,12 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
       })
   }
 
-  const boundTitle = watch("nazev_akce")
   const dateValues = watch(["datum_pocatku", "datum_ukonceni"])
 
   return (
     <DetailWrapper>
       <form onSubmit={handleSubmit(onSubmit)} tw="pb-4">
         <div tw="flex items-start justify-between">
-          <h1 tw="pb-4 text-xl font-semibold text-gray-700">
-            {c_akce}&ensp;{boundTitle}
-          </h1>
           <div tw="flex items-center">
             {type === "update" && (
               <Dropdown tw="my-auto mr-4">
@@ -141,9 +194,11 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                 />
               </Dropdown>
             )}
-            <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
-              {type === "update" ? "Uložit\u00a0změny" : "Vytvořit\u00a0akci"}
-            </Button>
+            {type === "create" ? (
+              <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
+                Vytvořit&nbsp;akci
+              </Button>
+            ) : null}
           </div>
         </div>
         <div>
@@ -157,6 +212,9 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
               })}
               error={errors}
               overrides={{ input: tw`w-7/12` }}
+              onChange={({ target }) => {
+                setProjectTitle(target.value)
+              }}
             />
           </DefaultFieldset>
         </div>
@@ -326,13 +384,13 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                     placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
                     onDayChange={(date: Date) => {
                       setValue("datum_pocatku", date)
+                      formState.touched["datum_pocatku"] = true
                     }}
                     dayPickerProps={{
                       months: monthsCZ,
                       weekdaysLong: daysCZ,
                       weekdaysShort: daysShortCZ,
                       firstDayOfWeek: 1,
-
                       selectedDays:
                         (dateValues.datum_pocatku || detail?.datum_pocatku) &&
                         new Date(dateValues.datum_pocatku || detail?.datum_pocatku),
@@ -379,6 +437,7 @@ const Detail = ({ detail = {} as Detail, type = "update" }: DetailProps) => {
                     placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
                     onDayChange={(date: Date) => {
                       setValue("datum_ukonceni", date)
+                      formState.touched["datum_ukonceni"] = true
                     }}
                     dayPickerProps={{
                       months: monthsCZ,

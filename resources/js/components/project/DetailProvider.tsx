@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useLocation } from "react-router-dom"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { ExclamationCircleIcon } from "@heroicons/react/outline"
@@ -16,11 +16,13 @@ type Params = {
 }
 
 const DetailProvider = () => {
-  const [data, setData] = useState()
+  const [data, setData] = useState<Akce>()
   const dispatch = useAppDispatch()
 
   const { state } = useLocation()
   const params = useParams<Params>()
+  // Should I use the 'data' state slice instead as single sourec of truth? Probably yes…
+  const [projectTitle, setProjectTitle] = useState<string>()
 
   // Using state from spreadsheet view link – old way, probably redundant, but maybe faster?
   const projectFromLinkState = useAppSelector(
@@ -36,8 +38,10 @@ const DetailProvider = () => {
   const error = useAppSelector(store => store.projects.getSingle.error)
 
   useEffect(() => {
-    if (projectFromLinkState || projectFromUrl) {
-      setData(projectFromLinkState || projectFromUrl)
+    const project = projectFromLinkState || projectFromUrl
+    if (project) {
+      setData(project as Akce)
+      setProjectTitle(String((project as Akce)["nazev_akce"]))
     } else {
       dispatch(fetchProject({ year: Number(params.year), id: Number(params.num) }))
     }
@@ -46,8 +50,11 @@ const DetailProvider = () => {
   if (data) {
     return (
       <DetailPage>
+        <h1 tw="py-4 text-xl font-semibold text-gray-700">
+          {data.c_akce}&ensp;{projectTitle}
+        </h1>
         <DetailNav detail={data} />
-        <DetailRoutes detail={data}></DetailRoutes>
+        <DetailRoutes detail={data} setProjectTitle={setProjectTitle} />
       </DetailPage>
     )
   }

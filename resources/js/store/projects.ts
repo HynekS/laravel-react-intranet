@@ -130,10 +130,8 @@ const projectsSlice = createSlice({
             ...payload.createdProject,
           },
         }
-      }),
-      builder.addCase(createProject.rejected, (state, { error }) => {
-        state.createProject.status = "rejected"
-        state.createProject.error = error as SerializedError
+        if (payload.createdProject.rok_per_year)
+          state.idsByYear[payload.createdProject.rok_per_year].push(String(payload.id))
       }),
       builder.addCase(updateProject.fulfilled, (state, { payload }) => {
         state.byId = {
@@ -146,6 +144,7 @@ const projectsSlice = createSlice({
       }),
       builder.addCase(deleteProject.fulfilled, (state, { payload }) => {
         const { [payload.id]: deleted, ...withoutDeletedProject } = state.byId
+        /* To be honest I am not really sure why I don't have to remove from Id's by year, but it's working anyways */
         return {
           ...state,
           byId: withoutDeletedProject,
@@ -276,7 +275,7 @@ export const createProject = createAsyncThunk<
   {
     rejectValue: ValidationError | unknown
   }
->("projects/createProject", async ({ navigate, userId, ...project }, { rejectWithValue }) => {
+>("projects/createProject", async ({ navigate, userId, project }, { rejectWithValue }) => {
   try {
     const response = await client.post(`akce`, { userId, ...project })
     const data = response.data
@@ -301,8 +300,8 @@ export const updateProject = createAsyncThunk<
   {
     rejectValue: string
   }
->("projects/updateProject", async ({ id, userId, ...project }) => {
-  const response = await client.put(`akce/${id}`, { id_akce: id, userId, ...project })
+>("projects/updateProject", async ({ id, userId, project }) => {
+  const response = await client.put(`akce/${id}`, { userId, ...project })
   return { id, updatedProject: response.data }
 })
 

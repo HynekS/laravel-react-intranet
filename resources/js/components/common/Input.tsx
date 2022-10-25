@@ -56,6 +56,7 @@ const Input = ({
           onFocus={() => {
             delete error[name]
           }}
+          {...(type === "chcekbox" && { defaultChecked: !!name })}
           {...props}
         />
         {error[name] ? (

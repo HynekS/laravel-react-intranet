@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
 
@@ -23,30 +24,33 @@ const ButtonStyledRadio = ({
   overrides = {},
   ...props
 }: Props) => {
-  const renderRadioButtons = (key: string, index: number, self: Record<string, any>) => {
-    return (
-      <span key={key} tw="relative">
-        <input
-          type="radio"
-          id={`${name}-${index}`}
-          name={name}
-          value={String(options[key])}
-          ref={register}
-          tw="absolute w-0"
-        />
-        <label
-          htmlFor={`${name}-${index}`}
-          css={css`
-            ${tw`inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid`}
-            ${index === 0 && tw`border-l rounded-l-lg`}
+  const renderRadioButtons = useCallback(
+    (key: string, index: number, self: Record<string, any>) => {
+      return (
+        <span key={key} tw="relative">
+          <input
+            type="radio"
+            id={`${name}-${index}`}
+            name={name}
+            value={String(options[key])}
+            ref={register}
+            tw="absolute w-0 appearance-none"
+          />
+          <label
+            htmlFor={`${name}-${index}`}
+            css={css`
+              ${tw`inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid`}
+              ${index === 0 && tw`border-l rounded-l-lg`}
             ${index === self.length - 1 && tw`rounded-r-lg`}
-          `}
-        >
-          {key}
-        </label>
-      </span>
-    )
-  }
+            `}
+          >
+            {key}
+          </label>
+        </span>
+      )
+    },
+    [],
+  )
 
   if (name && options) {
     return (
