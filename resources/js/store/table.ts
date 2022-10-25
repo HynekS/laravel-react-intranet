@@ -8,7 +8,7 @@ export type Filters = {
 }
 
 type SortBy = {
-  key: keyof Akce | null
+  key: keyof Akce
   order: SortOrder
 }
 
@@ -24,7 +24,8 @@ interface InitialState {
 
 const initialState: InitialState = {
   sortBy: {
-    key: null,
+    // Sorry – to suppress TS error on BaseTable sortBy prop
+    key: null as unknown as keyof Akce,
     order: "asc",
   },
   filters: {},
