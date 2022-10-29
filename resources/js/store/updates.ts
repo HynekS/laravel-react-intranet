@@ -1,8 +1,9 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 
 import client from "@services/http/client"
 
 import { updates as Update, users as User } from "@codegen"
+import { RootState } from "./configuredStore"
 
 type UpdateListItem = {
   akce: {
@@ -16,24 +17,28 @@ type UpdateListItem = {
   updates: Array<Update & { user: Pick<User, "id" | "full_name" | "avatar_path"> }>
 }
 interface InitialState {
-  latestId: number | null
+  latestUpdateId: number | null
   latestUpdates: UpdateListItem[]
 }
 
 const initialState: InitialState = {
-  latestId: null,
+  latestUpdateId: null, // <--- TODO should fetch this right after user authenticate!
   latestUpdates: [],
 }
 
 export const updatesSlice = createSlice({
   name: "updatesSlice",
   initialState,
-  reducers: {},
+  reducers: {
+    setUpdateId(state, { payload }: PayloadAction<number>) {
+      state.latestUpdateId = payload
+    },
+  },
   extraReducers: builder => {
     builder.addCase(fetchLatestUpdateId.fulfilled, (state, { payload }) => {
       return {
         ...state,
-        latestId: payload,
+        latestUpdateId: payload,
       }
     })
     builder.addCase(fetchLastMonthUpdates.fulfilled, (state, { payload }) => {
@@ -51,9 +56,28 @@ export const fetchLatestUpdateId = createAsyncThunk<
   {
     rejectValue: string
   }
->("updates/fetchLatestUpdateId", async () => {
+>("updates/fetchLatestUpdateId", async (_, { getState }) => {
+  const { updates } = getState() as RootState
+  const clientUpdateId = updates.latestUpdateId
+
   const response = await client("/updates/latest_id")
-  return response.data
+
+  if (clientUpdateId === null) {
+    return response.data
+  }
+  if (clientUpdateId === response.data) {
+    return response.data
+  }
+
+  if (
+    window.confirm(
+      `V databázi byly provedeny změny. Chcete tyto změny načíst?\nCurrent id: ${clientUpdateId} incoming: ${response.data}`,
+    )
+  ) {
+    location.reload()
+  } else {
+    return response.data
+  }
 })
 
 export const fetchLastMonthUpdates = createAsyncThunk<
@@ -67,4 +91,5 @@ export const fetchLastMonthUpdates = createAsyncThunk<
   return response.data
 })
 
+export const { setUpdateId } = updatesSlice.actions
 export default updatesSlice.reducer

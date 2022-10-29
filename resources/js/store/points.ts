@@ -5,6 +5,7 @@ import client from "@services/http/client"
 import type { pointgroups as Pointgroup, points as Point } from "@codegen"
 
 import { createPointgroup } from "./pointgroups"
+import { setUpdateId } from "./updates"
 
 export type PointgroupWithPoins = Pointgroup & { points: Point[] }
 
@@ -58,6 +59,7 @@ export const createPoint = createAsyncThunk<
       akce_id: projectId,
       userId,
     })
+    dispatch(setUpdateId(response.data.update_id))
     return {
       projectId,
       data: response.data,
@@ -77,18 +79,22 @@ export const updatePoint = createAsyncThunk<
   {
     rejectValue: string
   }
->("points/updatePoint", async ({ pointId, longitude, latitude, projectId, userId }) => {
-  const response = await client.put(`/point/${pointId}`, {
-    longitude,
-    latitude,
-    akce_id: projectId,
-    userId,
-  })
-  return {
-    projectId,
-    data: response.data,
-  }
-})
+>(
+  "points/updatePoint",
+  async ({ pointId, longitude, latitude, projectId, userId }, { dispatch }) => {
+    const response = await client.put(`/point/${pointId}`, {
+      longitude,
+      latitude,
+      akce_id: projectId,
+      userId,
+    })
+    dispatch(setUpdateId(response.data.update_id))
+    return {
+      projectId,
+      data: response.data,
+    }
+  },
+)
 
 export const deletePoint = createAsyncThunk<
   { projectId: number; data: Point },
@@ -96,10 +102,11 @@ export const deletePoint = createAsyncThunk<
   {
     rejectValue: string
   }
->("points/deletePoint", async ({ pointId, projectId, userId }) => {
+>("points/deletePoint", async ({ pointId, projectId, userId }, { dispatch }) => {
   const response = await client.delete(`/point/${pointId}`, {
     data: { akce_id: projectId, userId },
   })
+  dispatch(setUpdateId(response.data.update_id))
   return {
     projectId,
     data: response.data,

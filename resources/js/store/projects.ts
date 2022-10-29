@@ -18,6 +18,7 @@ import pointgroupsReducer, {
 import { createPoint, updatePoint, deletePoint } from "./points"
 import { uploadMultipleFiles } from "./upload"
 import fileReducer, { deleteFile } from "./files"
+import { setUpdateId } from "./updates"
 
 import type { NavigateFunction } from "react-router"
 import type { akce as Akce, faktury as Faktura, pointgroups as Pointgroup } from "@codegen"
@@ -230,8 +231,11 @@ const projectsSlice = createSlice({
   },
 })
 
-export const { fetchProjectByYearsInit, fetchProjectByYearsSuccess, setActivePointgroupIndex } =
-  projectsSlice.actions
+export const {
+  fetchProjectByYearsInit,
+  fetchProjectByYearsSuccess,
+  setActivePointgroupIndex,
+} = projectsSlice.actions
 
 export const fetchProjectsByYears = createAsyncThunk(
   "projects/fetchProjectByYears",
@@ -275,20 +279,27 @@ export const createProject = createAsyncThunk<
   {
     rejectValue: ValidationError | unknown
   }
->("projects/createProject", async ({ navigate, userId, project }, { rejectWithValue }) => {
-  try {
-    const response = await client.post(`akce`, { userId, ...project })
-    const data = response.data
-    if (response.status < 400) {
-      navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
-      return { id: data.id_akce, createdProject: data }
-    } else {
-      return rejectWithValue(response.response.data)
+>(
+  "projects/createProject",
+  async ({ navigate, userId, project }, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await client.post(`akce`, { userId, ...project })
+      const data = response.data
+      if (response.status < 400) {
+        // HOTFIXING the logic where creating a project (of current year) makes the app think all projects of that year have been fetched
+        dispatch(fetchProjectsOfOneYear(new Date().getFullYear()))
+
+        dispatch(setUpdateId(response.data.update_id))
+        navigate(`/akce/${data.rok_per_year}/${data.cislo_per_year}`)
+        return { id: data.id_akce, createdProject: data }
+      } else {
+        return rejectWithValue(response.response.data)
+      }
+    } catch (error) {
+      return rejectWithValue(error.response.data)
     }
-  } catch (error) {
-    return rejectWithValue(error.response.data)
-  }
-})
+  },
+)
 
 export const updateProject = createAsyncThunk<
   { id: number; updatedProject: Akce },
@@ -300,8 +311,9 @@ export const updateProject = createAsyncThunk<
   {
     rejectValue: string
   }
->("projects/updateProject", async ({ id, userId, project }) => {
+>("projects/updateProject", async ({ id, userId, project }, { dispatch }) => {
   const response = await client.put(`akce/${id}`, { userId, ...project })
+  dispatch(setUpdateId(response.data.update_id))
   return { id, updatedProject: response.data }
 })
 
@@ -311,10 +323,11 @@ export const deleteProject = createAsyncThunk<
   {
     rejectValue: string
   }
->("projects/deleteProject", async ({ id, userId }) => {
-  await client.delete(`akce/${id}`, {
+>("projects/deleteProject", async ({ id, userId }, { dispatch }) => {
+  const response = await client.delete(`akce/${id}`, {
     data: { userId, id_akce: id },
   })
+  dispatch(setUpdateId(response.data.update_id))
   return { id }
 })
 

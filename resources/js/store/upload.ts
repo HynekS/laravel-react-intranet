@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 
 import client from "@services/http/client"
-import getFileExtension from "../utils/getFileExtension"
+import getFileExtension from "@utils/getFileExtension"
+import { setUpdateId } from "./updates"
 import type { Model } from "./files"
 
 export interface FileObject {
@@ -181,6 +182,7 @@ export const uploadSingleFile = createAsyncThunk<
         dispatch(setUploadProgress({ updatedProgress: Math.round(progress), i, length }))
       },
     })
+    dispatch(setUpdateId(response.data.update_id))
     return response.data
   },
 )
