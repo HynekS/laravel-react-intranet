@@ -14,7 +14,7 @@ $factory->define(User::class, function (Faker $faker) {
         'user_name' => transliterator_transliterate('Any-Latin; Latin-ASCII;', $first_name),
         'full_name' => "{$first_name} {$lastName}",
         'password' => Hash::make(Str::random(8, 16)),
-        'typ_uzivatele' => rand(2, 5),
+        'role' => rand(2, 5),
         'created_at' => now(),
         'active' => 1,
     ];
