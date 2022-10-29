@@ -31,7 +31,7 @@ class LinkAkceToFaktury extends Migration
         }
 
         Schema::table('faktury', function (Blueprint $table) {
-            $table->foreign('akce_id')->references('id_akce')->on('akce');
+            $table->foreign('akce_id')->references('id_akce')->on('akce')->onDelete('cascade');
         });
     }
 
