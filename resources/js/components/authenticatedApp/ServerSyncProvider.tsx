@@ -28,6 +28,10 @@ type Props = {
 const ServerSyncProvider = ({ children }: Props) => {
   const dispatch = useAppDispatch()
 
+  useEffect(() => {
+    dispatch(fetchLatestUpdateId())
+  }, [])
+
   usePoll(() => dispatch(fetchLatestUpdateId()), [], 60000)
 
   return <Fragment>{children}</Fragment>
