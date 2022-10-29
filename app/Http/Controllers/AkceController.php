@@ -10,12 +10,14 @@ use Illuminate\Http\Request;
 class AkceController extends Controller
 {
     public function store(Request $request)
-    {
+    {    
         $validated = $request->validate([
             'nazev_akce' => 'required|unique:akce',
         ]);
 
-        $akce = new Akce($validated);
+        $akce = new Akce($request->except(['userId']));
+
+        $akce->nazev_akce = $validated["nazev_akce"];
 
         $currentYear = (new \DateTime)->format("Y");
         $latestCurrentYearProject = Akce::where("rok_per_year", "=", $currentYear)->orderBy("cislo_per_year", "desc")->first();
@@ -26,8 +28,10 @@ class AkceController extends Controller
         $akce->c_akce = $yearly_id . "/" . substr($currentYear, -2);
 
         $akce->save();
-
+        $update_id = $akce->update_id;
+             
         $withRelated = $akce->refresh()->withAll()->find($akce->id_akce);
+        $withRelated->update_id = $update_id;
 
         return response()->json(AkceTransformer::transformResponse($withRelated), 201);
     }
@@ -43,7 +47,7 @@ class AkceController extends Controller
         $akce = Akce::find($id);
         $akce->delete();
 
-        return response()->noContent();
+        return ["update_id" => $akce->update_id];
     }
 
     public function showYear($year)
