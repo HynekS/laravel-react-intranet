@@ -25,7 +25,7 @@ const ProjectDeleteDialog = ({ onModalClose, userId, detail }: Props) => {
     dispatch(deleteProject({ id, userId, project: detail }))
       .unwrap()
       .then(() => {
-        setIsLoading(false)
+        setIsLoading(false) // TO CONSIDER REMOVING: Triggers update on unmounted component!
         navigate(`/akce/${Number(rok_per_year)}`)
         triggerToast({
           type: "success",
