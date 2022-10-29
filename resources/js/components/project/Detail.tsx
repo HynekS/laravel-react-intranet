@@ -26,6 +26,8 @@ import ModalCloseButton from "../common/ModalCloseButton"
 import triggerToast from "../common/Toast"
 import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
+import { transformDefaultValues, isFormDirty } from "./formUtils"
+
 import type { akce as Akce, users as User } from "@codegen"
 
 function parseDate(str: string, format: string, locale: Locale | undefined) {
@@ -46,30 +48,6 @@ type DetailProps = {
   detail?: Akce & { user: User }
   type: "update" | "create"
   setProjectTitle: React.SetStateAction<string>
-}
-
-function transformDefaultValues(original: Akce | undefined) {
-  let obj = { ...original }
-  if (!obj) return {}
-  ;(Object.keys(obj) as Array<keyof Akce>).forEach((k: keyof Akce) => {
-    if (obj[k] instanceof Object) {
-      // (unneccessary in practise)
-      return transformDefaultValues(obj[k])
-    }
-    if (["datum_pocatku", "datum_ukonceni"].includes(k)) {
-      // Date objects
-      obj[k] = new Date(obj[k])
-      // TODO migrate all 'chackbox' fielsd to booleans
-    } else if (["objednavka", "smlouva", "registrovano_bit"].includes(k)) {
-      // checkboxes
-      obj[k] = Boolean(obj[k])
-    } else {
-      // other inputs
-      obj[k] = obj[k] ? String(obj[k]) : ""
-    }
-  })
-
-  return obj
 }
 
 const Detail = ({
@@ -123,7 +101,7 @@ const Detail = ({
 
   useEffect(() => {
     return () => {
-      if (type === "update" && isFormDirty()) {
+      if (type === "update" && isFormDirty(defaultValues, getValues())) {
         onSubmit(getValues())
       }
     }
@@ -131,21 +109,9 @@ const Detail = ({
 
   const submitOnUnmount = () => {
     ;(document.activeElement as HTMLElement)?.blur()
-    if (type === "update" && isFormDirty()) {
+    if (type === "update" && isFormDirty(defaultValues, getValues())) {
       onSubmit(getValues())
     }
-  }
-
-  const isFormDirty = () => {
-    let isDirty = false
-    let currentValues = getValues()
-    for (let key of Object.keys(currentValues) as Array<keyof Akce>) {
-      if (String(defaultValues[key]) !== String(currentValues[key])) {
-        isDirty = true
-        break
-      }
-    }
-    return isDirty
   }
 
   const onSubmit = (data: Akce) => {
