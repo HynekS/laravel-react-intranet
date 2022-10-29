@@ -192,6 +192,7 @@ const Detail = ({
                 name="objednavka"
                 label="objednávka"
                 register={register}
+                // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
@@ -213,6 +214,7 @@ const Detail = ({
                 name="smlouva"
                 label="smlouva podepsána"
                 register={register}
+                // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
@@ -238,6 +240,7 @@ const Detail = ({
                 name="registrovano_bit"
                 label="registrováno v databázi"
                 register={register}
+                // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
