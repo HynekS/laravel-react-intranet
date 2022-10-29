@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useForm, ManualFieldError } from "react-hook-form"
 import tw from "twin.macro"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
@@ -11,46 +11,67 @@ import TextArea from "../common/TextArea"
 import { updateProject } from "@store/projects"
 import triggerToast from "../common/Toast"
 import { DefaultInput, mergeStyles, styles } from "./DefaultInputs"
+import { transformDefaultValues, isFormDirty } from "./formUtils"
 
 import type { akce as Akce } from "@codegen"
 
 type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
 
 const ApprovalSheet = ({ detail }: DetailProps) => {
-  const [isPending, setIsPending] = useState(false)
+  const defaultValues = transformDefaultValues(detail)
+  //const [isPending, setIsPending] = useState(false)
 
   const userId = useAppSelector(store => store.auth!.user!.id)
   const dispatch = useAppDispatch()
-  const { register, handleSubmit, setValue, setError } = useForm()
+  const getValuesRef = useRef(null)
+
+  const { register, handleSubmit, setError, formState, getValues } = useForm<Akce>({
+    defaultValues,
+  })
+
+  const { touched } = formState
+
+  useEffect(() => {
+    getValuesRef.current = getValues
+  })
+
   const { id_akce: id } = detail || {}
 
   useEffect(() => {
-    if (detail) {
-      for (let [key, value] of Object.entries(detail)) {
-        if (value && ["datum_pocatku", "datum_ukonceni"].includes(key)) {
-          setValue(key, new Date(value))
-        } else {
-          setValue(key, value)
-        }
+    window.addEventListener("beforeunload", submitOnUnmount)
+    return () => {
+      window.removeEventListener("beforeunload", submitOnUnmount)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (isFormDirty(defaultValues, getValues())) {
+        onSubmit(getValues())
       }
     }
-  }, [detail])
+  }, [JSON.stringify(touched)])
 
-  const onSubmit = data => {
-    setIsPending(true)
-    dispatch(updateProject({ id, userId, ...data }))
+  const submitOnUnmount = () => {
+    ;(document.activeElement as HTMLElement)?.blur()
+    if (isFormDirty(defaultValues, getValues())) {
+      onSubmit(getValues())
+    }
+  }
+
+  const onSubmit = (data: Akce) => {
+    //setIsPending(true)
+    dispatch(updateProject({ id, userId, project: data }))
       .unwrap()
-      .then(() => {
-        setIsPending(false)
-      })
+      .then(() => {})
       .catch(err => {
-        setIsPending(false)
+        // setIsPending(false)
         setError(
           Object.entries(err.errors).map(([key, val]) => ({
             name: key,
             message: val,
             type: "required", //?
-          })) as ManualFieldError<{ [name: string]: string }>[],
+          })) as ManualFieldError<Akce>[],
         )
         triggerToast({
           type: "error",
@@ -134,12 +155,12 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
           name="EL_hotovo"
           label="údaje pro expertní list jsou vloženy"
           register={register}
-          overrides={{ input: tw`w-auto` }}
+          // TODO these overrides should be defaults for checkboxes
+          overrides={{
+            input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+          }}
         />
         <div tw="flex items-start pt-8">
-          <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
-            Uložit změny
-          </Button>
           <Button
             tw="bg-gray-100 text-gray-500 hover:(bg-gray-200 text-gray-600) ml-4"
             type="button"
