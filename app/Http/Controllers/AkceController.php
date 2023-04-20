@@ -38,6 +38,8 @@ class AkceController extends Controller
 
     public function update(Request $request, Akce $akce)
     {
+        // HOTFIX to prevent saving "null" as 0
+        $request->merge(["nalez" => $request->stav === "null" ? null : $request->nalez]);
         $akce->update($request->except(['userId']));
         return response()->json($akce, 200);
     }
