@@ -109,7 +109,7 @@ const MapWithTooltip = ({ ...props }) => {
           </div>
         ))}
       </div>
-      {statsByYears ? (
+      {statsByYears && statsByYears[selectedYear] ? (
         <div tw="mb-4 text-sm text-gray-500">
           <h3 tw="font-bold text-center text-lg text-gray-300 pb-1">{selectedYear}</h3>
           <dl tw="flex justify-between">
@@ -164,11 +164,11 @@ const Tooltip = ({ isVisible, position, id, stats, selectedYear, ...props }: Too
     >
       <div tw="flex justify-between items-baseline">
         <span>{id}</span>
-        {stats && stats[selectedYear][id] ? (
+        {stats && stats[selectedYear] && stats[selectedYear][id] ? (
           <span tw="text-xs font-bold text-gray-400 ml-auto px-1">({selectedYear})</span>
         ) : null}
       </div>
-      {stats && stats[selectedYear][id] ? (
+      {stats && stats[selectedYear] && stats[selectedYear][id] ? (
         <ul tw="pt-1 pb-1.5 pr-2">
           <li tw="text-xs pb-0.5">
             <span tw="text-xs">⛏️ </span>
@@ -280,7 +280,7 @@ const DistrictMap = memo(
             d={d}
             id={id}
             fill={
-              stats[selectedYear][id]
+              stats[selectedYear]?.[id]
                 ? colorRange[
                     Math.floor((stats[selectedYear][id].all / maximum) * (colorRangeStep - 1))
                   ]
