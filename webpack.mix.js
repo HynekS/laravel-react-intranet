@@ -55,6 +55,9 @@ mix
           "react-dom": "preact/compat",
         },
       },
+      output: {
+        chunkFilename: "[name].js?id=[chunkhash]",
+      },
     }),
   })
   .options({
@@ -73,5 +76,4 @@ mix
 
 if (mix.inProduction()) {
   mix.version()
-  mix.bundleAnalyzer()
 }
