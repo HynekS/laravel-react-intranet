@@ -1,19 +1,21 @@
-import { useState, useEffect, useRef } from "react"
-import { useForm, Controller, ManualFieldError, OnSubmit } from "react-hook-form"
+import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react"
+import { useForm, Controller, UseFormGetValues } from "react-hook-form"
 import { useNavigate } from "react-router"
-import { css } from "@emotion/react"
 import tw from "twin.macro"
-import DayPickerInput from "react-day-picker/DayPickerInput"
+
 import "react-day-picker/lib/style.css"
-import dateFnsFormat from "date-fns/format"
-import dateFnsParse from "date-fns/parse"
-import { DateUtils } from "react-day-picker"
+
+import { parse, isValid } from "date-fns"
 import { TrashIcon } from "@heroicons/react/solid"
+import ReactDatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { createProject, updateProject } from "@store/projects"
 import { fetchActiveUsers } from "@store/users"
-import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
+import pick from "@utils/pick"
+// TODO use it to display localiyed or remove the file!
+// import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
@@ -26,20 +28,42 @@ import ModalCloseButton from "../common/ModalCloseButton"
 import triggerToast from "../common/Toast"
 import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
-import { transformDefaultValues, isFormDirty } from "./formUtils"
-
 import type { akce as Akce, users as User } from "@codegen"
 
-function parseDate(str: string, format: string, locale: Locale | undefined) {
-  const parsed = dateFnsParse(str, format, new Date(), { locale })
-  if (DateUtils.isDate(parsed)) {
+const detailFields = [
+  "id_akce",
+  "nazev_akce",
+  "objednavka",
+  "objednavka_cislo",
+  "objednavka_info",
+  "smlouva",
+  "rozpocet_B",
+  "rozpocet_A",
+  "registrovano_bit",
+  "registrace_info",
+  "id_stav",
+  "nalez",
+  "investor_jmeno",
+  "investor_kontakt",
+  "investor_adresa",
+  "investor_ico",
+  "datum_pocatku_text",
+  "datum_pocatku",
+  "datum_ukonceni_text",
+  "datum_ukonceni",
+  "user_id",
+  "katastr",
+  "okres",
+  "kraj",
+] as const
+
+function parseDate(str: string, format: string) {
+  const parsed = parse(str, format, new Date())
+
+  if (isValid(parsed)) {
     return parsed
   }
   return undefined
-}
-
-function formatDate(date: Date, format: string, locale: Locale | undefined) {
-  return dateFnsFormat(date, format, { locale })
 }
 
 type Detail = Akce & { user: User }
@@ -47,7 +71,7 @@ type Detail = Akce & { user: User }
 type DetailProps = {
   detail?: Akce & { user: User }
   type: "update" | "create"
-  setProjectTitle: React.SetStateAction<string>
+  setProjectTitle: Dispatch<SetStateAction<string>>
 }
 
 const Detail = ({
@@ -57,34 +81,35 @@ const Detail = ({
     return ""
   },
 }: DetailProps) => {
-  const defaultValues = transformDefaultValues(detail)
+  const defaultValues = pick(detail, ...detailFields)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const userId = useAppSelector(store => store.auth.user!.id)
   const activeUsers = useAppSelector(store => store.users.activeUsers)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
-  const getValuesRef = useRef(null)
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    setError,
-    errors,
-    formState,
-    getValues,
-  } = useForm<Akce>({ defaultValues })
-
-  const { touched } = formState
-
-  useEffect(() => {
-    getValuesRef.current = getValues
+  const { register, control, handleSubmit, setError, formState, getValues, setValue } = useForm<
+    Akce
+  >({
+    defaultValues,
+    mode: "onTouched",
   })
 
+  // TODO submit only dirty fields
+  const { errors, dirtyFields, isDirty, touchedFields } = formState
+
   const { id_akce: id } = detail
+
+  const dirtyRef = useRef(false)
+  dirtyRef.current = isDirty
+
+  useEffect(() => {
+    ;(["datum_pocatku", "datum_ukonceni"] as const).forEach(field => {
+      if (detail[field] && isValid(new Date(detail[field]!)))
+        setValue(field, new Date(detail[field]!))
+    })
+  }, [])
 
   useEffect(() => {
     if (!activeUsers.length) {
@@ -101,20 +126,20 @@ const Detail = ({
 
   useEffect(() => {
     return () => {
-      if (type === "update" && isFormDirty(defaultValues, getValues())) {
+      if (type === "update" && isDirty) {
         onSubmit(getValues())
       }
     }
-  }, [JSON.stringify(touched)])
+  }, [JSON.stringify(touchedFields)])
 
   const submitOnUnmount = () => {
     ;(document.activeElement as HTMLElement)?.blur()
-    if (type === "update" && isFormDirty(defaultValues, getValues())) {
+    if (type === "update" && dirtyRef.current) {
       onSubmit(getValues())
     }
   }
 
-  const onSubmit = (data: Akce) => {
+  const onSubmit = (data: Akce /*Partial<Pick<Akce, typeof detailFields[number]>>*/) => {
     if (type === "update")
       return dispatch(updateProject({ id, userId, project: data }))
         .unwrap()
@@ -127,13 +152,9 @@ const Detail = ({
       })
       .catch(err => {
         setIsPending(false)
-        setError(
-          Object.entries(err.errors).map(([key, val]) => ({
-            name: key,
-            message: val,
-            type: "required", //?
-          })) as ManualFieldError<Akce>[],
-        )
+        Object.entries(err.errors).forEach((key, val) => {
+          setError(key, { type: val })
+        })
         triggerToast({
           type: "error",
           message: err.message,
@@ -142,12 +163,10 @@ const Detail = ({
       })
   }
 
-  const dateValues = watch(["datum_pocatku", "datum_ukonceni"])
-
   return (
     <DetailWrapper>
       <form onSubmit={handleSubmit(onSubmit)} tw="pb-4">
-        <div tw="flex items-start justify-between">
+        <div tw="flex items-start justify-end">
           <div tw="flex items-center">
             {type === "update" && (
               <Dropdown tw="my-auto mr-4">
@@ -170,14 +189,13 @@ const Detail = ({
         <div>
           <DefaultFieldset>
             <DefaultInput
-              name="nazev_akce"
               label="název akce"
               placeholder="název akce"
-              register={register({
-                required: { value: true, message: "toto pole je třeba vyplnit" },
-              })}
               error={errors}
               overrides={{ input: tw`w-7/12` }}
+              {...register("nazev_akce", {
+                required: { value: true, message: "toto pole je třeba vyplnit" },
+              })}
               onChange={({ target }) => {
                 setProjectTitle(target.value)
               }}
@@ -189,47 +207,41 @@ const Detail = ({
             <DefaultFieldset>
               <DefaultInput
                 type="checkbox"
-                name="objednavka"
                 label="objednávka"
-                register={register}
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
+                {...register("objednavka")}
               />
               <DefaultInput
-                name="objednavka_cislo"
                 label="číslo objednávky"
                 placeholder="číslo objednávky"
-                register={register}
+                {...register("objednavka_cislo")}
               />
               <DefaultInput
-                name="objednavka_info"
                 label="objednávka info"
                 placeholder="objednávka info"
-                register={register}
+                {...register("objednavka_info")}
               />
               <DefaultInput
                 type="checkbox"
-                name="smlouva"
                 label="smlouva podepsána"
-                register={register}
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
+                {...register("smlouva")}
               />
               <DefaultInput
-                name="rozpocet_B"
                 label="rozpočet dohledy"
                 placeholder="Rozpočet dohledy"
-                register={register}
+                {...register("rozpocet_B")}
               />
               <DefaultInput
-                name="rozpocet_A"
                 label="rozpočet výzkum"
                 placeholder="Rozpočet výzkum"
-                register={register}
+                {...register("rozpocet_A")}
               />
             </DefaultFieldset>
           </div>
@@ -237,25 +249,22 @@ const Detail = ({
             <DefaultFieldset>
               <DefaultInput
                 type="checkbox"
-                name="registrovano_bit"
                 label="registrováno v databázi"
-                register={register}
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
                   input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
+                {...register("registrovano_bit")}
               />
               <DefaultInput
-                name="registrace_info"
                 label="id registrace"
                 placeholder="id registrace"
-                register={register}
                 overrides={{ input: tw`width[26ch]` }}
+                {...register("registrace_info")}
               />
             </DefaultFieldset>
             <DefaultFieldset>
               <Select
-                name="id_stav"
                 label="stav"
                 placeholder="stav"
                 options={[
@@ -265,164 +274,145 @@ const Detail = ({
                   { label: "💻 3 (probíhá zpracování)", value: 3 },
                   { label: "✔️ 4 (hotovo)", value: 4 },
                 ]}
-                register={register}
                 styles={mergeStyles(styles, { input: tw`width[26ch]` })}
+                {...register("id_stav")}
               />
               <ButtonStyledRadio
-                name="nalez"
                 label="nález"
                 options={{
-                  nezjištěno: null,
-                  pozitivní: 1,
                   negativní: 0,
+                  pozitivní: 1,
+                  nezjištěno: 2,
                 }}
-                register={register}
                 styles={mergeStyles(styles, {})}
+                {...register("nalez")}
               />
             </DefaultFieldset>
           </div>
         </div>
         <DefaultFieldset>
           <DefaultInput
-            name="investor_jmeno"
             label="název investora"
             placeholder="jméno investora"
-            register={register}
             overrides={{ input: tw`w-7/12` }}
+            {...register("investor_jmeno")}
           />
           <DefaultInput
-            name="investor_kontakt"
             label="zástupce investora"
             placeholder="zástupce investora"
-            register={register}
             overrides={{ input: tw`w-7/12` }}
+            {...register("investor_kontakt")}
           />
           <DefaultInput
-            name="investor_adresa"
             label="sídlo investora"
             placeholder="sídlo investora"
-            register={register}
             overrides={{ input: tw`w-7/12` }}
+            {...register("investor_adresa")}
           />
           <DefaultInput
-            name="investor_ico"
             label="IČO investora"
             placeholder="IČO investora"
-            register={register}
+            {...register("investor_ico")}
           />
         </DefaultFieldset>
         <div tw="flex">
           <div tw="w-4/12">
             <DefaultFieldset>
-              <DefaultInput
-                name="datum_pocatku_text"
-                label="předběžné datum počátku"
-                register={register}
-              />
+              <DefaultInput label="předběžné datum počátku" {...register("datum_pocatku_text")} />
               <div className="fieldWrapper" css={[styles.fieldWrapper]}>
                 <div className="labelWrapper" css={[styles.labelWrapper]}>
                   <label css={[styles.label]}>datum počátku</label>
                 </div>
-                <div
-                  className="inputWrapper"
-                  css={css`
-                    ${styles.inputWrapper}
-                    & .DayPickerInput {
-                      ${tw`relative after:(absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current background[url(/images/calendar-solid.svg) no-repeat center])`}
-                      & input {
-                        ${styles.input}
-                      }
-                    }
-                    & .DayPicker {
-                      font-size: small;
-                    }
-                    & .DayPickerInput-Overlay {
-                      bottom: 100%;
-                      left: 100%;
-                    }
-                  `}
-                >
+                <div className="inputWrapper">
                   <Controller
-                    tw="border border-gray-200 text-gray-500 rounded-sm py-0.5 px-1.5 width[24ch] focus:(border-transparent outline-none ring ring-2 transition-shadow duration-300)"
-                    as={DayPickerInput}
                     control={control}
                     name="datum_pocatku"
-                    format="d. M. yyyy"
-                    formatDate={formatDate}
-                    parseDate={parseDate}
-                    placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
-                    onDayChange={(date: Date) => {
-                      setValue("datum_pocatku", date)
-                      formState.touched["datum_pocatku"] = true
-                    }}
-                    dayPickerProps={{
-                      months: monthsCZ,
-                      weekdaysLong: daysCZ,
-                      weekdaysShort: daysShortCZ,
-                      firstDayOfWeek: 1,
-                      selectedDays:
-                        (dateValues.datum_pocatku || detail?.datum_pocatku) &&
-                        new Date(dateValues.datum_pocatku || detail?.datum_pocatku),
-                    }}
+                    render={({ field }) => (
+                      <ReactDatePicker
+                        onBlur={field.onBlur}
+                        dateFormat="d. M. yyyy"
+                        //locale="cs-CZ"
+                        showTimeSelect={false}
+                        todayButton="Today"
+                        dropdownMode="select"
+                        isClearable
+                        placeholderText="Click to select time"
+                        shouldCloseOnSelect
+                        onChange={date => {
+                          // Using this method results in inverted day and month.
+                          // But it still needs to be used for clearing the input field (when using the button).
+                          if (date === null) field.onChange(date)
+                        }}
+                        onChangeRaw={e => {
+                          const trimmedInput = String(e.target.value).trim()
+                          const maybeADate =
+                            /^\d{1,2}\.\s*\d{1,2}\.\s*\d{4}$/.test(trimmedInput) &&
+                            parseDate(trimmedInput.replace(/\s/g, ""), "d.M.yyyy")
+                          if (maybeADate) {
+                            field.onChange(maybeADate)
+                            setValue("datum_pocatku", maybeADate, { shouldTouch: true })
+                          }
+                        }}
+                        onSelect={date => {
+                          field.onChange(date)
+                          setValue("datum_pocatku", date, { shouldTouch: true })
+                        }}
+                        {...(field.value && isValid(field.value)
+                          ? { selected: new Date(field.value) }
+                          : {})}
+                      />
+                    )}
                   />
                 </div>
               </div>
-              <DefaultInput
-                type="text"
-                name="datum_ukonceni_text"
-                label="předběžné datum ukončení"
-                register={register}
-              />
+              <DefaultInput label="předběžné datum ukončení" {...register("datum_ukonceni_text")} />
               <div className="fieldWrapper" css={[styles.fieldWrapper]}>
                 <div className="labelWrapper" css={[styles.labelWrapper]}>
                   <label css={[styles.label]}>datum ukončení</label>
                 </div>
-                <div
-                  className="inputWrapper"
-                  css={css`
-                    ${styles.inputWrapper}
-                    & .DayPickerInput {
-                      ${tw`relative after:(absolute inset-y-0 right-0 w-4 h-full mr-2 opacity-25 fill-current background[url(/images/calendar-solid.svg) no-repeat center])`}
-                      & input {
-                        ${styles.input}
-                      }
-                    }
-                    & .DayPicker {
-                      font-size: small;
-                    }
-                    & .DayPickerInput-Overlay {
-                      bottom: 100%;
-                      left: 100%;
-                    }
-                  `}
-                >
+                <div className="inputWrapper">
                   <Controller
-                    as={DayPickerInput}
                     control={control}
                     name="datum_ukonceni"
-                    format="d. M. yyyy"
-                    formatDate={formatDate}
-                    parseDate={parseDate}
-                    placeholder={`${dateFnsFormat(new Date(), "d. M. yyyy")}`}
-                    onDayChange={(date: Date) => {
-                      setValue("datum_ukonceni", date)
-                      formState.touched["datum_ukonceni"] = true
-                    }}
-                    dayPickerProps={{
-                      months: monthsCZ,
-                      weekdaysLong: daysCZ,
-                      weekdaysShort: daysShortCZ,
-                      firstDayOfWeek: 1,
-
-                      selectedDays:
-                        (dateValues.datum_ukonceni || detail?.datum_ukonceni) &&
-                        new Date(dateValues.datum_ukonceni || detail?.datum_ukonceni),
-                    }}
+                    render={({ field }) => (
+                      <ReactDatePicker
+                        onBlur={field.onBlur}
+                        dateFormat="d. M. yyyy"
+                        //locale="cs-CZ"
+                        showTimeSelect={false}
+                        todayButton="Today"
+                        dropdownMode="select"
+                        isClearable
+                        placeholderText="Click to select time"
+                        shouldCloseOnSelect
+                        onChange={date => {
+                          // Using this method results in inverted day and month.
+                          // But it still needs to be used for clearing the input field (when using the button).
+                          if (date === null) field.onChange(date)
+                        }}
+                        onChangeRaw={e => {
+                          const trimmedInput = String(e.target.value).trim()
+                          const maybeADate =
+                            /^\d{1,2}\.\s*\d{1,2}\.\s*\d{4}$/.test(trimmedInput) &&
+                            parseDate(trimmedInput.replace(/\s/g, ""), "d.M.yyyy")
+                          if (maybeADate) {
+                            field.onChange(maybeADate)
+                            setValue("datum_ukonceni", maybeADate, { shouldTouch: true })
+                          }
+                        }}
+                        onSelect={date => {
+                          field.onChange(date)
+                          setValue("datum_ukonceni", date, { shouldTouch: true })
+                        }}
+                        {...(field.value && isValid(field.value)
+                          ? { selected: new Date(field.value) }
+                          : {})}
+                      />
+                    )}
                   />
                 </div>
               </div>
               <Select
-                name="user_id"
                 label="zajišťuje"
                 options={activeUsers
                   .map(user => ({
@@ -438,33 +428,16 @@ const Detail = ({
                           value: detail.user?.id,
                         },
                   )}
-                register={register}
                 styles={mergeStyles(styles, {})}
+                {...register("user_id")}
               />
             </DefaultFieldset>
           </div>
           <div>
             <DefaultFieldset>
-              <DefaultInput
-                name="katastr"
-                label="katastr"
-                placeholder="katastr"
-                register={register}
-              />
-              <DefaultInput
-                type="text"
-                name="okres"
-                label="okres"
-                placeholder="okres"
-                register={register}
-              />
-              <DefaultInput
-                type="text"
-                name="kraj"
-                label="kraj"
-                placeholder="kraj"
-                register={register}
-              />
+              <DefaultInput label="katastr" placeholder="katastr" {...register("katastr")} />
+              <DefaultInput label="okres" placeholder="okres" {...register("okres")} />
+              <DefaultInput label="kraj" placeholder="kraj" {...register("kraj")} />
             </DefaultFieldset>
           </div>
         </div>

@@ -16,7 +16,14 @@ const LoginForm = () => {
   const status = useAppSelector(store => store.auth.status)
   const error = useAppSelector(store => store.auth.error)
   const dispatch = useAppDispatch()
-  const { register, handleSubmit, errors } = useForm()
+  const {
+    register,
+    handleSubmit,
+
+    formState: {
+      errors,
+    },
+  } = useForm()
   const formRef = useFocusNextOnEnter()
   const onSubmit = data => dispatch(submitLoginData(data))
 
@@ -34,14 +41,12 @@ const LoginForm = () => {
         </label>
         <input
           type="text"
-          name="user_name"
+          {...register('user_name', { required: true })}
           id="user_name"
           autoComplete="on"
           placeholder="Jan Novák"
-          ref={register({ required: true })}
           autoFocus={true}
-          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
-        />
+          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)" />
         <HiddenMessage show={errors.user_name}>
           <div tw="pb-2 text-sm text-red-600">Zadejte, prosím, uživatelské jméno.</div>
         </HiddenMessage>
@@ -51,13 +56,11 @@ const LoginForm = () => {
         <div tw="relative">
           <input
             type={passwordShown ? "text" : "password"}
-            name="password"
+            {...register('password', { required: true })}
             id="password"
             autoComplete="on"
             placeholder="*******"
-            ref={register({ required: true })}
-            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
-          />
+            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)" />
           <button
             type="button"
             tw="absolute top-0 bottom-0 text-gray-400 right-2"
@@ -80,7 +83,7 @@ const LoginForm = () => {
         </Button>
       </form>
     </div>
-  )
+  );
 }
 
 export default LoginForm

@@ -628,7 +628,8 @@ const Table = ({ rawData }: Props) => {
                 &:focus:not(.focus-visible) {
                   ${tw`outline-none focus:(ring-2 border-blue-500 bg-blue-100)`}
                 }
-                &[value=""] {
+                &[value=""],
+                &:not([value]) {
                   ${tw`bg-gray-100 border-gray-300`}
                 }
               }

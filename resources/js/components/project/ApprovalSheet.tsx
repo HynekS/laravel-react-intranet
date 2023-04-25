@@ -1,41 +1,56 @@
-import { useState, useEffect, useRef } from "react"
-import { useForm, ManualFieldError } from "react-hook-form"
+import { useEffect, useRef } from "react"
+import { useForm } from "react-hook-form"
 import tw from "twin.macro"
 import { DocumentDownloadIcon } from "@heroicons/react/outline"
 
 import client from "@services/http/client"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
+import { updateProject } from "@store/projects"
+import pick from "@utils/pick"
+
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
 import TextArea from "../common/TextArea"
-import { updateProject } from "@store/projects"
 import triggerToast from "../common/Toast"
 import { DefaultInput, mergeStyles, styles } from "./DefaultInputs"
-import { transformDefaultValues, isFormDirty } from "./formUtils"
 
-import type { akce as Akce } from "@codegen"
+import type { akce as Akce, users as User } from "@codegen"
 
-type DetailProps = { detail: Akce & { user: { id: number; full_name: string } } }
+const approvalSheetFields = [
+  "id_akce",
+  "EL_lokalita",
+  "EL_Termin",
+  "EL_Forma",
+  "EL_fotodokumentace",
+  "EL_kresebna_a_textova",
+  "EL_Dokumentovane",
+  "EL_Movite",
+  "EL_ulozeni",
+  "EL_Popis",
+  "EL_datum",
+  "EL_hotovo",
+] as const
 
-const ApprovalSheet = ({ detail }: DetailProps) => {
-  const defaultValues = transformDefaultValues(detail)
-  //const [isPending, setIsPending] = useState(false)
+type Detail = Akce & { user: User }
 
-  const userId = useAppSelector(store => store.auth!.user!.id)
+type DetailProps = { detail?: Akce & { user: User } }
+
+const ApprovalSheet = ({ detail = {} as Detail }: DetailProps) => {
+  const defaultValues = pick(detail, ...approvalSheetFields)
+  const userId = useAppSelector(store => store.auth.user!.id)
   const dispatch = useAppDispatch()
-  const getValuesRef = useRef(null)
+  const dirtyRef = useRef(false)
 
   const { register, handleSubmit, setError, formState, getValues } = useForm<Akce>({
     defaultValues,
+    mode: "onTouched",
   })
 
-  const { touched } = formState
+  const { errors, dirtyFields, isDirty, touchedFields } = formState
 
-  useEffect(() => {
-    getValuesRef.current = getValues
-  })
+  const { id_akce: id } = detail
 
-  const { id_akce: id } = detail || {}
+  dirtyRef.current = isDirty
 
   useEffect(() => {
     window.addEventListener("beforeunload", submitOnUnmount)
@@ -46,15 +61,15 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
 
   useEffect(() => {
     return () => {
-      if (isFormDirty(defaultValues, getValues())) {
+      if (isDirty) {
         onSubmit(getValues())
       }
     }
-  }, [JSON.stringify(touched)])
+  }, [JSON.stringify(touchedFields)])
 
   const submitOnUnmount = () => {
     ;(document.activeElement as HTMLElement)?.blur()
-    if (isFormDirty(defaultValues, getValues())) {
+    if (dirtyRef.current) {
       onSubmit(getValues())
     }
   }
@@ -65,14 +80,9 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
       .unwrap()
       .then(() => {})
       .catch(err => {
-        // setIsPending(false)
-        setError(
-          Object.entries(err.errors).map(([key, val]) => ({
-            name: key,
-            message: val,
-            type: "required", //?
-          })) as ManualFieldError<Akce>[],
-        )
+        Object.entries(err.errors).forEach((key, val) => {
+          setError(key, { type: val })
+        })
         triggerToast({
           type: "error",
           message: err.message,
@@ -86,79 +96,60 @@ const ApprovalSheet = ({ detail }: DetailProps) => {
       <h1>Expertní list</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DefaultInput
-          name="EL_lokalita"
           label="lokalita"
           placeholder="lokalita"
-          register={register}
           overrides={{ input: tw`md:(w-96)` }}
+          {...register("EL_lokalita")}
         />
         <DefaultInput
-          name="EL_Termin"
           label="termín kontrol"
           placeholder="termín kontrol"
-          register={register}
+          {...register("EL_Termin")}
         />
         <DefaultInput
-          name="EL_Forma"
           label="forma"
           placeholder="forma"
-          register={register}
+          {...register("EL_Forma")}
           overrides={{ input: tw`md:(w-96)` }}
         />
 
-        <DefaultInput name="EL_Denik" label="deník" placeholder="deník" register={register} />
+        <DefaultInput label="deník" placeholder="deník" {...register("EL_Denik")} />
         <DefaultInput
-          name="EL_fotodokumentace"
           label="fotodokumentace"
           placeholder="fotodokumentace"
-          register={register}
+          {...register("EL_fotodokumentace")}
         />
         <DefaultInput
-          name="EL_kresebna_a_textova"
           label="kresebná či textová dokumentace"
           placeholder="kresebná či textová dokumentace"
-          register={register}
+          {...register("EL_kresebna_a_textova")}
         />
         <DefaultInput
-          name="EL_Dokumentovane"
           label="dokumentované situace"
           placeholder="dokumentované situace"
-          register={register}
+          {...register("EL_Dokumentovane")}
         />
+        <DefaultInput label="movité nálezy" placeholder="dokumentace" {...register("EL_Movite")} />
         <DefaultInput
-          name="EL_Movite"
-          label="movité nálezy"
-          placeholder="dokumentace"
-          register={register}
-        />
-        <DefaultInput
-          name="EL_ulozeni"
           label="uložení movitých nálezů"
           placeholder="uložení movitých nálezů"
-          register={register}
+          {...register("EL_ulozeni")}
         />
         <TextArea
-          name="EL_Popis"
           label="popis"
           placeholder="popis"
-          register={register}
+          {...register("EL_Popis")}
           styles={mergeStyles(styles, { input: tw`max-w-full resize w-96` })}
         />
-        <DefaultInput
-          name="EL_datum"
-          label="datum tisku"
-          placeholder="datum tisku"
-          register={register}
-        />
+        <DefaultInput label="datum tisku" placeholder="datum tisku" {...register("EL_datum")} />
         <DefaultInput
           type="checkbox"
-          name="EL_hotovo"
           label="údaje pro expertní list jsou vloženy"
-          register={register}
           // TODO these overrides should be defaults for checkboxes
           overrides={{
             input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
           }}
+          {...register("EL_hotovo")}
         />
         <div tw="flex items-start pt-8">
           <Button

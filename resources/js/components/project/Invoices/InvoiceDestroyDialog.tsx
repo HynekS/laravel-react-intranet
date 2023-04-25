@@ -11,7 +11,7 @@ type Props = {
   modalState: {
     data: Faktura
   }
-  onModalClose: React.MouseEventHandler<HTMLButtonElement>
+  onModalClose: () => void
 }
 
 const InvoiceDestroyDialog = ({ modalState: { data }, onModalClose }: Props) => {

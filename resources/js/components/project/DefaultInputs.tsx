@@ -1,3 +1,4 @@
+import { forwardRef } from "react"
 import tw from "twin.macro"
 
 import Input from "../common/Input"
@@ -22,8 +23,10 @@ export const mergeStyles = (styles: StyleScopeObject = {}, overrides: StyleScope
   return result
 }
 
-export const DefaultInput = ({ overrides, ...props }: InputProps) => (
-  <Input {...props} styles={mergeStyles(styles, overrides)} />
+export const DefaultInput = forwardRef<HTMLInputElement, InputProps>(
+  ({ overrides, ...props }, ref) => (
+    <Input ref={ref} {...props} styles={mergeStyles(styles, overrides)} />
+  ),
 )
 
 export const DefaultFieldset = ({

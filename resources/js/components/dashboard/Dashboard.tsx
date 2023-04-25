@@ -209,7 +209,7 @@ const Dashboard = () => {
         </div>
       </div>
     </DetailPage>
-  )
+  );
 }
 
 export default Dashboard

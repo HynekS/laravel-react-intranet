@@ -9,6 +9,15 @@ import { updateInvoice } from "@store/invoices"
 import Input from "../../common/Input"
 import Select from "../../common/Select"
 
+import { faktury as Faktura } from "@codegen"
+
+type Props = {
+  modalState: {
+    data: Faktura
+  }
+  onModalClose: () => void
+}
+
 const styles = css`
   fieldset {
     border-bottom: 1px solid gray;
@@ -59,9 +68,15 @@ const styles = css`
   }
 `
 
-const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => {
+const InvoiceUpdateForm = ({ modalState: { data }, onModalClose }: Props) => {
   const [isPending, setIsPending] = useState(false)
-  const { register, setValue, handleSubmit, errors } = useForm()
+  const {
+    register,
+    setValue,
+    handleSubmit,
+
+    formState: { errors },
+  } = useForm()
   const dispatch = useAppDispatch()
   const { id_zaznam: invoiceId, akce_id: projectId } = data
 
@@ -87,36 +102,33 @@ const InvoiceUpdateForm = ({ modalState: { data }, onModalClose, ...props }) => 
       <form css={styles} onSubmit={handleSubmit(onSubmit)}>
         <div tw="p-6">
           <Select
-            name="typ_castky"
             label="typ částky"
             options={[
               { label: "🦺 Dohled", value: 0 },
               { label: "⛏️ Výzkum", value: 1 },
             ]}
-            register={register({
+            error={errors}
+            {...register("typ_castky", {
               required: "zvolte, prosím, typ částky",
             })}
-            error={errors}
           />
           <Input
             label="číslo faktury"
-            name="c_faktury"
             inputMode="numeric"
-            register={register({
+            error={errors}
+            {...register("c_faktury", {
               pattern: { value: /^[0-9]+$/, message: "pole smí obsahovat pouze čísla" },
               required: { value: true, message: "toto pole je třeba vyplnit" },
             })}
-            error={errors}
           />
           <Input
             label="částka (Kč)"
-            name="castka"
             inputMode="numeric"
-            register={register({
+            error={errors}
+            {...register("castka", {
               pattern: { value: /^[0-9]+$/, message: "pole smí obsahovat pouze čísla" },
               required: { value: true, message: "toto pole je třeba vyplnit" },
             })}
-            error={errors}
           />
         </div>
         <footer tw="flex justify-end p-6 bg-gray-100 rounded-lg rounded-t-none">
