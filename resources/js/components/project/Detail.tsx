@@ -3,8 +3,6 @@ import { useForm, Controller, UseFormGetValues } from "react-hook-form"
 import { useNavigate } from "react-router"
 import tw from "twin.macro"
 
-import "react-day-picker/lib/style.css"
-
 import { parse, isValid } from "date-fns"
 import { TrashIcon } from "@heroicons/react/solid"
 import ReactDatePicker from "react-datepicker"
