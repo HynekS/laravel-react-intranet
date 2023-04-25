@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react"
 import { useForm, Controller, UseFormGetValues } from "react-hook-form"
 import { useNavigate } from "react-router"
+import { css } from "@emotion/react"
 import tw from "twin.macro"
 
 import { parse, isValid } from "date-fns"
@@ -18,7 +19,6 @@ import pick from "@utils/pick"
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
 import Select from "../common/Select"
-import ButtonStyledRadio from "./ButtonStyledRadio"
 import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
 import Modal from "../common/StyledModal"
 import ProjectDeleteDialog from "./ProjectDeleteDialog"
@@ -275,16 +275,97 @@ const Detail = ({
                 styles={mergeStyles(styles, { input: tw`width[26ch]` })}
                 {...register("id_stav")}
               />
-              <ButtonStyledRadio
-                label="nález"
-                options={{
-                  negativní: 0,
-                  pozitivní: 1,
-                  nezjištěno: 2,
-                }}
-                styles={mergeStyles(styles, {})}
-                {...register("nalez")}
-              />
+              <div css={[styles.fieldWrapper]}>
+                <div css={[styles.labelWrapper]}>
+                  <label htmlFor="nalez" css={[styles.label]}>
+                    nález
+                  </label>
+                </div>
+                <div
+                  css={css`
+                    ${styles.inputWrapper}
+                    & label {
+                      transition: all 0.2s ease-in-out;
+                    }
+                    & input[value="0"] {
+                      &:checked + label {
+                        ${tw`text-orange-700 bg-orange-200 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(192, 86, 33, 0.7);
+                      }
+                      &:focus + label {
+                        box-shadow: 0 0 0 1px rgba(192, 86, 33, 0.7),
+                          0 0 2px 2px rgba(192, 86, 33, 0.4);
+                      }
+                    }
+                    & input[value="1"] {
+                      &:checked + label {
+                        ${tw`text-green-700 bg-green-200 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.7);
+                      }
+                      &:focus + label {
+                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.7),
+                          0 0 2px 2px rgba(47, 133, 90, 0.4);
+                      }
+                    }
+                    & input[value="2"] {
+                      &:checked + label {
+                        ${tw`text-gray-700 bg-gray-200 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.7);
+                      }
+                      &:focus + label {
+                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.7),
+                          0 0 2px 2px rgba(74, 85, 104, 0.4);
+                      }
+                    }
+                  `}
+                >
+                  <div tw="relative inline-block">
+                    <input
+                      type="radio"
+                      id={`negativní`}
+                      value="0"
+                      tw="absolute w-0 appearance-none"
+                      {...register("nalez")}
+                    />
+                    <label
+                      htmlFor={`negativní`}
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid border-l rounded-l-lg"
+                    >
+                      negativní
+                    </label>
+                  </div>
+                  <div tw="relative inline-block">
+                    <input
+                      type="radio"
+                      id={`pozitivní`}
+                      value="1"
+                      tw="absolute w-0 appearance-none"
+                      {...register("nalez")}
+                    />
+                    <label
+                      htmlFor={`pozitivní`}
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid"
+                    >
+                      pozitivní
+                    </label>
+                  </div>
+                  <div tw="relative inline-block">
+                    <input
+                      type="radio"
+                      id={`nezjištěno`}
+                      value="2"
+                      tw="absolute w-0 appearance-none"
+                      {...register("nalez")}
+                    />
+                    <label
+                      htmlFor={`nezjištěno`}
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid rounded-r-lg"
+                    >
+                      nezjištěno
+                    </label>
+                  </div>
+                </div>
+              </div>
             </DefaultFieldset>
           </div>
         </div>
