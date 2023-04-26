@@ -38,13 +38,13 @@ const LoginForm = () => {
           Uživatelské jméno
         </label>
         <input
-          type="text"
-          {...register('user_name', { required: true })}
           id="user_name"
           autoComplete="on"
           placeholder="Jan Novák"
           autoFocus={true}
-          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)" />
+          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
+          {...register("user_name", { required: true })}
+        />
         <HiddenMessage show={errors.user_name}>
           <div tw="pb-2 text-sm text-red-600">Zadejte, prosím, uživatelské jméno.</div>
         </HiddenMessage>
@@ -54,11 +54,12 @@ const LoginForm = () => {
         <div tw="relative">
           <input
             type={passwordShown ? "text" : "password"}
-            {...register('password', { required: true })}
             id="password"
             autoComplete="on"
             placeholder="*******"
-            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)" />
+            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
+            {...register("password", { required: true })}
+          />
           <button
             type="button"
             tw="absolute top-0 bottom-0 text-gray-400 right-2"
@@ -81,7 +82,7 @@ const LoginForm = () => {
         </Button>
       </form>
     </div>
-  );
+  )
 }
 
 export default LoginForm
