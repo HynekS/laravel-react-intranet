@@ -13,7 +13,7 @@ const UserWidget = () => {
   return user ? (
     <section tw="flex items-center px-2">
       <div
-        tw="mr-3 border-gray-200 rounded-full bg-lightblue-200 w-9 h-9"
+        tw="mr-3 rounded-full bg-lightblue-200 w-9 h-9"
         style={{ backgroundImage: `url(/storage/${user.avatar_path})` }}
       ></div>
       <div tw="py-2 text-sm font-semibold text-gray-500">{user.full_name}</div>

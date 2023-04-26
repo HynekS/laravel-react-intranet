@@ -188,7 +188,7 @@ const Dashboard = () => {
                               </div>
                               <div tw="flex flex-1">
                                 <div
-                                  tw="w-4 h-4 mx-2 border border-gray-200 rounded-full bg-lightblue-200"
+                                  tw="w-4 h-4 mx-2 rounded-full bg-lightblue-200"
                                   style={{
                                     backgroundImage: `url(/storage/${update.user.avatar_path})`,
                                   }}
@@ -209,7 +209,7 @@ const Dashboard = () => {
         </div>
       </div>
     </DetailPage>
-  );
+  )
 }
 
 export default Dashboard
