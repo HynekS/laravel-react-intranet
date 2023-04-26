@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react"
-import { useForm, Controller, UseFormGetValues } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
 
 import { parse, isValid } from "date-fns"
+import cs from "date-fns/locale/cs"
 import { TrashIcon } from "@heroicons/react/solid"
-import ReactDatePicker from "react-datepicker"
+import ReactDatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
@@ -27,6 +28,8 @@ import triggerToast from "../common/Toast"
 import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
 import type { akce as Akce, users as User } from "@codegen"
+
+registerLocale("cs-CZ", cs)
 
 const detailFields = [
   "id_akce",
@@ -410,7 +413,7 @@ const Detail = ({
                       <ReactDatePicker
                         onBlur={field.onBlur}
                         dateFormat="d. M. yyyy"
-                        //locale="cs-CZ"
+                        locale="cs-CZ"
                         showTimeSelect={false}
                         todayButton="Today"
                         dropdownMode="select"
@@ -457,7 +460,7 @@ const Detail = ({
                       <ReactDatePicker
                         onBlur={field.onBlur}
                         dateFormat="d. M. yyyy"
-                        //locale="cs-CZ"
+                        locale="cs-CZ"
                         showTimeSelect={false}
                         todayButton="Today"
                         dropdownMode="select"
