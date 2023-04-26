@@ -19,13 +19,11 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
-
-    formState: {
-      errors,
-    },
-  } = useForm()
+    formState: { errors },
+  } = useForm<{ user_name: string; password: string }>()
   const formRef = useFocusNextOnEnter()
-  const onSubmit = data => dispatch(submitLoginData(data))
+  const onSubmit = (data: { user_name: string; password: string }) =>
+    dispatch(submitLoginData(data))
 
   return (
     <div tw="relative z-10 w-full max-w-xs">
