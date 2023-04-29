@@ -296,32 +296,32 @@ const Detail = ({
                     }
                     & input[value="0"] {
                       &:checked + label {
-                        ${tw`text-orange-700 bg-orange-200 border-transparent`}
-                        box-shadow: 0 0 0 1px rgba(192, 86, 33, 0.7);
+                        ${tw`text-red-700 bg-red-50 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.4);
                       }
                       &:focus + label {
-                        box-shadow: 0 0 0 1px rgba(192, 86, 33, 0.7),
-                          0 0 2px 2px rgba(192, 86, 33, 0.4);
+                        box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.4),
+                          0 0 2px 2px rgba(185, 28, 28, 0.2);
                       }
                     }
                     & input[value="1"] {
                       &:checked + label {
-                        ${tw`text-green-700 bg-green-200 border-transparent`}
-                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.7);
+                        ${tw`text-green-700 bg-green-50 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.4);
                       }
                       &:focus + label {
-                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.7),
-                          0 0 2px 2px rgba(47, 133, 90, 0.4);
+                        box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.4),
+                          0 0 2px 2px rgba(47, 133, 90, 0.2);
                       }
                     }
                     & input[value="2"] {
                       &:checked + label {
-                        ${tw`text-gray-700 bg-gray-200 border-transparent`}
-                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.7);
+                        ${tw`text-gray-700 bg-gray-50 border-transparent`}
+                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.45);
                       }
                       &:focus + label {
-                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.7),
-                          0 0 2px 2px rgba(74, 85, 104, 0.4);
+                        box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.4),
+                          0 0 2px 2px rgba(74, 85, 104, 0.2);
                       }
                     }
                   `}
@@ -336,7 +336,7 @@ const Detail = ({
                     />
                     <label
                       htmlFor={`negativní`}
-                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid border-l rounded-l-lg"
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-300 border-solid border-l rounded-l-lg"
                     >
                       negativní
                     </label>
@@ -351,7 +351,7 @@ const Detail = ({
                     />
                     <label
                       htmlFor={`pozitivní`}
-                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid"
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-300 border-solid"
                     >
                       pozitivní
                     </label>
@@ -366,7 +366,7 @@ const Detail = ({
                     />
                     <label
                       htmlFor={`nezjištěno`}
-                      tw="inline-block px-4 py-2 border border-l-0 border-gray-400 border-solid rounded-r-lg"
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-300 border-solid rounded-r-lg"
                     >
                       nezjištěno
                     </label>
