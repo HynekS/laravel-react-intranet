@@ -32,6 +32,8 @@ const Select = forwardRef<HTMLSelectElement, Props>(
       ChevronComponent = DefaultChevron,
       styles = {},
       overrides = {},
+      onChange,
+      onBlur,
       ...props
     },
     ref,
@@ -56,6 +58,8 @@ const Select = forwardRef<HTMLSelectElement, Props>(
               name={name}
               ref={ref}
               className={error[name] ? "hasError" : ""}
+              onChange={onChange}
+              onBlur={onBlur}
               css={[styles.input, tw`appearance-none`]}
             >
               {label && <option value="" />}
