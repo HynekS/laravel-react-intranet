@@ -21,16 +21,15 @@ const DetailNav = ({ detail }: DetailNavProps) => {
       css={css`
         ${tw`pt-4`}
         & ul {
-          ${tw`flex`}
+          ${tw`inline-flex`}
           position: relative;
-
           &::after {
             content: "";
             ${tw`bg-white`}
             height: 25px;
-            left: 0;
-            right: 10px;
-            bottom: -25px;
+            left: 1px;
+            right: -2px;
+            top: calc(100% + 1px);
             position: absolute;
             z-index: 10;
           }
@@ -42,15 +41,17 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           transition: all 0.25s ease;
         }
         & a {
-          ${tw`relative flex bg-gray-200 rounded-t py-2 pl-4 pr-6 font-semibold text-gray-600 hover:(text-blue-600 bg-blue-100 bg-opacity-50 transition duration-300) shadow-lg `}
+          ${tw`relative flex bg-white bg-opacity-50 rounded-t border border-b-transparent py-2 pl-4 pr-6 font-semibold text-gray-500 shadow-lg hover:(text-blue-500 bg-blue-100 border-opacity-75 border-blue-100 border-b-transparent bg-opacity-50 transition duration-300)`}
           & svg {
             ${tw`opacity-25`}
           }
           &.active {
-            padding-top: calc(0.5rem + 2px);
-            margin-top: -2px;
-            transition all 0s;
-            ${tw`z-10 text-gray-700 bg-white rounded-t`}
+            padding-top: calc(0.5rem + 3px);
+            margin-top: -3px;
+            transition-duration: 0s;
+            position: relative;
+            top: 1px;
+            ${tw`z-10 text-gray-700 bg-white rounded-t border-gray-200 border-b-transparent`}
             & svg {
               ${tw`opacity-50`}
             }
