@@ -169,7 +169,7 @@ const Detail = ({
 
   return (
     <DetailWrapper>
-      <form onSubmit={handleSubmit(onSubmit)} tw="pb-4">
+      <form onSubmit={handleSubmit(onSubmit)} tw="pb-3">
         <div tw="flex items-start justify-end">
           <div tw="flex items-center">
             {type === "update" && (
