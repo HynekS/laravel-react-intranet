@@ -76,4 +76,8 @@ mix
 
 if (mix.inProduction()) {
   mix.version()
+} else {
+  mix.webpackConfig({
+    devtool: "inline-source-map",
+  })
 }
