@@ -6,11 +6,11 @@ import Input from "../common/Input"
 import type { StyleScopeObject, InputProps } from "../common/Input"
 
 export const styles = {
-  fieldWrapper: tw`flex text-sm mb-2 flex-col md:(flex-row)`,
+  fieldWrapper: tw`flex text-sm mb-1.5 flex-col md:(flex-row)`,
   labelWrapper: tw`pr-4 md:(w-60 flex items-center justify-end) lg:(w-72) xl:(w-80)`,
   label: tw`font-semibold`,
   inputWrapper: tw`relative flex-1 w-full`,
-  input: tw`border border-gray-200 text-gray-600 rounded-sm py-0.5 px-1.5 width[20ch] focus:(border-transparent outline-none ring-2 transition-shadow duration-300) placeholder:(text-gray-300)`,
+  input: tw`border border-gray-200 text-gray-600 rounded-sm py-0.75 px-2 width[20ch] focus:(border-transparent outline-none ring-2 transition-shadow duration-300) placeholder:(text-gray-300)`,
   inputError: tw`border-red-400 focus:(ring-red-400)`,
   errorMessage: tw`absolute left-0 z-10 inline-block p-1 pr-2 text-xs text-red-400 bg-white border-red-300 rounded shadow-sm top-full`,
 }

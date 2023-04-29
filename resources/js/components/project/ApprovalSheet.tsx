@@ -93,8 +93,7 @@ const ApprovalSheet = ({ detail = {} as Detail }: DetailProps) => {
 
   return (
     <DetailWrapper>
-      <h1>Expertní list</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} tw="pt-4">
         <DefaultInput
           label="lokalita"
           placeholder="lokalita"
@@ -139,7 +138,10 @@ const ApprovalSheet = ({ detail = {} as Detail }: DetailProps) => {
           label="popis"
           placeholder="popis"
           {...register("EL_Popis")}
-          styles={mergeStyles(styles, { input: tw`max-w-full resize w-96` })}
+          styles={mergeStyles(styles, {
+            input: tw`max-w-full resize w-96 min-height[4rem]`,
+            labelWrapper: tw`md:(items-start pt-1)`,
+          })}
         />
         <DefaultInput label="datum tisku" placeholder="datum tisku" {...register("EL_datum")} />
         <DefaultInput
