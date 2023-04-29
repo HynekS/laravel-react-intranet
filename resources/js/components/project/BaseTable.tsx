@@ -256,7 +256,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "registrovano_bit",
       width: 60,
       cellRenderer: ({ cellData }) =>
-        Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
+        Boolean(cellData) ? <CheckIcon tw="w-5 stroke-current opacity[0.6]" /> : null,
     },
     {
       title: "Číslo reg.",
@@ -288,7 +288,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "zaa_hlaseno",
       width: 70,
       cellRenderer: ({ cellData }) =>
-        Boolean(cellData) ? <CheckIcon width={"1.25rem"} stroke="#48bb78" /> : null,
+        Boolean(cellData) ? <CheckIcon tw="w-5 stroke-current opacity[0.6]" /> : null,
       headerRenderer: ({ column }) => (
         <div>
           <div>{column.title}</div>
