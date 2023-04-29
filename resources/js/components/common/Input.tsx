@@ -52,18 +52,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             type={type}
             name={name}
             placeholder={placeholder}
-            ref={ref}
             css={[styles.input, error[name] && styles.inputError]}
             onFocus={() => {
+              // TO CONSIDER update error handling according to v7 docs, this feels very wrong.
               delete error[name]
             }}
             {...(type === "chcekbox" && { defaultChecked: !!name })}
             {...props}
+            ref={ref}
           />
           {error[name] ? (
             <div css={[styles.errorMessage]}>
               <ExclamationCircleIcon tw="inline-block w-4 h-4 mr-2 fill-current" />
-              {error[name].message || "Something is wrong with this field"}
+              {error?.[name]?.message || "Something is wrong with this field"}
             </div>
           ) : null}
         </div>
