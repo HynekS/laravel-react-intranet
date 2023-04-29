@@ -170,7 +170,7 @@ const Table = ({ rawData }: Props) => {
       key: "c_akce",
       dataKey: "c_akce",
       width: 80,
-      cellRenderer: ({ cellData: c_akce, rowData, rowIndex }) => (
+      cellRenderer: ({ cellData: c_akce, rowData }) => (
         <div onMouseOver={() => Detail.preload()}>
           <div key="numberPerYear">
             <strong>{c_akce}</strong>
