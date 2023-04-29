@@ -9,7 +9,7 @@ const globalStyles = css`
   }
 
   html {
-    color: #4a5568;
+    color: rgb(75 85 99); /* gray-600 tailwind v3 */
     overflow-y: overlay;
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
