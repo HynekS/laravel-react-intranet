@@ -40,13 +40,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref,
   ) => {
     return (
-      <div className="fieldWrapper" css={[styles.fieldWrapper]}>
-        <div className="labelWrapper" css={[styles.labelWrapper]}>
+      <div css={[styles.fieldWrapper]}>
+        <div css={[styles.labelWrapper]}>
           <label htmlFor={name} css={[styles.label]}>
             {label}
           </label>
         </div>
-        <div className="inputWrapper" css={[styles.inputWrapper]}>
+        <div css={[styles.inputWrapper]}>
           <input
             id={name}
             type={type}
@@ -54,7 +54,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             placeholder={placeholder}
             ref={ref}
             css={[styles.input, error[name] && styles.inputError]}
-            className={error[name] ? "hasError" : ""}
             onFocus={() => {
               delete error[name]
             }}
@@ -62,7 +61,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {error[name] ? (
-            <div className="errorMessage" css={[styles.errorMessage]}>
+            <div css={[styles.errorMessage]}>
               <ExclamationCircleIcon tw="inline-block w-4 h-4 mr-2 fill-current" />
               {error[name].message || "Something is wrong with this field"}
             </div>
