@@ -62,7 +62,9 @@ export const fetchLatestUpdateId = createAsyncThunk<
 
   const response = await client("/updates/latest_id")
 
-  if (clientUpdateId === null) {
+  // Where is the 'undefined' coming from?
+  // Also, this conrol flow is super weird.
+  if (clientUpdateId === null || clientUpdateId === undefined) {
     return response.data
   }
   if (clientUpdateId === response.data) {
