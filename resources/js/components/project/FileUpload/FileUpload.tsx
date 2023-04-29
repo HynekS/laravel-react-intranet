@@ -104,7 +104,7 @@ const FileUpload = ({
           >
             <div
               css={[
-                tw`absolute transition-all duration-300 border-2 border-gray-400 border-dashed rounded-lg pointer-events-none z--10 inset-2`,
+                tw`absolute transition-all duration-300 border-2 border-gray-400 border-dashed rounded-lg pointer-events-none -z-10 inset-2`,
                 isItemOverDropArea && tw`border-white`,
               ]}
             >
