@@ -1,6 +1,8 @@
 module.exports = {
   theme: {
     extend: {
+      spacing: {
+        0.75: "0.1875rem",
       },
       /* Temporarily adding all the colors because otherwise I failed to compile (waiting to incoming twin.macro release to fix it) */
       colors: {
