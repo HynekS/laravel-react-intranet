@@ -2,6 +2,7 @@ import React from "react"
 import { Routes, Route } from "react-router-dom"
 
 import Dashboard from "../dashboard/Dashboard"
+import CreateProjectPage from "../project/CreateProjectPage"
 
 const TableDataProvider = React.lazy(
   () => import(/* webpackChunkName: 'TableProvider' */ "../project/TableDataProvider"),
@@ -19,7 +20,7 @@ const AuthenticatedRoutes = () => (
   >
     <Routes>
       <Route path="/" element={<Dashboard />} />
-      <Route path="/vytvorit-akci" element={<Detail type="create" />} />
+      <Route path="/vytvorit-akci" element={<CreateProjectPage />} />
       <Route path="/akce" element={<TableDataProvider />} />
       <Route path="/akce/:year" element={<TableDataProvider />} />
       <Route path="/akce/:year/:num/*" element={<DetailProvider />} />
