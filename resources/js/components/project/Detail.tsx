@@ -94,12 +94,11 @@ const Detail = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
-  const { register, control, handleSubmit, setError, formState, getValues, setValue } = useForm<
-    Akce
-  >({
-    defaultValues,
-    mode: "onTouched",
-  })
+  const { register, control, handleSubmit, setError, formState, getValues, setValue } =
+    useForm<Akce>({
+      defaultValues,
+      mode: "onTouched",
+    })
 
   // TODO submit only dirty fields
   const { errors, dirtyFields, isDirty, touchedFields } = formState
