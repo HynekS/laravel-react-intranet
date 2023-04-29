@@ -17,24 +17,23 @@ export type TextAreaProps = {
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   ({ name, label, error = {}, placeholder = "", styles = {}, overrides = {}, ...props }, ref) => {
     return (
-      <div className="fieldWrapper" css={[styles.fieldWrapper]}>
-        <div className="labelWrapper" css={[styles.labelWrapper]}>
+      <div css={[styles.fieldWrapper]}>
+        <div css={[styles.labelWrapper]}>
           <label htmlFor={name} css={[styles.label]}>
             {label}
           </label>
         </div>
-        <div className="inputWrapper" css={[styles.inputWrapper]}>
+        <div css={[styles.inputWrapper]}>
           <textarea
             id={name}
             name={name}
             placeholder={placeholder}
             ref={ref}
             css={[styles.input]}
-            className={error[name] ? "hasError" : ""}
             {...props}
           />
           {error[name] && (
-            <div className="errorMessage" css={[styles.errorMessage]}>
+            <div css={[styles.errorMessage]}>
               <ExclamationCircleIcon />
               {error[name].message}
             </div>

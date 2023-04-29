@@ -43,21 +43,20 @@ const Select = forwardRef<HTMLSelectElement, Props>(
       return null
     }
     return (
-      <div className="fieldWrapper" css={[styles.fieldWrapper]}>
+      <div css={[styles.fieldWrapper]}>
         {label && (
-          <div className="labelWrapper" css={[styles.labelWrapper]}>
+          <div css={[styles.labelWrapper]}>
             <label htmlFor={name} css={[styles.label]}>
               {label}
             </label>
           </div>
         )}
-        <div className="inputWrapper" css={[styles.inputWrapper]}>
+        <div css={[styles.inputWrapper]}>
           <div tw="relative inline-block">
             <select
               id={name}
               name={name}
               ref={ref}
-              className={error[name] ? "hasError" : ""}
               onChange={onChange}
               onBlur={onBlur}
               css={[styles.input, tw`appearance-none`]}
@@ -72,7 +71,7 @@ const Select = forwardRef<HTMLSelectElement, Props>(
             <ChevronComponent {...props} />
           </div>
           {error[name] && (
-            <div className="errorMessage">
+            <div>
               <ExclamationCircleIcon />
               {error?.[name]?.message}
             </div>
