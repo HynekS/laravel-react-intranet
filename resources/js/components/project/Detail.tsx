@@ -67,6 +67,10 @@ function parseDate(str: string, format: string) {
   return undefined
 }
 
+function formatDateAsdMyyyy(date: Date) {
+  return `${date.getDate()}. ${date.getMonth() + 1}. ${date.getFullYear()}`
+}
+
 type Detail = Akce & { user: User }
 
 type DetailProps = {
@@ -397,7 +401,33 @@ const Detail = ({
             {...register("investor_ico")}
           />
         </DefaultFieldset>
-        <div tw="flex">
+        <div
+          tw="flex"
+          css={css`
+            .react-datepicker {
+              ${tw`border-gray-200 shadow-lg`};
+            }
+            .react-datepicker,
+            .react-datepicker__current-month,
+            .react-datepicker-time__header,
+            .react-datepicker-year-header {
+              color: inherit;
+            }
+            .react-datepicker__header {
+              ${tw`border-b-gray-200`}
+            }
+            .react-datepicker__header,
+            .react-datepicker__today-button {
+              ${tw`bg-gray-100`}
+            }
+            [class*="--keyboard-selected"] {
+              ${tw`bg-blue-100 text-blue-700`}
+              &:hover {
+                ${tw`bg-blue-200 text-blue-900`}
+              }
+            }
+          `}
+        >
           <div tw="w-4/12">
             <DefaultFieldset>
               <DefaultInput label="předběžné datum počátku" {...register("datum_pocatku_text")} />
@@ -415,11 +445,10 @@ const Detail = ({
                         dateFormat="d. M. yyyy"
                         locale="cs-CZ"
                         showTimeSelect={false}
-                        todayButton="Today"
                         dropdownMode="select"
-                        isClearable
-                        placeholderText="Click to select time"
+                        placeholderText={formatDateAsdMyyyy(new Date())}
                         shouldCloseOnSelect
+                        customInput={<input css={[styles.input]} />}
                         onChange={date => {
                           // Using this method results in inverted day and month.
                           // But it still needs to be used for clearing the input field (when using the button).
@@ -462,11 +491,10 @@ const Detail = ({
                         dateFormat="d. M. yyyy"
                         locale="cs-CZ"
                         showTimeSelect={false}
-                        todayButton="Today"
                         dropdownMode="select"
-                        isClearable
-                        placeholderText="Click to select time"
+                        placeholderText={formatDateAsdMyyyy(new Date())}
                         shouldCloseOnSelect
+                        customInput={<input css={[styles.input]} />}
                         onChange={date => {
                           // Using this method results in inverted day and month.
                           // But it still needs to be used for clearing the input field (when using the button).
