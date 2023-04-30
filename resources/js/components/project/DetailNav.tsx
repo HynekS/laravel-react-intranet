@@ -21,23 +21,18 @@ const DetailNav = ({ detail }: DetailNavProps) => {
       css={css`
         ${tw`pt-4`}
         & ul {
-          ${tw`inline-flex`}
-          position: relative;
+          ${tw`relative inline-flex`}
           &::after {
             content: "";
-            ${tw`bg-white`}
+            ${tw`absolute z-10 bg-white`}
             height: 25px;
             left: 1px;
             right: -2px;
             top: calc(100% + 1px);
-            position: absolute;
-            z-index: 10;
           }
         }
         & li {
-          ${tw`mr-1`}
-          display: flex;
-          position: relative;
+          ${tw`relative flex mr-1`}
           transition: all 0.25s ease;
         }
         & a {
@@ -49,9 +44,8 @@ const DetailNav = ({ detail }: DetailNavProps) => {
             padding-top: calc(0.5rem + 3px);
             margin-top: -3px;
             transition-duration: 0s;
-            position: relative;
             top: 1px;
-            ${tw`z-10 text-gray-700 bg-white rounded-t border-gray-200 border-b-transparent`}
+            ${tw`relative z-10 text-gray-700 bg-white border-t-2 border-gray-200 rounded-t border-b-transparent border-t-blue-500`}
             & svg {
               ${tw`opacity-50`}
             }
