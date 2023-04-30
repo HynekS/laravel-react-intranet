@@ -12,6 +12,7 @@ type DropdownItemProps = {
 } & JSX.IntrinsicElements["button"]
 
 type DropdownProps = {
+  button: ElementType
   children: ReactNode
 } & JSX.IntrinsicElements["div"]
 
@@ -30,8 +31,10 @@ export const DropdownItem = ({ onClick, Icon, label, ...props }: DropdownItemPro
   )
 }
 
-export const Dropdown = ({ children, ...props }: DropdownProps) => {
+export const Dropdown = ({ children, button, ...props }: DropdownProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const Button = button
 
   const innerRef = useOuterClick<HTMLDivElement>(() => {
     setIsMenuOpen(false)
@@ -45,8 +48,9 @@ export const Dropdown = ({ children, ...props }: DropdownProps) => {
         type="button"
         aria-label="rozbalit menu"
       >
-        <DotsHorizontalIcon tw="flex w-5 h-6 opacity-50" />
+        {Button ? <Button {...props} /> : <DotsHorizontalIcon tw="flex w-5 h-6 opacity-50" />}
       </button>
+
       <div
         css={[
           tw`absolute right-0 z-10 invisible text-sm text-gray-500 bg-white border border-gray-200 rounded shadow top-full`,
