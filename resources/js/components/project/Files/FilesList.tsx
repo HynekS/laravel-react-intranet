@@ -1,4 +1,5 @@
 import { useState, memo } from "react"
+import { PlusIcon } from "@heroicons/react/solid"
 
 import Modal from "../../common/StyledModal"
 import ModalCloseButton from "../../common/ModalCloseButton"
@@ -45,7 +46,7 @@ const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
   return (
     <div>
       <div tw="pb-2">
-        <div tw="p-4 pt-2 bg-gray-200 rounded">
+        <div tw="p-4 pt-2 border rounded">
           <h4 tw="pb-4 font-semibold text-gray-600">{publicName}</h4>
           <div tw="flex flex-wrap flex-1">
             {data.length > 0 &&
@@ -61,10 +62,10 @@ const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
           </div>
           <div tw="flex-1">
             <button
-              style={{ minWidth: "7rem" }}
-              tw="text-white text-sm px-2 py-1 bg-blue-600 rounded focus:(outline-none ring)"
+              tw="flex items-center justify-center text-blue-700 border-blue-500 text-xs px-2 py-1.5 border border-blue-600 font-medium rounded transition-colors focus:(outline-none ring) min-w-[7.5rem] hover:(border-blue-700 bg-blue-50)"
               onClick={() => setIsModalOpen(true)}
             >
+              <PlusIcon tw="w-4 h-4 opacity-75 mr-1" />
               Nahrát soubor{!isSingular && "y"}
             </button>
           </div>

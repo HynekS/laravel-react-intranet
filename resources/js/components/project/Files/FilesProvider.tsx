@@ -83,7 +83,7 @@ const FilesProvider = ({ detail, ...props }: Props) => {
 
   return detail ? (
     <DetailWrapper>
-      <div tw="flex justify-end">
+      <div tw="flex justify-end pb-3">
         <Button
           onClick={() => {
             const fileName = `Soubory_k_akci_${

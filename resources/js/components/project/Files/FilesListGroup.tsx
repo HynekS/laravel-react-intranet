@@ -35,12 +35,16 @@ type Props = {
 
 const FilesListGroup = ({ group, label, detail, ...props }: Props) => {
   return (
-    <div tw="pb-8">
-      <h3 tw="pb-2 text-xl font-medium">{label}</h3>
-      {!!group.length &&
-        group.map((subgroup, i) => (
-          <FilesList subgroup={subgroup} detail={detail} {...props} key={i} />
-        ))}
+    <div tw="flex pb-8">
+      <div tw="w-[15%]">
+        <h3 tw="pb-2 text-xl font-medium">{label}</h3>
+      </div>
+      <div tw="flex-1">
+        {!!group.length &&
+          group.map((subgroup, i) => (
+            <FilesList subgroup={subgroup} detail={detail} {...props} key={i} />
+          ))}
+      </div>
     </div>
   )
 }

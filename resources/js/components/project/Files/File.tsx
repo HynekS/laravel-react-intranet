@@ -7,9 +7,11 @@ import getFileExtension from "@utils/getFileExtension"
 
 import { DownloadIcon } from "@heroicons/react/outline"
 import { TrashIcon } from "@heroicons/react/solid"
+import { DotsHorizontalIcon } from "@heroicons/react/solid"
 
 import { Dropdown, DropdownItem } from "../../common/Dropdown"
 import SecuredImage from "../../common/SecuredImage"
+import triggerToast from "../../common/Toast"
 
 import type {
   teren_foto as TerenFoto,
@@ -39,7 +41,9 @@ const onDownload = (path: string) => {
     .then(response => {
       fileDownload(response.data, path)
     })
-    .catch(error => console.log(error))
+    .catch(error => {
+      triggerToast({ type: "error", message: error?.message || "Ajaj! Něco se pokazilo…" })
+    })
 }
 
 type FileProps = FileType & {
@@ -47,7 +51,7 @@ type FileProps = FileType & {
 }
 
 const File = ({ file, model, projectId, fileId }: FileProps) => {
-  const { id: userId } = useAppSelector(store => store.auth.user)
+  const { id: userId } = useAppSelector(store => store.auth.user!)
   const dispatch = useAppDispatch()
 
   const path = file?.file_path
@@ -58,20 +62,15 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
   const icon = path ? String(getFileExtension(path)).toLowerCase() : "fallback"
 
   return path ? (
-    <div tw="pb-4 pr-4 w-1/2 md:(w-1/3) lg:(w-1/4)">
-      <div
-        tw="flex justify-between w-full p-1.5 bg-white bg-opacity-50 rounded"
-        style={{
-          boxShadow: "0 0 8px -2px rgba(5, 10, 29, 0.2)",
-        }}
-      >
+    <div tw="pb-3 pr-3 w-1/2 md:(w-1/3) lg:(w-1/4)">
+      <div tw="flex justify-between w-full p-1.5 bg-white border border-opacity-75 rounded /*box-shadow[0 0 8px -2px rgba(5, 10, 29, 0.2)]*/">
         <button
           onClick={() => onDownload(path)}
           title={`uložit soubor ${path.split("/").pop()}`}
           tw="flex max-w-[80%]"
         >
-          {["jpg", "jpeg", "png", "svg"].includes(getFileExtension(path)) ? (
-            <span tw="block w-[4em] h-[4em] min-w-[4em] bg-gray-300 rounded self-start flex-shrink-0 overflow-hidden">
+          {["jpg", "jpeg", "png", "svg"].includes(getFileExtension(path).toLowerCase()) ? (
+            <span tw="block w-[3em] h-[3em] min-w-[3em] bg-gray-200 rounded self-start flex-shrink-0 overflow-hidden">
               <SecuredImage
                 path={`${folders}/thumbnails/thumbnail_${decodeURI(filename)}`}
                 alt="thumbnail"
@@ -80,7 +79,7 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
             </span>
           ) : (
             <span
-              tw="block w-[4em] h-[4em] min-w-[4em] bg-gray-300 rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0"
+              tw="block w-[3em] h-[3em] min-w-[3em] rounded bg-no-repeat background-size[2.5em 2.5em] bg-center self-start flex-shrink-0"
               style={{
                 backgroundImage: `url(/images/fileIcons/${icon}.svg), url(/images/fileIcons/fallback.svg)`,
               }}
@@ -88,7 +87,7 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
           )}
           <span tw="flex flex-col justify-between px-3 pt-1 pb-2 pr-4 text-left">
             <div tw="flex">
-              <span tw="block text-sm font-medium text-gray-600 break-all leading-none pb-1 truncate max-w-[90%]">
+              <span tw="block text-sm font-medium text-gray-600 break-all leading-none pb-1 truncate max-w-[24ch]">
                 {String(path.split("/").pop()).split(".").shift()}
               </span>
               <span tw="pb-1 text-sm font-medium leading-none text-gray-600">
@@ -100,7 +99,7 @@ const File = ({ file, model, projectId, fileId }: FileProps) => {
             </span>
           </span>
         </button>
-        <Dropdown>
+        <Dropdown button={() => <DotsHorizontalIcon tw="flex w-5 h-5 px-1 opacity-50" />}>
           <DropdownItem
             onClick={() => dispatch(deleteFile({ model, projectId, fileId, userId }))}
             Icon={TrashIcon}
