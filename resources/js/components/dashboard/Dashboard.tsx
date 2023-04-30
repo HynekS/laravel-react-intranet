@@ -11,7 +11,6 @@ import {
 } from "@store/stats"
 import { fetchLastMonthUpdates } from "@store/updates"
 import { fetchSearchResults, resetSearchResult } from "@store/search"
-import DetailPage from "../project/DetailPage"
 
 import type { akce as Akce } from "@codegen"
 
@@ -108,7 +107,7 @@ const Dashboard = () => {
   }, [])
 
   return (
-    <DetailPage>
+    <div tw="w-full pt-2 pb-8 px-2 lg:(px-10)">
       <div tw="p-4 bg-white rounded-lg lg:(p-8)">
         <h1 tw="text-xl">Přehled</h1>
         <div tw="flex flex-col md:(flex-row gap-x-12)">
@@ -208,7 +207,7 @@ const Dashboard = () => {
           </section>
         </div>
       </div>
-    </DetailPage>
+    </div>
   )
 }
 
