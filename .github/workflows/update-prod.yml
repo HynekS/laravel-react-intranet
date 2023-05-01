@@ -27,7 +27,7 @@ jobs:
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
 
       - name: Pull changes
-        run: ssh staging 'cd htdocs && git fetch https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/HynekS/laravel-react-intranet && git reset --hard origin/master'
+        run: ssh staging 'cd htdocs && git pull https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/HynekS/laravel-react-intranet'
       
       - name: Bundle client code
         # TODO if package.json (or lock?) has changed, it should run npm ci as well, the same applies to composer and DB migrations
