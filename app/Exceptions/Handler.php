@@ -42,8 +42,8 @@ class Handler extends ExceptionHandler
             "Uncaught exception '%s' with message '%s' in %s:%d%s%s",
             get_class($exception),
             $exception->getMessage(),
-            $exception->getTrace()[0]['file'],
-            $exception->getTrace()[0]['line'],
+			$exception->getTrace()[0]['file'] ?? '(no file)',
+            $exception->getTrace()[0]['line'] ?? '(no line)',
             PHP_EOL,
             PHP_EOL
         ));
