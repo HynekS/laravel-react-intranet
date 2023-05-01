@@ -26,5 +26,9 @@ jobs:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
 
-      - name: Just-Log
-        run: ssh staging 'whoami'
+      - name: Pull changes
+        run: ssh staging 'cd htdocs && git fetch https://${{ secrets.GITHUB_TOKEN }}@github.com/HynekS/laravel-react-intranet && dit reset --hard origin/master'
+      
+      - name: Bundle client code
+        # TODO if package.json (or lock?) has changed, it should run npm ci as well, the same applies to composer and DB migrations
+        run: ssh staging 'cd htdocs && npm run prod'
