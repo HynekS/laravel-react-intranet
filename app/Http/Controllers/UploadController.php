@@ -93,7 +93,7 @@ class UploadController extends Controller
                 try {
                     File::ensureDirectoryExists($storage->path($directory . "/thumbnails"));
                     $thumbnail = $this->createThumbnail($storage->path($directory . $uniqueFileName), 200, 200);
-                    $thumbnail->save($storage->path($directory . "/thumbnails\/" . "thumbnail_" . $uniqueFileName));
+                    Storage::disk('local')->put($directory . "/thumbnails\/" . "thumbnail_" . $uniqueFileName, $thumbnail->encode($thumbnail->extension));
                 } catch (\Throwable $th) {
                     // Just swallow the error for now;
                 }
