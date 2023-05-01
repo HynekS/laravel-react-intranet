@@ -1,0 +1,34 @@
+# This is a basic workflow that is manually triggered
+
+name: Update production
+
+on: [push]
+jobs:
+  deploy:
+    name: "Deploy to staging"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+
+      - name: Pull changes
+        run: ssh staging 'cd htdocs && git pull https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/HynekS/laravel-react-intranet master && git status'
+      
+      - name: Bundle client code
+        # TODO if package.json (or lock?) has changed, it should run npm ci as well, the same applies to composer and DB migrations
+        run: ssh staging 'cd htdocs && npm run prod'
