@@ -59,7 +59,7 @@ const Select = forwardRef<HTMLSelectElement, Props>(
               ref={ref}
               onChange={onChange}
               onBlur={onBlur}
-              css={[styles.input, tw`appearance-none`]}
+              css={[styles.input, error[name] && styles.inputError, tw`appearance-none`]}
             >
               {label && <option value="" />}
               {options.map((option, i) => (
@@ -71,8 +71,8 @@ const Select = forwardRef<HTMLSelectElement, Props>(
             <ChevronComponent {...props} />
           </div>
           {error[name] && (
-            <div>
-              <ExclamationCircleIcon />
+            <div css={[styles.errorMessage]}>
+              <ExclamationCircleIcon tw="inline-block w-4 h-4 mr-2 fill-current" />
               {error?.[name]?.message}
             </div>
           )}
