@@ -1,62 +1,27 @@
 import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react"
-import { useForm, Controller } from "react-hook-form"
+import { type useForm, Controller, FieldValues } from "react-hook-form"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
 
 import { parse, isValid } from "date-fns"
 import cs from "date-fns/locale/cs"
-import { TrashIcon } from "@heroicons/react/solid"
 import ReactDatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { createProject, updateProject } from "@store/projects"
 import { fetchActiveUsers } from "@store/users"
-import pick from "@utils/pick"
-// TODO use it to display localiyed or remove the file!
-// import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
 import Select from "../common/Select"
-import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
-import Modal from "../common/StyledModal"
-import ProjectDeleteDialog from "./ProjectDeleteDialog"
-import ModalCloseButton from "../common/ModalCloseButton"
 import triggerToast from "../common/Toast"
 import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
 import type { akce as Akce, users as User } from "@codegen"
 
 registerLocale("cs-CZ", cs)
-
-const detailFields = [
-  "id_akce",
-  "nazev_akce",
-  "objednavka",
-  "objednavka_cislo",
-  "objednavka_info",
-  "smlouva",
-  "rozpocet_B",
-  "rozpocet_A",
-  "registrovano_bit",
-  "registrace_info",
-  "id_stav",
-  "nalez",
-  "investor_jmeno",
-  "investor_kontakt",
-  "investor_adresa",
-  "investor_ico",
-  "datum_pocatku_text",
-  "datum_pocatku",
-  "datum_ukonceni_text",
-  "datum_ukonceni",
-  "user_id",
-  "katastr",
-  "okres",
-  "kraj",
-] as const
 
 function parseDate(str: string, format: string) {
   const parsed = parse(str, format, new Date())
@@ -76,29 +41,17 @@ type Detail = Akce & { user: User }
 type DetailProps = {
   detail?: Akce & { user: User }
   type: "update" | "create"
-  setProjectTitle: Dispatch<SetStateAction<string>>
+  methods: ReturnType<typeof useForm<FieldValues, unknown>>
 }
 
-const Detail = ({
-  detail = {} as Detail,
-  type = "update",
-  setProjectTitle = () => {
-    return ""
-  },
-}: DetailProps) => {
-  const defaultValues = pick(detail, ...detailFields)
+const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const userId = useAppSelector(store => store.auth.user!.id)
   const activeUsers = useAppSelector(store => store.users.activeUsers)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
-  const { register, control, handleSubmit, setError, formState, getValues, setValue } =
-    useForm<Akce>({
-      defaultValues,
-      mode: "onTouched",
-    })
+  const { register, control, handleSubmit, setError, formState, getValues, setValue } = methods
 
   // TODO submit only dirty fields
   const { errors, dirtyFields, isDirty, touchedFields } = formState
@@ -169,20 +122,9 @@ const Detail = ({
 
   return (
     <DetailWrapper>
-      <form onSubmit={handleSubmit(onSubmit)} tw="pb-3">
+      <form onSubmit={handleSubmit(onSubmit)} tw="pt-4 pb-3">
         <div tw="flex items-start justify-end">
           <div tw="flex items-center">
-            {type === "update" && (
-              <Dropdown tw="my-auto mr-4">
-                <DropdownItem
-                  onClick={() => {
-                    setIsModalOpen(true)
-                  }}
-                  Icon={TrashIcon}
-                  label="Odstranit&nbsp;akci"
-                />
-              </Dropdown>
-            )}
             {type === "create" ? (
               <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
                 Vytvořit&nbsp;akci
@@ -200,9 +142,6 @@ const Detail = ({
               {...register("nazev_akce", {
                 required: { value: true, message: "toto pole je třeba vyplnit" },
               })}
-              onChange={({ target }) => {
-                setProjectTitle(target.value)
-              }}
             />
           </DefaultFieldset>
         </div>
@@ -551,22 +490,6 @@ const Detail = ({
           </div>
         </div>
       </form>
-      <Modal
-        isOpen={isModalOpen}
-        shouldCloseOnOverlayClick={true}
-        onRequestClose={() => setIsModalOpen(false)}
-        closeTimeoutMS={500}
-      >
-        <header tw="flex justify-between p-6">
-          <h2 tw="text-lg font-medium">Odstranit akci</h2>
-          <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
-        </header>
-        <ProjectDeleteDialog
-          onModalClose={() => setIsModalOpen(false)}
-          detail={detail}
-          userId={userId}
-        />
-      </Modal>
     </DetailWrapper>
   )
 }

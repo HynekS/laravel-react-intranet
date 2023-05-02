@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useLocation } from "react-router-dom"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { ExclamationCircleIcon } from "@heroicons/react/outline"
 
 import { fetchProject } from "@store/projects"
-import DetailRoutes from "./DetailRoutes"
-import DetailNav from "./DetailNav"
 import DetailPage from "./DetailPage"
 
 import type { akce as Akce } from "@codegen"
+import InfoFormProvider from "./InfoFormProvider"
 
 type Params = {
   year: string | undefined
@@ -48,15 +47,7 @@ const DetailProvider = () => {
   }, [params, projectFromLinkState, projectFromUrl])
 
   if (data) {
-    return (
-      <DetailPage>
-        <h1 tw="py-4 text-xl font-semibold text-gray-700">
-          {data.c_akce}&ensp;{projectTitle}
-        </h1>
-        <DetailNav detail={data} />
-        <DetailRoutes detail={data} setProjectTitle={setProjectTitle} />
-      </DetailPage>
-    )
+    return <InfoFormProvider detail={data} />
   }
   if (error) {
     return (
