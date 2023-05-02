@@ -1,19 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useLocation } from "react-router-dom"
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { ExclamationCircleIcon } from "@heroicons/react/outline"
 
 import { fetchProject } from "@store/projects"
-import DetailRoutes from "./DetailRoutes"
-import DetailNav from "./DetailNav"
 import DetailPage from "./DetailPage"
 
 import type { akce as Akce } from "@codegen"
-import { Dropdown, DropdownItem } from "../common/Dropdown"
-import Modal from "../common/StyledModal"
-import ModalCloseButton from "../common/ModalCloseButton"
-import ProjectDeleteDialog from "./ProjectDeleteDialog"
-import { TrashIcon } from "@heroicons/react/solid"
+import InfoFormProvider from "./InfoFormProvider"
 
 type Params = {
   year: string | undefined
@@ -21,7 +15,6 @@ type Params = {
 }
 
 const DetailProvider = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Akce>()
   const dispatch = useAppDispatch()
 
@@ -43,8 +36,6 @@ const DetailProvider = () => {
 
   const error = useAppSelector(store => store.projects.getSingle.error)
 
-  const userId = useAppSelector(store => store.auth.user!.id)
-
   useEffect(() => {
     const project = projectFromLinkState || projectFromUrl
     if (project) {
@@ -56,43 +47,7 @@ const DetailProvider = () => {
   }, [params, projectFromLinkState, projectFromUrl])
 
   if (data) {
-    return (
-      <DetailPage>
-        <div tw="flex justify-between">
-          <h1 tw="py-4 text-xl font-semibold text-gray-700">
-            {data.c_akce}&ensp;{projectTitle}
-          </h1>
-
-          <Dropdown tw="my-auto mr-4">
-            <DropdownItem
-              onClick={() => {
-                setIsModalOpen(true)
-              }}
-              Icon={TrashIcon}
-              label="Odstranit&nbsp;akci"
-            />
-          </Dropdown>
-        </div>
-        <DetailNav detail={data} />
-        <DetailRoutes detail={data} setProjectTitle={setProjectTitle} />
-        <Modal
-          isOpen={isModalOpen}
-          shouldCloseOnOverlayClick={true}
-          onRequestClose={() => setIsModalOpen(false)}
-          closeTimeoutMS={500}
-        >
-          <header tw="flex justify-between p-6">
-            <h2 tw="text-lg font-medium">Odstranit akci</h2>
-            <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
-          </header>
-          <ProjectDeleteDialog
-            onModalClose={() => setIsModalOpen(false)}
-            detail={data}
-            userId={userId}
-          />
-        </Modal>
-      </DetailPage>
-    )
+    return <InfoFormProvider detail={data} />
   }
   if (error) {
     return (
