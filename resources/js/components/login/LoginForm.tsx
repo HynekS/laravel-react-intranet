@@ -42,7 +42,7 @@ const LoginForm = () => {
           autoComplete="on"
           placeholder="Jan Novák"
           autoFocus={true}
-          tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
+          tw="appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(border-transparent outline-none ring-2 transition-shadow duration-300)"
           {...register("user_name", { required: true })}
         />
         <HiddenMessage show={errors.user_name}>
@@ -57,11 +57,12 @@ const LoginForm = () => {
             id="password"
             autoComplete="on"
             placeholder="*******"
-            tw="bg-gray-200 appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(outline-none ring transition-shadow duration-300)"
+            tw="appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:(border-transparent outline-none ring-2 transition-shadow duration-300)"
             {...register("password", { required: true })}
           />
           <button
             type="button"
+            data-skipEnterFocus={true}
             tw="absolute top-0 bottom-0 text-gray-400 right-2"
             aria-label="show password"
             onClick={() => setPasswordShown(!passwordShown)}
