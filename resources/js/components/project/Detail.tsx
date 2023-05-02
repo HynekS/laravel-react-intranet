@@ -6,7 +6,6 @@ import tw from "twin.macro"
 
 import { parse, isValid } from "date-fns"
 import cs from "date-fns/locale/cs"
-import { TrashIcon } from "@heroicons/react/solid"
 import ReactDatePicker, { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -14,16 +13,10 @@ import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { createProject, updateProject } from "@store/projects"
 import { fetchActiveUsers } from "@store/users"
 import pick from "@utils/pick"
-// TODO use it to display localiyed or remove the file!
-// import { monthsCZ, daysCZ, daysShortCZ } from "@services/date/terms_cs-CZ"
 
 import DetailWrapper from "./DetailWrapper"
 import Button from "../common/Button"
 import Select from "../common/Select"
-import { Dropdown, DropdownItem } from "../../components/common/Dropdown"
-import Modal from "../common/StyledModal"
-import ProjectDeleteDialog from "./ProjectDeleteDialog"
-import ModalCloseButton from "../common/ModalCloseButton"
 import triggerToast from "../common/Toast"
 import { DefaultInput, DefaultFieldset, mergeStyles, styles } from "./DefaultInputs"
 
@@ -91,7 +84,6 @@ const Detail = ({
   const navigate = useNavigate()
   const userId = useAppSelector(store => store.auth.user!.id)
   const activeUsers = useAppSelector(store => store.users.activeUsers)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
   const { register, control, handleSubmit, setError, formState, getValues, setValue } =
@@ -169,20 +161,9 @@ const Detail = ({
 
   return (
     <DetailWrapper>
-      <form onSubmit={handleSubmit(onSubmit)} tw="pb-3">
+      <form onSubmit={handleSubmit(onSubmit)} tw="pt-4 pb-3">
         <div tw="flex items-start justify-end">
           <div tw="flex items-center">
-            {type === "update" && (
-              <Dropdown tw="my-auto mr-4">
-                <DropdownItem
-                  onClick={() => {
-                    setIsModalOpen(true)
-                  }}
-                  Icon={TrashIcon}
-                  label="Odstranit&nbsp;akci"
-                />
-              </Dropdown>
-            )}
             {type === "create" ? (
               <Button type="submit" className={isPending ? "spinner" : ""} disabled={isPending}>
                 Vytvořit&nbsp;akci
@@ -551,22 +532,6 @@ const Detail = ({
           </div>
         </div>
       </form>
-      <Modal
-        isOpen={isModalOpen}
-        shouldCloseOnOverlayClick={true}
-        onRequestClose={() => setIsModalOpen(false)}
-        closeTimeoutMS={500}
-      >
-        <header tw="flex justify-between p-6">
-          <h2 tw="text-lg font-medium">Odstranit akci</h2>
-          <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
-        </header>
-        <ProjectDeleteDialog
-          onModalClose={() => setIsModalOpen(false)}
-          detail={detail}
-          userId={userId}
-        />
-      </Modal>
     </DetailWrapper>
   )
 }
