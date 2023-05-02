@@ -36,7 +36,7 @@ const DetailNav = ({ detail }: DetailNavProps) => {
           transition: all 0.25s ease;
         }
         & a {
-          ${tw`relative flex bg-white bg-opacity-50 rounded-t border border-b-transparent py-2 pl-4 pr-6 font-semibold text-gray-500 shadow-lg hover:(text-blue-500 bg-blue-100 border-opacity-75 border-blue-100 border-b-transparent bg-opacity-50 transition duration-300)`}
+          ${tw`relative flex bg-white bg-opacity-50 rounded-t border border-gray-300 border-b-transparent shadow-lg py-2 pl-4 pr-6 font-semibold text-gray-500 hover:(text-blue-500 bg-blue-100 border-opacity-75 border-blue-200 border-b-transparent bg-opacity-50 transition duration-300)`}
           & svg {
             ${tw`opacity-25`}
           }
