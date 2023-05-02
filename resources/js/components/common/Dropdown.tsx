@@ -12,7 +12,7 @@ type DropdownItemProps = {
 } & JSX.IntrinsicElements["button"]
 
 type DropdownProps = {
-  button: ElementType
+  button?: ElementType
   children: ReactNode
 } & JSX.IntrinsicElements["div"]
 
