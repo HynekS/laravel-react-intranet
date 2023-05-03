@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useRef, useCallback, type ReactElement } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { shallowEqual } from "react-redux"
@@ -16,6 +16,7 @@ import {
   XIcon,
   CheckCircleIcon,
 } from "@heroicons/react/outline"
+import HeaderWithTextInput from "./HeaderWithTextInput"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
 import { setSortBy, updateFilters, clearFilters, updateScrollState } from "@store/table"
@@ -24,6 +25,7 @@ import { Detail } from "./lazyImports"
 import budgetCellRenderer from "./BudgetCellRenderer"
 
 import type { akce as Akce } from "@codegen"
+import SortIndicator from "./SortIndicator"
 
 type Props = {
   rawData: Akce[]
@@ -43,6 +45,8 @@ const Table = ({ rawData }: Props) => {
 
   const status = useAppSelector(store => store.projects.getMultiple.status)
   const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
+  console.log({ sortBy })
+
   const filters = useAppSelector(store => store.table.filters, shallowEqual)
   const filterLength = useAppSelector(store => Object.values(store.table.filters).length)
   const scrollStateByYear = useAppSelector(store => store.table.scrollState[String(year)])
@@ -109,11 +113,11 @@ const Table = ({ rawData }: Props) => {
   }, [])
 
   useEffect(() => {
-    setData(applyFilters(sortData(rawData, { ...sortBy })))
+    setData(applyFilters(sortData(rawData, sortBy)))
     return () => {
       dispatch(updateScrollState({ [String(year)]: scrollTopRef.current }))
     }
-  }, [rawData, filters])
+  }, [rawData, filters, sortBy.key, sortBy.order])
 
   /*
     filtering
@@ -152,6 +156,7 @@ const Table = ({ rawData }: Props) => {
 
     const sortedList =
       key === "c_akce" ? sortIdSlashYear(data.slice(0), key) : data.slice(0).sort(defaultSort)
+    console.log(order)
 
     if (order === "desc") {
       sortedList.reverse()
@@ -161,7 +166,6 @@ const Table = ({ rawData }: Props) => {
 
   const onColumnSort = ({ key, order }) => {
     dispatch(setSortBy({ key, order }))
-    setData(applyFilters(sortData(data, { key, order })))
   }
 
   const columns: BaseTableProps[] = [
@@ -169,9 +173,10 @@ const Table = ({ rawData }: Props) => {
       title: "Číslo",
       key: "c_akce",
       dataKey: "c_akce",
-      width: 80,
+      width: 90,
+      sortable: true,
       cellRenderer: ({ cellData: c_akce, rowData }) => (
-        <div onMouseOver={() => Detail.preload()}>
+        <div onMouseOver={() => Detail.preload()} tw="mr-auto">
           <div key="numberPerYear">
             <strong>{c_akce}</strong>
           </div>
@@ -181,13 +186,18 @@ const Table = ({ rawData }: Props) => {
             state={rowData}
             aria-label={`odkaz na detail akce č. ${year}/${c_akce.split("/")[0]}`}
           >
-            <div tw="flex items-center justify-center p-1 px-2 text-white transition-colors duration-300 bg-blue-500 rounded hover:bg-blue-700">
+            <div tw="inline-flex items-center justify-center ml-auto mt-0.5 p-1 px-2 text-white transition-colors duration-300 bg-blue-500 rounded hover:bg-blue-700">
               <PencilIcon tw="w-4" />
             </div>
           </Link>
         </div>
       ),
-      sortable: true,
+      headerRenderer: ({ column }) => (
+        <div tw="flex justify-start items-center">
+          <span>{column.title}</span>
+          {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
+        </div>
+      ),
     },
     {
       title: "Název",
@@ -198,7 +208,7 @@ const Table = ({ rawData }: Props) => {
       resizable: true,
       cellRenderer: ({ cellData, column: { key } }) => (
         <Highlighter
-          textToHighlight={cellData}
+          textToHighlight={cellData || ""}
           sanitize={deburr}
           searchWords={[filters[key] || ""]}
           highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */ }}
@@ -215,21 +225,12 @@ const Table = ({ rawData }: Props) => {
         </Highlighter>
       ),
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            autoComplete="off"
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
     },
     {
@@ -240,6 +241,12 @@ const Table = ({ rawData }: Props) => {
       align: Column.Alignment.RIGHT,
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_B" }),
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div tw="flex justify-start items-center">
+          <span>{column.title}</span>
+          {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
+        </div>
+      ),
     },
     {
       title: "Výzkum",
@@ -249,6 +256,12 @@ const Table = ({ rawData }: Props) => {
       align: Column.Alignment.RIGHT,
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_A" }),
       sortable: true,
+      headerRenderer: ({ column }) => (
+        <div tw="flex justify-start items-center">
+          <span>{column.title}</span>
+          {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
+        </div>
+      ),
     },
     {
       title: "Reg.",
@@ -265,21 +278,12 @@ const Table = ({ rawData }: Props) => {
       width: 100,
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            autoComplete="off"
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
     },
     {
@@ -292,7 +296,7 @@ const Table = ({ rawData }: Props) => {
       headerRenderer: ({ column }) => (
         <div>
           <div>{column.title}</div>
-          <div tw="flex items-center my-2 bg-gray-200 border border-gray-200 rounded-full border-t-gray-300 border-l-gray-300">
+          <div tw="inline-flex items-center my-2 bg-gray-100 border border-gray-200 rounded-full border-t-gray-300 border-l-gray-300 mx-0.5">
             <div tw="flex">
               <input
                 tw="sr-only checked:sibling:(bg-gray-100 rounded-full h-3 w-3 border border-gray-300 border-b-gray-400 border-r-gray-400 shadow-sm)"
@@ -307,7 +311,7 @@ const Table = ({ rawData }: Props) => {
                 checked={filters[column.key] === "1"}
                 onChange={e => filterData(column, e)}
               />
-              <label tw="w-3 h-3 -my-0.5 -ml-0.5" htmlFor={`${column.key}-1`}>
+              <label tw="w-3 h-3" htmlFor={`${column.key}-1`}>
                 <span tw="sr-only">hlášeno</span>
               </label>
             </div>
@@ -325,7 +329,7 @@ const Table = ({ rawData }: Props) => {
                 }}
                 onChange={e => filterData(column, e)}
               />
-              <label tw="w-3 h-3 -my-0.5" htmlFor={`${column.key}-empty`}>
+              <label tw="w-3 h-3" htmlFor={`${column.key}-empty`}>
                 <span tw="sr-only">(vypnout filtr)</span>
               </label>
             </div>
@@ -343,7 +347,7 @@ const Table = ({ rawData }: Props) => {
                 checked={filters[column.key] === "0"}
                 onChange={e => filterData(column, e)}
               />
-              <label tw="w-3 h-3 -my-0.5 -mr-0.5" htmlFor={`${column.key}-0`}>
+              <label tw="w-3 h-3" htmlFor={`${column.key}-0`}>
                 <span tw="sr-only">nehlášeno</span>
               </label>
             </div>
@@ -359,21 +363,12 @@ const Table = ({ rawData }: Props) => {
       align: Column.Alignment.RIGHT,
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            autoComplete="off"
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
     },
     {
@@ -381,25 +376,18 @@ const Table = ({ rawData }: Props) => {
       key: "investor_jmeno",
       dataKey: "investor_jmeno",
       width: 180,
+      sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
       cellRenderer: ({ cellData, column: { key } }) => (
         <Highlighter
-          textToHighlight={cellData}
+          textToHighlight={cellData || ""}
           sanitize={deburr}
           searchWords={[filters[key] || ""]}
           highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */ }}
@@ -414,22 +402,14 @@ const Table = ({ rawData }: Props) => {
       key: "investor_kontakt",
       dataKey: "investor_kontakt",
       width: 180,
+      sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            autoComplete="off"
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
     },
     {
@@ -439,24 +419,16 @@ const Table = ({ rawData }: Props) => {
       width: 90,
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
       cellRenderer: ({ cellData, column: { key } }) => (
         <Highlighter
-          textToHighlight={cellData}
+          textToHighlight={cellData || ""}
           sanitize={deburr}
           searchWords={[filters[key] || ""]}
           highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */ }}
@@ -472,24 +444,16 @@ const Table = ({ rawData }: Props) => {
       width: 90,
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
       cellRenderer: ({ cellData, column: { key } }) => (
         <Highlighter
-          textToHighlight={cellData}
+          textToHighlight={cellData || ""}
           sanitize={deburr}
           searchWords={[filters[key] || ""]}
           highlightStyle={{ backgroundColor: "#fbd38d" /* tailwind bg-orange-300 */ }}
@@ -505,21 +469,12 @@ const Table = ({ rawData }: Props) => {
       width: 120,
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div>
-          <div>{column.title}</div>
-          <input
-            tw="relative"
-            type="text"
-            name={column.key}
-            autoComplete="off"
-            defaultValue={filters[column.key]}
-            aria-label="filtrovat"
-            onClick={e => {
-              e.stopPropagation()
-            }}
-            onChange={e => filterData(column, e)}
-          />
-        </div>
+        <HeaderWithTextInput
+          column={column}
+          sortBy={sortBy}
+          filters={filters}
+          filterFn={e => filterData(column, e)}
+        />
       ),
     },
     {
@@ -548,6 +503,13 @@ const Table = ({ rawData }: Props) => {
       dataKey: "user.full_name",
       width: 90,
       sortable: true,
+      // Header renderer with filter -> This does not work, because data are ids, not names!
+      headerRenderer: ({ column }) => (
+        <div tw="flex justify-start items-center">
+          <span>{column.title}</span>
+          {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
+        </div>
+      ),
     },
     {
       title: "Nález",
@@ -588,6 +550,9 @@ const Table = ({ rawData }: Props) => {
               .BaseTable__header-cell--align-right {
                 ${tw`flex-row-reverse justify-start`}
               }
+              .BaseTable__sort-indicator {
+                display: none !important;
+              }
               .BaseTable__row.negative {
                 ${tw`text-red-900 bg-red-50`}
                 &:hover {
@@ -615,22 +580,20 @@ const Table = ({ rawData }: Props) => {
               .BaseTable__header-cell {
                 ${tw`pt-1`}
               }
-              .BaseTable__table-main .BaseTable__header-cell:last-child {
-                padding-right: 8px;
-                /* This doesn't work as expected in the base css – being applied to all the header cells */
+              .BaseTable__header-row > .BaseTable__header-cell:first-of-type {
+                padding-left: 12px;
               }
-              .BaseTable__table-main .BaseTable__header-cell:first-child {
-                padding-left: 8px;
-                /* This doesn't work as expected in the base css – being applied to all the header cells */
+              .BaseTable__header-row > .BaseTable__header-cell:last-of-type {
+                padding-right: 12px;
               }
               input {
-                ${tw`w-full h-5 p-1 mt-1 text-xs bg-blue-100 border border-blue-200 rounded-sm border-b-gray-200 border-r-gray-200`}
+                ${tw`w-full h-5 p-1 mt-1 text-xs bg-blue-50 border border-blue-200 rounded-sm border-b-gray-200 border-r-gray-200`}
                 &:focus:not(.focus-visible) {
-                  ${tw`outline-none focus:(ring-2 border-blue-500 bg-blue-100)`}
+                  ${tw`outline-none focus:(ring-2 border-transparent bg-blue-100)`}
                 }
                 &[value=""],
                 &:not([value]) {
-                  ${tw`bg-gray-100 border-gray-300`}
+                  ${tw`bg-gray-50 border-gray-300`}
                 }
               }
             `}
@@ -672,11 +635,13 @@ const Table = ({ rawData }: Props) => {
             }}
             headerRenderer={({ cells, headerIndex }) =>
               headerIndex === 0 ? (
-                cells.map(cell =>
-                  React.cloneElement(cell, {
-                    children: <div key={cell.key}>{cell}</div>,
-                  }),
-                )
+                cells.map(cell => {
+                  const { onClick, className, width, ...rest } = cell.props
+                  const cellWithoutOnClick = { ...cell, props: rest }
+                  return React.cloneElement(cell, {
+                    children: cellWithoutOnClick,
+                  })
+                })
               ) : (
                 <div
                   role="cell"
