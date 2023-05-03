@@ -45,7 +45,6 @@ const Table = ({ rawData }: Props) => {
 
   const status = useAppSelector(store => store.projects.getMultiple.status)
   const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
-  console.log({ sortBy })
 
   const filters = useAppSelector(store => store.table.filters, shallowEqual)
   const filterLength = useAppSelector(store => Object.values(store.table.filters).length)
@@ -156,7 +155,6 @@ const Table = ({ rawData }: Props) => {
 
     const sortedList =
       key === "c_akce" ? sortIdSlashYear(data.slice(0), key) : data.slice(0).sort(defaultSort)
-    console.log(order)
 
     if (order === "desc") {
       sortedList.reverse()
@@ -547,8 +545,8 @@ const Table = ({ rawData }: Props) => {
                 align-items: flex-start;
                 padding-top: 0.5em;
               }
-              .BaseTable__header-cell--align-right {
-                ${tw`flex-row-reverse justify-start`}
+              .BaseTable__header-cell--align-right > div {
+                flex-direction: row-reverse;
               }
               .BaseTable__sort-indicator {
                 display: none !important;
@@ -639,7 +637,7 @@ const Table = ({ rawData }: Props) => {
                   const { onClick, className, width, ...rest } = cell.props
                   const cellWithoutOnClick = { ...cell, props: rest }
                   return React.cloneElement(cell, {
-                    children: cellWithoutOnClick,
+                    children: cellWithoutOnClick.props.children,
                   })
                 })
               ) : (

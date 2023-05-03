@@ -3,7 +3,7 @@ import SortIndicator from "./SortIndicator"
 const HeaderWithTextInput = ({ column, sortBy, filters, filterFn }) => {
   return (
     <div>
-      <div tw="flex justify-start items-center">
+      <div tw="flex justify-start items-center overflow-hidden">
         <span>{column.title}</span>
         {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
       </div>
