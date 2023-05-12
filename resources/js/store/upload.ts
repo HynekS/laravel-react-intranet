@@ -155,6 +155,7 @@ export const uploadMultipleFiles = createAsyncThunk<
   },
 )
 
+// TODO handle error!
 export const uploadSingleFile = createAsyncThunk<
   UploadResponse,
   { file: FileObject; model: Model; projectId: number; userId: number; i: number; length: number },
@@ -173,17 +174,22 @@ export const uploadSingleFile = createAsyncThunk<
     }
     formData.append("data", JSON.stringify(data))
 
-    const response = await client.post("/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      onUploadProgress: e => {
-        let progress = (e.loaded / e.total) * 100
-        dispatch(setUploadProgress({ updatedProgress: Math.round(progress), i, length }))
-      },
-    })
-    dispatch(setUpdateId(response.data.update_id))
-    return response.data
+    try {
+      const response = await client.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: e => {
+          let progress = (e.loaded / e.total) * 100
+          dispatch(setUploadProgress({ updatedProgress: Math.round(progress), i, length }))
+        },
+      })
+      dispatch(setUpdateId(response.data.update_id))
+      return response.data
+    } catch (e) {
+      dispatch(setInitialState())
+      return Promise.reject(e)
+    }
   },
 )
 
