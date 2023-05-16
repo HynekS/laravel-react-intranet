@@ -48,6 +48,11 @@ class CreatePlaceholderData extends Command
         // Remove Dispatcher 
         Akce::unsetEventDispatcher();
 
+        function join($arr, $separator = ", ")
+        {
+            return implode($separator,  array_filter($arr));
+        }
+
         function purebell($min, $max, $std_deviation, $step = 1)
         {
             $rand1 = (float)mt_rand() / (float)mt_getrandmax();
@@ -68,7 +73,7 @@ class CreatePlaceholderData extends Command
             $currentYear = date("Y");
             $diff = $currentYear - $since;
 
-            $temp = array_fill(0, $diff, $since);
+            $temp = array_fill(0, $diff + 1, $since);
             return array_map(fn ($item, $i) => $item + $i, array_keys($temp), array_values($temp));
         }
 
@@ -78,18 +83,25 @@ class CreatePlaceholderData extends Command
             return $arr[$index];
         }
 
-
-
-        $yearsSince2013 = getYearsSince(2013);
-
-        // Generate users pool
-        $userPool = factory(User::class, 15)->make();
+        $yearsSince2014 = getYearsSince(2014);
 
         // Generate investors pool
         $investorsPool = array_map(fn () => $faker->investor(), range(0, 100));
-        // print_r($investorsPool);
+        print_r($investorsPool);
 
-        $akcePool = factory(Akce::class, 50)->make();
+        $selectedYear = $this->choice(
+            'What year we are going to handle?',
+            $yearsSince2014,
+            array_key_last($yearsSince2014)
+        );
+
+        $selectedAmount = $this->choice(
+            'How many mock projects are we going to create?',
+            [10, 50, 100, 200, 500],
+            2
+        );
+
+        $akcePool = factory(Akce::class, $selectedAmount)->make();
 
         $incrementingInvoiceNumber = 0;
 
@@ -99,11 +111,17 @@ class CreatePlaceholderData extends Command
             $randomizer = purebell(5, 15, 5) / 10;
             $randomizedProminence =  $prominence * $randomizer;
 
-            $akce->investor_jmeno = biasedElement($investorsPool);
+            // Can be blank if project was cancelled or hasn't start yet!
+            $investor = biasedElement($investorsPool);
+            $contact = $faker->randomElement($investor["contacts"]);
+            $akce->investor_jmeno = $investor["companyName"];
+            $akce->investor_kontakt = join([$contact['name'], $contact['phone'], $contact['email']], " ");
+            $akce->investor_adresa = $investor["address"];
+            $akce->investor_ico = $investor["ico"];
 
             $akce->user_id = User::inRandomOrder()->first()->id;
 
-            $currentYear = (new \DateTime)->format("Y");
+            $currentYear = $selectedYear;
             $latestCurrentYearProject = Akce::where("rok_per_year", "=", $currentYear)->orderBy("cislo_per_year", "desc")->first();
             $yearly_id = $latestCurrentYearProject ? (int) $latestCurrentYearProject->cislo_per_year + 1 : 1;
             $compositeProjectNumber = $yearly_id . "/" . substr($currentYear, -2);
@@ -113,10 +131,12 @@ class CreatePlaceholderData extends Command
             $akce->cislo_per_year = $yearly_id;
             $akce->c_akce = $compositeProjectNumber;
 
-            $baseDate = new DateTimeImmutable("1-1-2022");
+
+            $baseDate = new DateTimeImmutable("1-1-{$selectedYear}");
             $addedDays = floor((count($akcePool)) / 365 * $yearly_id);
             $dateCreated = $baseDate->add(new DateInterval("P{$addedDays}D"));
             $akce->datum_vytvoreni = date($dateCreated->format('Y-m-d H:i:s'));
+
 
             $dateOfStart = $dateCreated->add(new DateInterval("P" . purebell(1, 365, 182) . "D"));
             $dateOfEnd = new \DateTimeImmutable($dateOfStart->format("Y-m-d"));
@@ -131,8 +151,8 @@ class CreatePlaceholderData extends Command
             $akce->datum_ukonceni = $isProjectConcluded ? $dateOfEnd : null;
 
             // RANDOMIZE!
-            $findingState = ($akce->datum_ukonceni) ? (int) purebell(1, 100, 50) < 20 : null;
-            $activityState = $isProjectCommenced ? ($isProjectConcluded ? (($findingState === 1) ? (rand(0, 1) ? 3 : 4) : 4) : 2) : 1; // Todo even positive can have 'concluded' state!
+            $findingState = ($akce->datum_ukonceni) ? (int) purebell(1, 100, 50) < 20 : 2;
+            $activityState = $isProjectCommenced ? ($isProjectConcluded ? (($findingState === 1) ? (rand(0, 1) ? 3 : 4) : 4) : 2) : 1;
             $akce->nalez = $findingState;
             $akce->id_stav = $activityState;
 
@@ -141,6 +161,28 @@ class CreatePlaceholderData extends Command
             $akce->rozpocet_A =  $findingState ? ($baseAmount * $randomizedProminence * 4) * $prominence : null;
             // dohled
             $akce->rozpocet_B = ($baseAmount * $randomizedProminence * $prominence) + ($baseAmount * $randomizedProminence);
+
+            if ((rand(1, 10) + $activityState) > 7) {
+                $akce->registrovano_bit = 1;
+                $is_in_moravia = in_array($akce->kraj, ["Moravskoslezský", "Jihomoravský", "Olomoucký", "Zlínský"]) || (in_array($akce->kraj, ["Vysočina", "Pardubický"]) && in_array($akce->okres, ["Svitavy", "Žďár nad Sázavou", "Třebíč", "Jihlava"]));
+                $akce->registrace_info = ($is_in_moravia ? "M-" : "C-") . $dateOfEnd->format("Y") . rand(10000, 99999);
+                
+                if($activityState === 4 && rand(1, 10) > 5) {
+                    $akce->zaa_hlaseno = 1;
+                }
+            }
+
+            if (rand(1, 10) > 2) {
+                $akce->objednavka = 1;
+
+                if (rand(1, 10) > 5) {
+                    $akce->objednavka_cislo = rand(100, 500);
+                }
+            }
+
+            if (rand(1, 10) > 2) {
+                $akce->smlouva = 1;
+            }
 
             $akce->save();
             $projectId = $akce->id_akce;
@@ -151,7 +193,7 @@ class CreatePlaceholderData extends Command
                 // Invoices dor "dohled"
                 $invoices_surveillance = factory(Faktura::class, (int) $prominence - rand(0, $prominence))
                     ->make(["castka" => ($baseAmount * $randomizedProminence), "akce_id" => $projectId]);
-                                
+
                 foreach ($invoices_surveillance as $invoice) {
                     $incrementingInvoiceNumber += 1;
                     $invoice->c_faktury = $incrementingInvoiceNumber;

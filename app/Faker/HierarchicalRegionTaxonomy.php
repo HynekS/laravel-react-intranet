@@ -54,9 +54,6 @@ class HierarchicalRegionTaxonomy extends Base
 
   public function hrtBiased()
   {
-    
-
-
     $random_region = static::biasedElement(static::get_regions());
 
     $random_district = static::biasedElement($random_region["districts"]);

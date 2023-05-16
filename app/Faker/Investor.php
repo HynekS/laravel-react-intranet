@@ -95,8 +95,27 @@ class Investor extends Base
     return array_merge($customNames, $abbreviationNames, $defaultFakerNames);
   }
 
-  public function investor()
+  protected function title()
   {
-    return static::randomElement(static::getcompleteNames());
+    $titles = ["Ing.", "ing.", "star.", "starost.", "stavbyved.", "stav.", "stavbyvedoucí", "dozor", "dod."];
+    return static::randomElement($titles);
+  }
+
+  protected function investorMeta()
+  {
+    $cast = rand(0, 99);
+    $name = $cast < 50 ? $this->cz_faker->name() : $this->cz_faker->lastName();
+    $randomNameForm = static::join([$cast > 33 ? static::title() : null, $name], " ");
+    $email = preg_replace('/[^\x20-\x7E]/', '', $name) . "@" . $this->cz_faker->safeEmailDomain();
+
+    $contacts = array_map(fn () => ["name" => static::opt($randomNameForm, 0.75), "phone" => static::opt($this->cz_faker->phoneNumber(), 0.75), "email" => static::opt($email)], array_fill(0, rand(1, 8), null));
+    $address = static::join([$this->cz_faker->streetName(), $this->cz_faker->buildingNumber(), $this->cz_faker->postcode(), $this->cz_faker->city()], " ");
+    $ico = $this->cz_faker->ico();
+
+    return ["contacts" => $contacts, "address" => $address, "ico" => $ico];
+  }
+
+  public function investor() {
+    return static::randomElement(array_map(fn ($v) => array_merge(["companyName" => $v], $this->investorMeta()), static::getcompleteNames()));
   }
 }
