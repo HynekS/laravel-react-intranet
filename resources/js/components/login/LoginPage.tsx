@@ -1,14 +1,12 @@
-import React from "react"
 import { css } from "@emotion/react"
-import tw from "twin.macro"
 
 import LoginForm from "./LoginForm"
 
-const LoginPage = props => {
+const LoginPage = () => {
   return (
     <div
       css={css`
-        background-image: url(/images/noise.svg), url(/images/jar-with-handle.jpg);
+        background-image: url(/images/noise.svg), url(/images/demo-app-login-background-lowres.jpg);
         background-repeat: no-repeat;
         background-size: cover;
         background-position: 50% 50%;
@@ -25,7 +23,7 @@ const LoginPage = props => {
           height: 100%;
           left: 0;
           top: 0;
-          background-color: rgba(0, 0, 0, 0.6);
+          background-color: rgba(0, 0, 0, 0.4);
         }
       `}
     >
