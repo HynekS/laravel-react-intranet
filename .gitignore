@@ -2,6 +2,8 @@
 /public
 /storage/*.key
 /storage/*.index
+/storage/*.index-shm
+/storage/*.index-wal
 /vendor
 .env*
 .phpunit.result.cache
