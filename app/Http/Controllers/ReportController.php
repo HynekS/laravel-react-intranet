@@ -10,7 +10,7 @@ class ReportController extends Controller
     public function generate_pdf(Request $request)
     {
         $date = date('j. n. Y', time());
-        $image_url = public_path('images/logo-with-address.jpg');
+        $image_url = public_path('images/demo-logo-no-address.jpg');
 
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML("
@@ -152,7 +152,7 @@ class ReportController extends Controller
 
             <dl>
             <dt>Vyhotovil:</dt>
-            <dd><b>Mgr. Pavel Hušták</b></dd>
+            <dd><b>Mgr. Jan Novák</b></dd>
             </dl>
 
             <dl>

@@ -5,7 +5,7 @@ import { EyeIcon } from "@heroicons/react/solid"
 import { EyeOffIcon } from "@heroicons/react/solid"
 
 import { useAppSelector, useAppDispatch } from "@hooks/useRedux"
-import Logo from "./Logo"
+import StickyNote from "./StickyNote"
 import Button from "../../components/common/Button"
 import HiddenMessage from "../common/HiddenMessage"
 import { submitLoginData } from "@store/auth"
@@ -19,20 +19,30 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<{ user_name: string; password: string }>()
   const formRef = useFocusNextOnEnter()
   const onSubmit = (data: { user_name: string; password: string }) =>
     dispatch(submitLoginData(data))
 
+  const fillAndSubmitDemoCredentials = () => {
+    setValue("user_name", "test")
+    setValue("password", "password")
+    onSubmit({ user_name: "test", password: "password" })
+  }
+
   return (
     <div tw="relative z-10 w-full max-w-xs">
+      <StickyNote onClick={fillAndSubmitDemoCredentials} />
       <form
         onSubmit={handleSubmit(onSubmit)}
         ref={formRef}
         tw="px-10 pt-8 pb-10 mb-4 bg-white rounded shadow-xl"
       >
-        <Logo />
+        <div tw="h-20">
+          <img src="/images/logoipsum-237.svg" tw="w-full pl-3 pr-6" />
+        </div>
         {error && <div tw="pb-2 text-sm text-red-600">{error.message}</div>}
         <label htmlFor="user_name" tw="block mb-2 text-sm font-bold text-gray-700">
           Uživatelské jméno
