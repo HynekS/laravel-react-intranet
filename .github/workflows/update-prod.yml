@@ -31,4 +31,4 @@ jobs:
 
       - name: Bundle client code
         # TODO if package.json (or lock?) has changed, it should run npm ci as well, the same applies to composer and DB migrations
-        run: ssh staging 'cd htdocs && git switch demo && npm run prod'
+        run: ssh staging 'cd htdocs && npm run prod'
