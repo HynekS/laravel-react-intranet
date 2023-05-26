@@ -48,15 +48,21 @@ const InvoicePage = ({ detail, ...props }: Props) => {
     rozpocet_A: rozpocet_vyzkum,
   } = detail || {}
 
-  const fakturyDohledSum = faktury_dohled.reduce((acc, item) => acc + Number(item.castka), 0)
-  const fakturyVyzkumSum = faktury_vyzkum.reduce((acc, item) => acc + Number(item.castka), 0)
+  const fakturyDohledSum = faktury_dohled.reduce(
+    (acc: number, item) => acc + Number(item.castka),
+    0,
+  )
+  const fakturyVyzkumSum = faktury_vyzkum.reduce(
+    (acc: number, item) => acc + Number(item.castka),
+    0,
+  )
 
   return (
     <DetailWrapper>
       {detail ? (
         <div>
           <div tw="flex flex-wrap">
-            <div style={{ flex: "0 0 62%" /* 62 is approximately 100/golden ratio */ }}>
+            <div tw="md:flex-[0 0 62%]" /* 62 is approximately 100/golden ratio */>
               {!!faktury_dohled.length && (
                 <InvoiceList
                   invoices={faktury_dohled}
@@ -120,21 +126,21 @@ const InvoicePage = ({ detail, ...props }: Props) => {
 }
 
 const InvoiceSummary = ({ budget, sum, label }: SummaryProps) => (
-  <div tw="p-4">
-    <div key={label} tw="p-8 font-medium text-gray-600 rounded-lg shadow">
+  <div tw="p-4 mb-12">
+    <div key={label} tw="text-gray-600">
       <dl>
-        <h3 tw="pb-4 text-lg font-medium text-gray-700">{label}</h3>
+        <h3 tw="pb-8 text-lg font-medium text-gray-400">Rozpočet {label.toLowerCase()}</h3>
         <div tw="flex justify-between">
-          <dt tw="pr-4 text-gray-500">rozpočet: </dt>
-          <dd>{budget.toLocaleString("cs-CZ")},–</dd>
+          <dt tw="pr-8 text-gray-500">rozpočet: </dt>
+          <dd tw="font-medium">{budget.toLocaleString("cs-CZ")},–</dd>
         </div>
-        <div tw="flex justify-between border-b">
-          <dt tw="pr-4 text-gray-500">fakturováno: </dt>
-          <dd>{sum.toLocaleString("cs-CZ")},–</dd>
+        <div tw="flex justify-between border-b pt-0.5">
+          <dt tw="pr-8 text-gray-500">fakturováno: </dt>
+          <dd tw="font-medium">{sum.toLocaleString("cs-CZ")},–</dd>
         </div>
         <div tw="flex justify-between pt-2">
-          <dt tw="pr-4 text-gray-600">zbývá: </dt>
-          <dd>{(budget - sum).toLocaleString("cs-CZ")},–</dd>
+          <dt tw="pr-8 text-gray-600">zbývá: </dt>
+          <dd tw="font-medium">{(budget - sum).toLocaleString("cs-CZ")},–</dd>
         </div>
       </dl>
     </div>

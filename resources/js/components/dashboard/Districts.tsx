@@ -271,7 +271,7 @@ const DistrictMap = memo(
         height={373.53}
         viewBox="-2 236.44 605.13 373.53"
         xmlSpace="preserve"
-        tw="text-blue-400 all-child:hover:(saturate-150	brightness-75) transition-colors duration-100"
+        tw="text-blue-400 all-child:hover:(saturate-150	brightness-75) transition-colors duration-100 max-w-full"
         onMouseMove={handleMouseMove}
         {...props}
       >

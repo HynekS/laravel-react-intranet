@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Dispatch, SetStateAction } from "react"
+import { useState, useEffect, useRef } from "react"
 import { type useForm, Controller, FieldValues } from "react-hook-form"
 import { useNavigate } from "react-router"
 import { css } from "@emotion/react"
@@ -138,22 +138,22 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
               label="název akce"
               placeholder="název akce"
               error={errors}
-              overrides={{ input: tw`w-7/12` }}
+              overrides={{ input: tw`md:w-7/12` }}
               {...register("nazev_akce", {
                 required: { value: true, message: "toto pole je třeba vyplnit" },
               })}
             />
           </DefaultFieldset>
         </div>
-        <div tw="flex justify-start">
-          <div tw="w-4/12">
+        <div tw="md:flex justify-start">
+          <div tw="md:w-4/12">
             <DefaultFieldset>
               <DefaultInput
                 type="checkbox"
                 label="objednávka"
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
-                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                  input: tw`appearance-none h-3 w-3 md:w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
                 {...register("objednavka")}
               />
@@ -172,7 +172,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                 label="smlouva podepsána"
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
-                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                  input: tw`appearance-none h-3 w-3 md:w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
                 {...register("smlouva")}
               />
@@ -195,7 +195,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                 label="registrováno v databázi"
                 // TODO these overrides should be defaults for checkboxes
                 overrides={{
-                  input: tw`appearance-none h-3 w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
+                  input: tw`appearance-none h-3 w-3 md:w-3 checked:(bg-blue-500 border-blue-500) transition duration-200 my-1 p-1.5 align-top bg-no-repeat bg-center bg-contain float-left cursor-pointer`,
                 }}
                 {...register("registrovano_bit")}
               />
@@ -318,19 +318,19 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
           <DefaultInput
             label="název investora"
             placeholder="jméno investora"
-            overrides={{ input: tw`w-7/12` }}
+            overrides={{ input: tw`md:w-7/12` }}
             {...register("investor_jmeno")}
           />
           <DefaultInput
             label="zástupce investora"
             placeholder="zástupce investora"
-            overrides={{ input: tw`w-7/12` }}
+            overrides={{ input: tw`md:w-7/12` }}
             {...register("investor_kontakt")}
           />
           <DefaultInput
             label="sídlo investora"
             placeholder="sídlo investora"
-            overrides={{ input: tw`w-7/12` }}
+            overrides={{ input: tw`md:w-7/12` }}
             {...register("investor_adresa")}
           />
           <DefaultInput
@@ -340,7 +340,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
           />
         </DefaultFieldset>
         <div
-          tw="flex"
+          tw="md:flex"
           css={css`
             .react-datepicker {
               ${tw`border-gray-200 shadow-lg`};
@@ -366,7 +366,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
             }
           `}
         >
-          <div tw="w-4/12">
+          <div tw="md:w-4/12">
             <DefaultFieldset>
               <DefaultInput label="předběžné datum počátku" {...register("datum_pocatku_text")} />
               <div className="fieldWrapper" css={[styles.fieldWrapper]}>
@@ -378,6 +378,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     control={control}
                     name="datum_pocatku"
                     render={({ field }) => (
+                      // Specific implementation due to an issue: https://github.com/Hacker0x01/react-datepicker/issues/4004
                       <ReactDatePicker
                         onBlur={field.onBlur}
                         dateFormat="d. M. yyyy"
@@ -424,6 +425,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     control={control}
                     name="datum_ukonceni"
                     render={({ field }) => (
+                      // Specific implementation due to an issue: https://github.com/Hacker0x01/react-datepicker/issues/4004
                       <ReactDatePicker
                         onBlur={field.onBlur}
                         dateFormat="d. M. yyyy"

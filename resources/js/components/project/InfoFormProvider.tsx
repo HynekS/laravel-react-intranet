@@ -58,10 +58,10 @@ const InfoFormProvider = ({ detail }) => {
 
   return (
     <DetailPage>
-      <div tw="flex justify-between">
-        <div tw="flex items-center py-4 h-full">
+      <div tw="px-2 flex justify-between md:px-0 ">
+        <div tw="flex flex-col py-4 h-full md:(flex-row items-center)">
           <ResultBadge value={nalez} />
-          <h1 tw="py-0 text-xl font-semibold text-gray-700 leading-none">
+          <h1 tw="pt-2 text-xl font-semibold text-gray-700 leading-none md:(py-0)">
             {detail.c_akce}
             &ensp;
             {projectTitle}

@@ -35,8 +35,8 @@ type Props = {
 
 const FilesListGroup = ({ group, label, detail, ...props }: Props) => {
   return (
-    <div tw="flex pb-8">
-      <div tw="w-[15%]">
+    <div tw="flex flex-col md:flex-row pb-8">
+      <div tw="md:w-[15%]">
         <h3 tw="pb-2 text-xl font-medium">{label}</h3>
       </div>
       <div tw="flex-1">

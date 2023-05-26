@@ -9,10 +9,12 @@ const style = css`
     ${tw`bg-blue-100`}
   }
 `
-const Nav = () => {
+const YearList = ({ isMenuOpen }: { isMenuOpen: boolean }) => {
   const currentYear = new Date().getFullYear()
   return (
-    <nav tw="flex flex-wrap px-4 py-2">
+    <section
+      css={[tw`hidden flex-wrap px-4 py-2 flex-col md:(flex flex-row)`, isMenuOpen && tw`flex`]}
+    >
       <NavLink css={style} to={`/akce`} end>
         vše
       </NavLink>
@@ -21,13 +23,13 @@ const Nav = () => {
           css={style}
           to={`/akce/${year}`}
           key={year}
-          aria-label={`akce proběhlé v roce ${year}`}
+          aria-label={`akce registrované v roce ${year}`}
         >
           {year}
         </NavLink>
       ))}
-    </nav>
+    </section>
   )
 }
 
-export default Nav
+export default YearList

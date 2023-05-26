@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback, type ReactElement } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { useParams } from "react-router-dom"
 import { Link } from "react-router-dom"
 import { shallowEqual } from "react-redux"
-import { useWindowHeight } from "@react-hook/window-size"
+import { useWindowSize } from "@react-hook/window-size"
 import { css } from "@emotion/react"
 import tw from "twin.macro"
 import deburr from "lodash.deburr"
@@ -41,7 +41,7 @@ const Table = ({ rawData }: Props) => {
 
   const [data, setData] = useState<Akce[]>([])
   const { year } = useParams<{ year: string }>()
-  const currentHeight = useWindowHeight()
+  const [currentWidth, currentHeight] = useWindowSize()
 
   const status = useAppSelector(store => store.projects.getMultiple.status)
   const sortBy = useAppSelector(store => store.table.sortBy, shallowEqual)
@@ -173,6 +173,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "c_akce",
       width: 90,
       sortable: true,
+      widthTreshold: 0,
       cellRenderer: ({ cellData: c_akce, rowData }) => (
         <div onMouseOver={() => Detail.preload()} tw="mr-auto">
           <div key="numberPerYear">
@@ -204,6 +205,7 @@ const Table = ({ rawData }: Props) => {
       width: 240,
       sortable: true,
       resizable: true,
+      widthTreshold: 0,
       cellRenderer: ({ cellData, column: { key } }) => (
         <Highlighter
           textToHighlight={cellData || ""}
@@ -237,6 +239,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "rozpocet_B",
       width: 100,
       align: Column.Alignment.RIGHT,
+      widthTreshold: 660,
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_B" }),
       sortable: true,
       headerRenderer: ({ column }) => (
@@ -252,6 +255,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "rozpocet_A",
       width: 100,
       align: Column.Alignment.RIGHT,
+      widthTreshold: 660,
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_A" }),
       sortable: true,
       headerRenderer: ({ column }) => (
@@ -266,6 +270,7 @@ const Table = ({ rawData }: Props) => {
       key: "registrovano_bit",
       dataKey: "registrovano_bit",
       width: 60,
+      widthTreshold: 1500,
       cellRenderer: ({ cellData }) =>
         Boolean(cellData) ? <CheckIcon tw="w-5 stroke-current opacity[0.6]" /> : null,
     },
@@ -275,6 +280,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "registrace_info",
       width: 100,
       sortable: true,
+      widthTreshold: 1500,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -289,6 +295,7 @@ const Table = ({ rawData }: Props) => {
       key: "zaa_hlaseno",
       dataKey: "zaa_hlaseno",
       width: 70,
+      widthTreshold: 1400,
       cellRenderer: ({ cellData }) =>
         Boolean(cellData) ? <CheckIcon tw="w-5 stroke-current opacity[0.6]" /> : null,
       headerRenderer: ({ column }) => (
@@ -360,6 +367,7 @@ const Table = ({ rawData }: Props) => {
       width: 60,
       align: Column.Alignment.RIGHT,
       sortable: true,
+      widthTreshold: 0,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -375,6 +383,8 @@ const Table = ({ rawData }: Props) => {
       dataKey: "investor_jmeno",
       width: 180,
       sortable: true,
+      resizable: true,
+      widthTreshold: 1300,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -401,6 +411,8 @@ const Table = ({ rawData }: Props) => {
       dataKey: "investor_kontakt",
       width: 180,
       sortable: true,
+      resizable: true,
+      widthTreshold: 1060,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -416,6 +428,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "kraj",
       width: 90,
       sortable: true,
+      widthTreshold: 1400,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -441,6 +454,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "okres",
       width: 90,
       sortable: true,
+      widthTreshold: 880,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -466,6 +480,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "katastr",
       width: 120,
       sortable: true,
+      widthTreshold: 600,
       headerRenderer: ({ column }) => (
         <HeaderWithTextInput
           column={column}
@@ -479,7 +494,9 @@ const Table = ({ rawData }: Props) => {
       title: "Zahájeno",
       key: "datum_pocatku",
       dataKey: "datum_pocatku",
+      sortable: true,
       width: 100,
+      widthTreshold: 550,
       cellRenderer: ({ rowData }) =>
         rowData.datum_pocatku
           ? new Date(rowData.datum_pocatku).toLocaleDateString()
@@ -489,7 +506,9 @@ const Table = ({ rawData }: Props) => {
       title: "Ukončeno",
       key: "datum_ukonceni",
       dataKey: "datum_ukonceni",
+      sortable: true,
       width: 100,
+      widthTreshold: 500,
       cellRenderer: ({ rowData }) =>
         rowData.datum_ukonceni
           ? new Date(rowData.datum_ukonceni).toLocaleDateString()
@@ -499,8 +518,9 @@ const Table = ({ rawData }: Props) => {
       title: "Zajišťuje",
       key: "user",
       dataKey: "user.full_name",
-      width: 90,
       sortable: true,
+      width: 130,
+      widthTreshold: 1150,
       // Header renderer with filter -> This does not work, because data are ids, not names!
       headerRenderer: ({ column }) => (
         <div tw="flex justify-start items-center">
@@ -515,6 +535,7 @@ const Table = ({ rawData }: Props) => {
       dataKey: "nalez",
       width: 80,
       sortable: true,
+      widthTreshold: 1540,
       cellRenderer: ({ cellData }) => {
         if (cellData === "1") {
           return <CheckCircleIcon tw="w-5 stroke-green-400 fill-green-100" />
@@ -670,9 +691,11 @@ const Table = ({ rawData }: Props) => {
               scrollTopRef.current = scrollTop
             }}
           >
-            {columns.map(column => (
-              <Column data={data} key={column.data_key} rawData={rawData} {...column} />
-            ))}
+            {columns
+              .filter(column => column.widthTreshold < currentWidth)
+              .map(column => (
+                <Column data={data} key={column.data_key} rawData={rawData} {...column} />
+              ))}
           </BaseTable>
         )}
       </AutoResizer>

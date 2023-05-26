@@ -15,12 +15,12 @@ const Invoice = ({ invoice, modalOpenCallback }: Props) => {
   return (
     <Fragment>
       <tr key={invoice.id_zaznam}>
-        <td tw="px-2 py-2 text-right">{invoice.c_faktury}</td>
-        <td tw="px-2 py-2 text-right">
+        <td tw="pr-8 py-2 text-right">{invoice.c_faktury}</td>
+        <td tw="pr-8 py-2 text-right">
           {new Date(Date.parse(String(invoice.datum_vlozeni))).toLocaleDateString("cs-CZ")}
         </td>
-        <td tw="px-2 py-2 text-right">{Number(invoice.castka).toLocaleString("cs-CZ")},–</td>
-        <td tw="px-2 py-2 text-right">
+        <td tw="pr-8 py-2 text-right">{Number(invoice.castka).toLocaleString("cs-CZ")},–</td>
+        <td tw="pr-8 py-2 text-right">
           <Dropdown>
             <DropdownItem
               onClick={() => modalOpenCallback({ status: "delete", data: invoice })}
