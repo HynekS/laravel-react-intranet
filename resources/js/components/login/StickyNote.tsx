@@ -1,6 +1,6 @@
 const StickyNote = ({ onClick }: { onClick: React.MouseEventHandler<HTMLButtonElement> }) => {
   return (
-    <div tw="relative w-48 overflow-hidden bg-yellow-100 shadow-2xl py-2 px-4 rounded rounded-tr-3xl border border-l-white border-t-white border-b-gray-300 border-r-gray-300 top-5 -left-1 transform -skew-x-3 font-family[cursive] text-sm rotate-[-2deg] after:(absolute top-0 right-0 bg-white w-4 h-4 shadow-lg border-b border-b-gray-300)">
+    <div tw="font-family['Segoe Print','Bradley Hand',Chilanka,TSCu_Comic,casual,cursive] relative w-max overflow-hidden bg-yellow-100 shadow-2xl py-2 px-4 rounded rounded-tr-3xl border border-l-white border-t-white border-b-gray-300 border-r-gray-300 top-5 -left-1 transform -skew-x-3 text-sm rotate-[-2deg] after:(absolute top-0 right-0 bg-white w-4 h-4 shadow-lg border-b border-b-gray-300)">
       <p>jméno: test</p>
       <p>heslo: password</p>
       <button
