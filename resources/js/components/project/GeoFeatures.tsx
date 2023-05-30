@@ -212,7 +212,7 @@ const GeoFeatures = ({ detail }: Props) => {
 
   return (
     <DetailWrapper>
-      <div tw="flex gap-4">
+      <div tw="flex gap-4 flex-wrap">
         <div
           tw="relative flex-1"
           css={css`
@@ -223,8 +223,8 @@ const GeoFeatures = ({ detail }: Props) => {
         >
           <div ref={mapContainerRef} style={{ height: 600, backgroundColor: "#f1f0e5" }} />
         </div>
-        <div tw="w-1/6">
-          <div tw="relative z-10 flex items-center justify-between mb-2">
+        <div tw="w-full md:w-1/6">
+          <div tw="relative z-10 flex items-center justify-between mb-2 flex-wrap gap-2">
             <h3 tw="font-bold">Dokumentační jednotky</h3>
             <button
               tw="flex items-center bg-blue-600 hover:bg-blue-700 transition-colors duration-300 text-white font-medium py-1 pl-2 pr-3 text-sm rounded focus:(outline-none ring)"

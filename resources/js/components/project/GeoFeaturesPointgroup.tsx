@@ -19,6 +19,12 @@ type Props = Omit<Pointgroup, "akce_id"> & {
   activeIndex: number | undefined
 }
 
+const mapFeatureTypesToDisplayNames = {
+  point: "bod",
+  line: "linie",
+  polygon: "polygon",
+}
+
 const GeoFeaturesPointgroup = ({ feature_type, id, points, projectId, i, activeIndex }: Props) => {
   const dispatch = useAppDispatch()
 
@@ -40,7 +46,7 @@ const GeoFeaturesPointgroup = ({ feature_type, id, points, projectId, i, activeI
       {id}
       <div tw="flex justify-between mb-2">
         <h4 tw="font-medium">
-          {i + 1}: {feature_type}
+          {i + 1}: {mapFeatureTypesToDisplayNames[feature_type]}
         </h4>
         <div>
           <button

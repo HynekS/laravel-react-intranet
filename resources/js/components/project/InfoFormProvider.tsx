@@ -68,7 +68,7 @@ const InfoFormProvider = ({ detail }) => {
           </h1>
         </div>
 
-        <Dropdown tw="my-auto mr-4">
+        <Dropdown tw="my-auto mr-1 md:mr-4">
           <DropdownItem
             onClick={() => {
               setIsModalOpen(true)
