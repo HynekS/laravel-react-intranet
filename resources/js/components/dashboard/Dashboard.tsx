@@ -52,9 +52,9 @@ const SearchResults = ({ results }: { results: null | Akce[] }) => {
                   {String(cislo_per_year).padStart(3, " ")}/{rok_per_year}
                 </div>
                 <div tw="p-4 truncate w-96">{nazev_akce}</div>
-                <div tw="w-32 p-4">{kraj}</div>
-                <div tw="w-32 p-4">{okres}</div>
-                <div tw="w-32 p-4">{katastr}</div>
+                <div tw="hidden md:(w-32 block p-4 truncate)">{kraj}</div>
+                <div tw="hidden md:(w-32 block p-4 truncate)">{okres}</div>
+                <div tw="hidden md:(w-32 block p-4 truncate)">{katastr}</div>
                 <div tw="w-20 p-4 text-right">{id_stav}</div>
                 <div tw="w-24 p-4 text-right">{nalez}</div>
               </Link>
@@ -141,7 +141,7 @@ const Dashboard = () => {
             </section>
             <SearchResults results={searchResults} />
             <Suspense fallback={<div>Loading…</div>}>
-              <section tw="flex items-center justify-center p-8">
+              <section tw="flex items-center justify-center pt-6 pb-4 md:p-8">
                 <DistrictsMap fill="#e5e7eb" />
               </section>
             </Suspense>

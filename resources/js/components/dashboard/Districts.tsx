@@ -46,26 +46,26 @@ const MapWithTooltip = ({ ...props }) => {
         {currentStateSummary ? (
           <div tw="mb-8">
             <h3 tw="font-bold">Současný stav akcí</h3>
-            <dl tw="flex justify-between">
-              <div tw="border-r px-4 w-1/4 gap-2">
+            <dl tw="flex justify-between flex-wrap">
+              <div tw="border-r pr-4 md:(px-4) w-1/4">
                 <dt tw="text-sm font-semibold text-gray-500">právě běží</dt>
                 <dd tw="font-bold">
                   <span tw="text-xs">⛏️</span> {currentStateSummary[2]}
                 </dd>
               </div>
-              <div tw="border-r px-4  w-1/4">
+              <div tw="border-r px-4 w-1/4">
                 <dt tw="text-sm font-semibold text-gray-500">čeká na zahájení</dt>
                 <dd tw="font-bold">
                   <span tw="text-xs">⏰</span> {currentStateSummary[1]}
                 </dd>
               </div>
-              <div tw="border-r px-4  w-1/4">
+              <div tw="border-r px-4 w-1/4">
                 <dt tw="text-sm font-semibold text-gray-500">zpracovává se</dt>
                 <dd tw="font-bold">
                   <span tw="text-xs">💻</span> {currentStateSummary[3]}
                 </dd>
               </div>
-              <div tw="px-4  w-1/4">
+              <div tw="pl-4 w-1/4 md:(px-4)">
                 <dt tw="text-sm font-semibold text-gray-500">je ukončeno</dt>
                 <dd tw="font-bold">
                   <span tw="text-xs">✔️</span> {currentStateSummary[4]}
@@ -91,7 +91,7 @@ const MapWithTooltip = ({ ...props }) => {
         maximum={allTimeMaximum}
         {...props}
       ></DistrictMap>
-      <div tw="mb-6 mt-1 flex justify-center">
+      <div tw="mb-6 mt-1 flex justify-center flex-wrap">
         {yearsSince2013reversed.map(year => (
           <div tw="inline-block" key={year}>
             <input
@@ -112,32 +112,34 @@ const MapWithTooltip = ({ ...props }) => {
       {statsByYears && statsByYears[selectedYear] ? (
         <div tw="mb-4 text-sm text-gray-500">
           <h3 tw="font-bold text-center text-lg text-gray-300 pb-1">{selectedYear}</h3>
-          <dl tw="flex justify-between">
-            <div>
+          <dl tw="flex flex-wrap md:(justify-between)">
+            <div tw="w-1/4 mb-2 md:(w-auto)">
               <dt>celkem</dt>
               <dd tw="font-bold">{statsByYears[selectedYear].all}</dd>
             </div>
-            <div>
+            <div tw="w-1/4 md:(w-auto)">
               <dt>pozitivní</dt>
               <dd tw="font-bold">{statsByYears[selectedYear].positive}</dd>
             </div>
-            <div tw="border-r pr-4">
+            <div tw="w-1/2 md:(border-r pr-4 w-auto)">
               <dt>negativní</dt>
               <dd tw="font-bold">{statsByYears[selectedYear].negative}</dd>
             </div>
-            <div>
+            <div tw="w-1/4 md:(w-auto)">
               <dt>právě běží</dt>
               <dd tw="font-bold">{statsByYears[selectedYear][2]}</dd>
             </div>
-            <div>
-              <dt>čeká na zahájení</dt>
+            <div tw="w-1/4 md:(w-auto)">
+              <dt>
+                čeká<span tw="hidden md:inline"> na zahájení</span>
+              </dt>
               <dd tw="font-bold">{statsByYears[selectedYear][1]}</dd>
             </div>
-            <div>
+            <div tw="w-1/4 md:(w-auto)">
               <dt>zpracovává se</dt>
               <dd tw="font-bold">{statsByYears[selectedYear][3]}</dd>
             </div>
-            <div>
+            <div tw="w-1/4 md:(w-auto)">
               <dt>je ukončeno</dt>
               <dd tw="font-bold">{statsByYears[selectedYear][4]}</dd>
             </div>
@@ -268,10 +270,9 @@ const DistrictMap = memo(
         x={0}
         y={0}
         width={605.13}
-        height={373.53}
         viewBox="-2 236.44 605.13 373.53"
         xmlSpace="preserve"
-        tw="text-blue-400 all-child:hover:(saturate-150	brightness-75) transition-colors duration-100 max-w-full"
+        tw="text-blue-400 all-child:hover:(saturate-150	brightness-75) transition-colors duration-100 max-w-full my-8 md:(my-4)"
         onMouseMove={handleMouseMove}
         {...props}
       >
