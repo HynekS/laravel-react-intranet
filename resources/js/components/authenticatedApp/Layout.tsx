@@ -1,5 +1,6 @@
-import { useState, Fragment, type ReactNode } from "react"
+import { useState, useEffect, Fragment, type ReactNode } from "react"
 import { NavLink } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { PlusIcon } from "@heroicons/react/solid"
 import tw from "twin.macro"
 
@@ -23,6 +24,25 @@ const CollapsibleMenuContent = ({ children }: { children: ReactNode }) => (
 
 const Layout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const location = useLocation()
+
+  const closeOnEsc = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setIsMenuOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener("keyup", closeOnEsc)
+    return () => {
+      document.removeEventListener("keyup", closeOnEsc)
+    }
+  }, [])
+
+  useEffect(() => {
+    setIsMenuOpen(false)
+  }, [location])
+
   const NavContentsWrapper = isMenuOpen ? CollapsibleMenuContent : Fragment
   return (
     <RootFlexWrapper>
