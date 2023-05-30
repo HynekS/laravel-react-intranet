@@ -43,7 +43,6 @@ const GeoFeaturesPointgroup = ({ feature_type, id, points, projectId, i, activeI
         dispatch(setActivePointgroupIndex({ newIndex: i, projectId }))
       }}
     >
-      {id}
       <div tw="flex justify-between mb-2">
         <h4 tw="font-medium">
           {i + 1}: {mapFeatureTypesToDisplayNames[feature_type]}
