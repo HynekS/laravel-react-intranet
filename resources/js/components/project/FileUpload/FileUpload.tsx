@@ -40,7 +40,6 @@ const FileUpload = ({
   const { id: userId } = useAppSelector(store => store.auth.user)
 
   const filesToUpload = useAppSelector(store => store.upload.filesToUpload as FileObject[])
-  // TODO needs error status!
   const status = useAppSelector(store => store.upload.status)
   const uploadProgress = useAppSelector(store =>
     (store.upload.uploadProgress as number[]).reduce(
@@ -120,8 +119,8 @@ const FileUpload = ({
             </div>
             <form onSubmit={onFormSubmit} tw="pointer-events-none" id={`fileUpload-${model}`}>
               <div css={[isItemOverDropArea && tw`invisible`]}>
-                <div tw="text-center text-gray-300 pointer-events-none">
-                  <DropIcon tw="inline-block w-24 pb-2" />
+                <div tw="text-center text-gray-400 pointer-events-none">
+                  <DropIcon tw="inline-block w-24 pb-2 fill-gray-400" />
                 </div>
                 <span tw="block text-lg">přetáhněte soubor{!isSingular && "y"}</span>
                 <span tw="block pb-4 leading-4 text-gray-600"> nebo</span>
