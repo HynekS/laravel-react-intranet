@@ -80,9 +80,9 @@ const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
       >
         <section tw="flex flex-col flex-1 h-full">
           <header tw="flex justify-between p-6">
-            <h2 tw="text-lg font-medium">
-              <span tw="text-gray-500">nahrát soubor{!isSingular && "y"}: </span>
-              <span>{publicName}</span>
+            <h2 tw="text-base">
+              <span tw="text-gray-400">nahrát soubor{!isSingular && "y"} | </span>
+              <span tw="font-medium">{publicName}</span>
             </h2>
             <ModalCloseButton handleClick={() => setIsModalOpen(false)} />
           </header>
