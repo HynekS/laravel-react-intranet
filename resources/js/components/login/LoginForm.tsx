@@ -27,9 +27,9 @@ const LoginForm = () => {
     dispatch(submitLoginData(data))
 
   const fillAndSubmitDemoCredentials = () => {
-    setValue("user_name", "test")
-    setValue("password", "password")
-    onSubmit({ user_name: "test", password: "password" })
+    setValue("user_name", "demo")
+    setValue("password", "CorrectHorseBatteryStaple")
+    onSubmit({ user_name: "demo", password: "CorrectHorseBatteryStaple" })
   }
 
   return (
