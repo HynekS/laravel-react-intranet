@@ -29,7 +29,8 @@ Because of the stack, the application is very easy to deploy. I use AWS Lightsai
 
 ## TODO
 
-- The database still isn't fully normalized; there are some duplications.
-- The names of many tables and rows are still mainly in Czech and are often confusing or inconsistent.
-- File upload won't handle extra-large files. This can be handled either by adding resumability or using an external service (S3?).
-- Some features (not vital ones) are still to be added.
+- [ ] The frontend file structure is really messy. Needs to be tidied up ASAP!
+- [ ] The database still isn't fully normalized; there are some duplications.
+- [ ] The names of many tables and rows are still mainly in Czech and are often confusing or inconsistent.
+- [ ] File upload won't handle extra-large files. This can be handled either by adding resumability or using an external service (S3?).
+- [ ] Some features (not vital ones) are still to be added.
