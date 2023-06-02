@@ -1,4 +1,4 @@
-const Logo = ({ src = "/images/logo.png", alt = "logo společnosti Pueblo" }) => {
+const Logo = ({ src = "/images/logo.png", alt = "" }) => {
   return <img src={src} alt={alt} width={227} height={135} />
 }
 
