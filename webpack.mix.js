@@ -37,6 +37,7 @@ const pathAliases = {
   "@store": path.join(__dirname, "resources/js/store"),
   "@services": path.join(__dirname, "resources/js/services"),
   "@utils": path.join(__dirname, "resources/js/utils"),
+  "@components": path.join(__dirname, "resources/js/components"),
 }
 
 mix

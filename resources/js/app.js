@@ -7,8 +7,7 @@ import { Global } from "@emotion/react"
 
 import configuredStore from "@store/configuredStore"
 import globalStyles from "./globalStyles"
-
-import HomePage from "./components/HomePage"
+import HomePage from "./HomePage"
 
 const App = () => {
   return (
