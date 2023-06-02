@@ -1,4 +1,3 @@
-import { jsx } from "@emotion/react"
 import tw from "twin.macro"
 
 const StyledLabel = tw.label`block text-gray-500 font-bold md:text-right mb-1 md:mb-0 pr-4`
