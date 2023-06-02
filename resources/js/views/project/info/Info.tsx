@@ -145,7 +145,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
             />
           </DefaultFieldset>
         </div>
-        <div tw="md:flex justify-start">
+        <div tw="justify-start md:flex">
           <div tw="md:w-4/12">
             <DefaultFieldset>
               <DefaultInput
@@ -234,7 +234,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     }
                     & input[value="0"] {
                       &:checked + label {
-                        ${tw`text-red-700 bg-red-50 border-transparent`}
+                        ${tw`text-red-700 border-transparent bg-red-50`}
                         box-shadow: 0 0 0 1px rgba(185, 28, 28, 0.4);
                       }
                       &:focus + label {
@@ -244,7 +244,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     }
                     & input[value="1"] {
                       &:checked + label {
-                        ${tw`text-green-700 bg-green-50 border-transparent`}
+                        ${tw`text-green-700 border-transparent bg-green-50`}
                         box-shadow: 0 0 0 1px rgba(47, 133, 90, 0.4);
                       }
                       &:focus + label {
@@ -254,7 +254,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     }
                     & input[value="2"] {
                       &:checked + label {
-                        ${tw`text-gray-700 bg-gray-50 border-transparent`}
+                        ${tw`text-gray-700 border-transparent bg-gray-50`}
                         box-shadow: 0 0 0 1px rgba(74, 85, 104, 0.45);
                       }
                       &:focus + label {
@@ -274,7 +274,7 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
                     />
                     <label
                       htmlFor={`negativní`}
-                      tw="inline-block px-4 py-2 border border-l-0 border-gray-300 border-solid border-l rounded-l-lg"
+                      tw="inline-block px-4 py-2 border border-l-0 border-gray-300 border-solid rounded-l-lg"
                     >
                       negativní
                     </label>
@@ -359,9 +359,9 @@ const Detail = ({ detail = {} as Detail, type = "update", methods }: DetailProps
               ${tw`bg-gray-100`}
             }
             [class*="--keyboard-selected"] {
-              ${tw`bg-blue-100 text-blue-700`}
+              ${tw`text-blue-700 bg-blue-100`}
               &:hover {
-                ${tw`bg-blue-200 text-blue-900`}
+                ${tw`text-blue-900 bg-blue-200`}
               }
             }
           `}

@@ -10,14 +10,14 @@ type Props = {
 
 const InvoiceList = ({ invoices, label, modalOpenCallback }: Props) => {
   return (
-    <div tw="relative pb-8 pt-4 md:pt-0 md:pr-8">
-      <h2 tw="mb-4 font-medium text-gray-400 text-lg">Faktury {label}</h2>
+    <div tw="relative pt-4 pb-8 md:pt-0 md:pr-8">
+      <h2 tw="mb-4 text-lg font-medium text-gray-400">Faktury {label}</h2>
       <table>
         <thead>
           <tr>
-            <th tw="pr-8 text-right font-medium">číslo faktury</th>
-            <th tw="pr-8 text-right font-medium">vloženo</th>
-            <th tw="pr-8 text-right font-medium">částka</th>
+            <th tw="pr-8 font-medium text-right">číslo faktury</th>
+            <th tw="pr-8 font-medium text-right">vloženo</th>
+            <th tw="pr-8 font-medium text-right">částka</th>
             <th />
           </tr>
         </thead>
@@ -32,10 +32,10 @@ const InvoiceList = ({ invoices, label, modalOpenCallback }: Props) => {
         </tbody>
         <tfoot tw="border-t">
           <tr>
-            <td colSpan={2} tw="text-right align-baseline pr-8">
+            <td colSpan={2} tw="pr-8 text-right align-baseline">
               {label} fakturováno celkem
             </td>
-            <td tw="pr-8 py-2 text-right align-baseline font-medium">
+            <td tw="py-2 pr-8 font-medium text-right align-baseline">
               {invoices.reduce((acc, item) => acc + Number(item.castka), 0).toLocaleString("cs-CZ")}
               ,–
             </td>

@@ -192,7 +192,7 @@ const Table = ({ rawData }: Props) => {
         </div>
       ),
       headerRenderer: ({ column }) => (
-        <div tw="flex justify-start items-center">
+        <div tw="flex items-center justify-start">
           <span>{column.title}</span>
           {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
         </div>
@@ -243,7 +243,7 @@ const Table = ({ rawData }: Props) => {
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_B" }),
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div tw="flex justify-start items-center">
+        <div tw="flex items-center justify-start">
           <span>{column.title}</span>
           {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
         </div>
@@ -259,7 +259,7 @@ const Table = ({ rawData }: Props) => {
       cellRenderer: ({ rowData }) => budgetCellRenderer({ row: rowData, key: "rozpocet_A" }),
       sortable: true,
       headerRenderer: ({ column }) => (
-        <div tw="flex justify-start items-center">
+        <div tw="flex items-center justify-start">
           <span>{column.title}</span>
           {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
         </div>
@@ -523,7 +523,7 @@ const Table = ({ rawData }: Props) => {
       widthTreshold: 1150,
       // Header renderer with filter -> This does not work, because data are ids, not names!
       headerRenderer: ({ column }) => (
-        <div tw="flex justify-start items-center">
+        <div tw="flex items-center justify-start">
           <span>{column.title}</span>
           {column.sortable && <SortIndicator column={column} sortBy={sortBy} />}
         </div>
@@ -606,13 +606,13 @@ const Table = ({ rawData }: Props) => {
                 padding-right: 12px;
               }
               input {
-                ${tw`w-full h-5 p-1 mt-1 text-xs bg-blue-50 border border-blue-200 rounded-sm border-b-gray-200 border-r-gray-200`}
+                ${tw`w-full h-5 p-1 mt-1 text-xs border border-blue-200 rounded-sm bg-blue-50 border-b-gray-200 border-r-gray-200`}
                 &:focus:not(.focus-visible) {
                   ${tw`outline-none focus:(ring-2 border-transparent bg-blue-100)`}
                 }
                 &[value=""],
                 &:not([value]) {
-                  ${tw`bg-gray-50 border-gray-300`}
+                  ${tw`border-gray-300 bg-gray-50`}
                 }
               }
             `}

@@ -62,10 +62,10 @@ const FilesList = memo(({ subgroup, detail, ...props }: Props) => {
           </div>
           <div tw="flex-1">
             <button
-              tw="flex items-center justify-center text-blue-700 border-blue-500 text-xs px-2 py-1.5 border border-blue-600 font-medium rounded transition-colors focus:(outline-none ring) min-w-[7.5rem] hover:(border-blue-700 bg-blue-50)"
+              tw="flex items-center justify-center text-blue-700 text-xs px-2 py-1.5 border border-blue-600 font-medium rounded transition-colors focus:(outline-none ring) min-w-[7.5rem] hover:(border-blue-700 bg-blue-50)"
               onClick={() => setIsModalOpen(true)}
             >
-              <PlusIcon tw="w-4 h-4 opacity-75 mr-1" />
+              <PlusIcon tw="w-4 h-4 mr-1 opacity-75" />
               Nahrát soubor{!isSingular && "y"}
             </button>
           </div>

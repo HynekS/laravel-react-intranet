@@ -16,8 +16,8 @@ const UserWidget = () => {
         tw="rounded-full bg-lightblue-200 w-9 h-9 md:mr-3"
         style={{ backgroundImage: `url(/storage/${user.avatar_path})` }}
       ></div>
-      <div tw="py-2 text-sm font-semibold text-gray-500 hidden md:block">{user.full_name}</div>
-      <Dropdown tw="my-auto hidden md:block">
+      <div tw="hidden py-2 text-sm font-semibold text-gray-500 md:block">{user.full_name}</div>
+      <Dropdown tw="hidden my-auto md:block">
         <DropdownItem
           label="odhlásit&nbsp;se"
           onClick={() => dispatch(logout(navigate))}
@@ -25,7 +25,7 @@ const UserWidget = () => {
         />
       </Dropdown>
       <button
-        tw="flex items-center text-sm text-gray-500 font-semibold md:hidden py-2 px-4"
+        tw="flex items-center px-4 py-2 text-sm font-semibold text-gray-500 md:hidden"
         onClick={() => dispatch(logout(navigate))}
       >
         <span> odhlásit&nbsp;se</span>
