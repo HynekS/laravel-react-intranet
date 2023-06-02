@@ -32,7 +32,8 @@ const Radio = ({ name, options, label, register }) => {
       </RowWrapper>
     )
   }
-  return console.warn('"name" and "options" props are required') || null
+  console.warn('"name" and "options" props are required')
+  return null
 }
 
 export default Radio
