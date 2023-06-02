@@ -30,7 +30,8 @@ class Akce extends Model
             'nazev_akce' => $this->nazev_akce,
             'registrace_info' => $this->registrace_info,
             'investor_jmeno' => $this->investor_jmeno,
-            'katastr'=> $this->katastr,
+            'okres' => $this->okres,
+            'katastr' => $this->katastr
         ];
     }
 
