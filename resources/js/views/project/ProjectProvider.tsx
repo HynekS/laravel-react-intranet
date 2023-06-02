@@ -38,7 +38,6 @@ const ProjectProvider = () => {
     const project = projectFromLinkState || projectFromUrl
     if (project) {
       setData(project as Akce)
-      setProjectTitle(String((project as Akce)["nazev_akce"]))
     } else {
       dispatch(fetchProject({ year: Number(params.year), id: Number(params.num) }))
     }
