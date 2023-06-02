@@ -1,3 +1,7 @@
+<div align="center">
+    <img src="https://github.com/HynekS/laravel-react-intranet/assets/24924967/408a613a-6706-460e-a352-8ea679935b91" alt="" style="margin-bottom:1rem">
+</div>
+
 # Project management app
 
 This is a repo of full-stack app crafted for the needs of my client's company.
